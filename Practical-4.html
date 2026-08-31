@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Keyboard Calculator</title>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        .calculator {
+            width: 300px;
+            padding: 20px;
+
+            background-color: #222;
+            border-radius: 15px;
+
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Display */
+        #display {
+            width: 100%;
+            height: 65px;
+
+            box-sizing: border-box;
+
+            margin-bottom: 15px;
+            padding: 10px;
+
+            border: none;
+            border-radius: 8px;
+
+            background-color: white;
+
+            font-size: 28px;
+            text-align: right;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 60px;
+
+            border: none;
+            border-radius: 8px;
+
+            background-color: #444;
+            color: white;
+
+            font-size: 20px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Operators */
+        .operator {
+            background-color: orange;
+        }
+
+        .operator:hover {
+            background-color: darkorange;
+        }
+
+        /* Clear */
+        .clear {
+            background-color: crimson;
+        }
+
+        .clear:hover {
+            background-color: darkred;
+        }
+
+        /* Equal */
+        .equal {
+            background-color: green;
+        }
+
+        .equal:hover {
+            background-color: darkgreen;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="calculator">
+
+        <!-- Display -->
+        <input type="text" id="display" readonly>
+
+        <!-- Calculator Keyboard -->
+        <div class="buttons">
+
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button onclick="appendValue('(')">(</button>
+            <button onclick="appendValue(')')">)</button>
+            <button class="operator" onclick="appendValue('/')">÷</button>
+
+            <button onclick="appendValue('7')">7</button>
+            <button onclick="appendValue('8')">8</button>
+            <button onclick="appendValue('9')">9</button>
+            <button class="operator" onclick="appendValue('*')">×</button>
+
+            <button onclick="appendValue('4')">4</button>
+            <button onclick="appendValue('5')">5</button>
+            <button onclick="appendValue('6')">6</button>
+            <button class="operator" onclick="appendValue('-')">−</button>
+
+            <button onclick="appendValue('1')">1</button>
+            <button onclick="appendValue('2')">2</button>
+            <button onclick="appendValue('3')">3</button>
+            <button class="operator" onclick="appendValue('+')">+</button>
+
+            <button onclick="appendValue('0')">0</button>
+            <button onclick="appendValue('.')">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // Display ko select karna
+        const display = document.getElementById("display");
+
+
+        // Calculator ke internal buttons se value add karna
+        function appendValue(value) {
+
+            // Agar display par Error hai to pehle clear karo
+            if (display.value === "Error") {
+                display.value = "";
+            }
+
+            display.value += value;
+        }
+
+
+        // Calculator clear karna
+        function clearDisplay() {
+            display.value = "";
+        }
+
+
+        // Last character delete karna
+        function deleteLast() {
+            display.value = display.value.slice(0, -1);
+        }
+
+
+        // Calculation
+        function calculate() {
+
+            if (display.value === "") {
+                return;
+            }
+
+            try {
+
+                let result = eval(display.value);
+
+                display.value = result;
+
+            } catch {
+
+                display.value = "Error";
+
+            }
+        }
+
+
+        // =====================================
+        // COMPUTER KEYBOARD CONTROL
+        // =====================================
+
+        document.addEventListener("keydown", function(event) {
+
+            let key = event.key;
+
+
+            // Numbers
+            if (key >= "0" && key <= "9") {
+
+                appendValue(key);
+
+            }
+
+
+            // Decimal
+            else if (key === ".") {
+
+                appendValue(".");
+
+            }
+
+
+            // Addition
+            else if (key === "+") {
+
+                appendValue("+");
+
+            }
+
+
+            // Subtraction
+            else if (key === "-") {
+
+                appendValue("-");
+
+            }
+
+
+            // Multiplication
+            else if (key === "*") {
+
+                appendValue("*");
+
+            }
+
+
+            // Division
+            else if (key === "/") {
+
+                appendValue("/");
+
+            }
+
+
+            // Opening bracket
+            else if (key === "(") {
+
+                appendValue("(");
+
+            }
+
+
+            // Closing bracket
+            else if (key === ")") {
+
+                appendValue(")");
+
+            }
+
+
+            // Enter = Calculate
+            else if (key === "Enter" || key === "=") {
+
+                calculate();
+
+            }
+
+
+            // Backspace = Delete last character
+            else if (key === "Backspace") {
+
+                deleteLast();
+
+            }
+
+
+            // Escape or Delete = Clear
+            else if (key === "Escape" || key === "Delete") {
+
+                clearDisplay();
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
