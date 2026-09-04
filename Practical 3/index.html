@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Railways Ticket Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Simple WELCOME Overlay -->
+    <div id="welcomeOverlay" style="display: none;">
+        <h1>WELCOME</h1>
+    </div>
+
+    <!-- Header Banner -->
+    <header class="flag-header">
+        <h1>Indian Railways Reservation Portal</h1>
+        <p>Government MCA College, Maninagar Project</p>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="data.html">Data</a>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container">
+        <table width="100%" cellpadding="10">
+            <tr valign="top">
+                <!-- Left Sidebar: Team Avatars Top Left + News -->
+                <td width="30%">
+                    <!-- Group Member Avatars Top-Left -->
+                    <div class="team-avatars-box">
+                        <h4>Project Team</h4>
+                        <div class="avatar-group">
+                            <div class="avatar-item">
+                                <a href="member1.html">
+                                    <img src="https://via.placeholder.com/150/FF9933/FFFFFF?text=Ridham" alt="Ridham" class="avatar-img">
+                                </a>
+                                <span class="avatar-name">Ridham</span>
+                            </div>
+                            <div class="avatar-item">
+                                <a href="member2.html">
+                                    <img src="https://via.placeholder.com/150/000080/FFFFFF?text=Riya" alt="Riya" class="avatar-img">
+                                </a>
+                                <span class="avatar-name">Riya</span>
+                            </div>
+                            <div class="avatar-item">
+                                <a href="member3.html">
+                                    <img src="https://via.placeholder.com/150/138808/FFFFFF?text=Riya" alt="Riya" class="avatar-img">
+                                </a>
+                                <span class="avatar-name">Vaibhav</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Railway Updates -->
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <h4 style="color: var(--navy); margin-top: 0;">Railway Bulletins</h4>
+                        <ul>
+                            <li>Vande Bharat Express route expanded.</li>
+                            <li>Tatkal booking opens at 10:00 AM daily.</li>
+                            <li>Senior Citizen quota policy updates.</li>
+                        </ul>
+                    </div>
+                </td>
+
+                <!-- Main Booking Area -->
+                <td width="70%">
+                    <div class="booking-card">
+                        <h3>Book Train Ticket</h3>
+                        <form id="railwayForm" onsubmit="handleRailwayBooking(event)">
+                            
+                            <div class="form-group">
+                                <label for="passengerName">Primary Passenger Full Name:</label>
+                                <input type="text" id="passengerName" placeholder="Enter name as per Govt ID" required>
+								<span class="error-msg" id="nameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Mobile Number (10 digits):</label>
+                                <input type="tel" id="phone" placeholder="9876543210" required>
+								<span class="error-msg" id="phoneError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="trainSelect">Select Train Route:</label>
+                                <select id="trainSelect" required>
+                                    <option value="">-- Select Train --</option>
+									<option value="12958">12958 | ADI SJ RAJDHANI (Ahmedabad to New Delhi - 17:40)</option>
+									<option value="20902">20902 | VANDE BHARAT EXP (Ahmedabad to Mumbai Central - 06:00)</option>
+									<option value="12833">12833 | ADI HWH EXP (Ahmedabad to Howrah - 00:15)</option>
+									<option value="12932">12932 | ADI MMCT DOUBLE DECKER (Ahmedabad to Mumbai - 06:00)</option>
+									<option value="22944">22944 | INDB DAUND EXP (Indore to Daund - 16:30)</option>
+									<option value="12009">12009 | BCT SHATABDI EXP (Mumbai Central to Ahmedabad - 06:20)</option>
+                                    <span class="error-msg" id="trainError"></span>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="travelClass">Select Travel Class:</label>
+                                <select id="travelClass" onchange="calculateRailwayTotal()" required>
+                                    <option value="500">Sleeper (SL) - ₹500</option>
+                                    <option value="1200">AC 3 Tier (3A) - ₹1200</option>
+                                    <option value="1800">AC 2 Tier (2A) - ₹1800</option>
+                                    <option value="3000">Executive / 1st AC (1A) - ₹3000</option>
+									<span class="error-msg" id="classError"></span>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="quota">Quota Type:</label>
+                                <select id="quota" required>
+                                    <option value="General">General (GN)</option>
+                                    <option value="Tatkal">Tatkal (TQ)</option>
+									<option value="Premium Tatkal">Premium Tatkal (PT)</option>
+                                    <option value="Ladies">Ladies (LD)</option>
+									<option value="Senior Citizen">Lower Berth / Sr. Citizen (SS)</option>
+									<span class="error-msg" id="quotaError"></span>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="passengerQty">Number of Passengers:</label>
+                                <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()" required>
+								<span class="error-msg" id="qtyError"></span>
+							</div>
+
+                            <div class="form-group">
+                                <label for="travelDate">Date of Journey:</label>
+                                <input type="date" id="travelDate" required>
+								<span class="error-msg" id="dateError"></span>
+							</div>
+
+                            <div class="price-summary">
+                                Total Fare: <span id="totalFare">500</span> INR
+                            </div>
+
+                            <button type="submit" class="btn-submit">Book Ticket Now</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <footer class="flag-footer">
+        <p>&copy; 2026 Indian Railways Reservation System | All Rights Reserved</p>
+	<div class="counter-badge">
+        👁 Total Portal Visits: <span id="visitCounter">0</span>
+    </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

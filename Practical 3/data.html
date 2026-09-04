@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submitted Booking Data - Reservation Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="flag-header">
+        <h1>Railway Reservation Records</h1>
+        <p>Government MCA College, Maninagar Project Dataset</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="data.html" class="active">Data</a>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Summary Widgets -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Bookings</h4>
+                <p id="totalBookingsCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h4>Total Revenue Collected</h4>
+                <p id="totalRevenueAmount">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h4>Active Routes</h4>
+                <p id="activeRoutesCount">0</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+            <input type="text" id="searchInput" onkeyup="filterBookingData()" placeholder="Search passenger name or PNR...">
+            <select id="quotaFilter" onchange="filterBookingData()">
+                <option value="ALL">All Quotas</option>
+                <option value="General">General (GN)</option>
+                <option value="Tatkal">Tatkal (TQ)</option>
+                <option value="Ladies">Ladies (LD)</option>
+            </select>
+        </div>
+
+        <!-- Reservations Table -->
+        <div id="dataContainer"></div>
+    </div>
+
+    <footer class="flag-footer">
+        <p>&copy; 2026 Indian Railways Reservation System | All Rights Reserved</p>
+	<div class="counter-badge">
+        👁 Total Portal Visits: <span id="visitCounter">0</span>
+    </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
