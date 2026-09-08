@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Official Web Technology Practical assignments portal for Group 10 at Government MCA College, Maninagar (GMCA). Access all practicals live.">
+    <meta name="keywords" content="GMCA, Web Technology Practicals, Group 10, MCA Practicals, Vercel, HTML, CSS, JavaScript">
+    <meta name="author" content="Group 10 - GMCA">
+    <title>Group 10 — Web Technology Practicals | GMCA</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0a0f1d;
+            --bg-card: rgba(18, 26, 47, 0.75);
+            --bg-card-hover: rgba(28, 40, 70, 0.85);
+            --border-glow: rgba(99, 102, 241, 0.25);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glow Backdrop */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ambient-blob-1 {
+            position: absolute;
+            top: -10%;
+            left: 15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: floatSlow 18s ease-in-out infinite alternate;
+        }
+
+        .ambient-blob-2 {
+            position: absolute;
+            bottom: 10%;
+            right: 10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            filter: blur(90px);
+            border-radius: 50%;
+            animation: floatSlow 22s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatSlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, 30px) scale(1.08); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation Bar */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: rgba(10, 15, 29, 0.75);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #ffffff;
+        }
+
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseGreen 2s infinite;
+        }
+
+        @keyframes pulseGreen {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 70px 0 40px;
+            text-align: center;
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 30px;
+            color: #a5b4fc;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.25rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 18px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 70%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 680px;
+            margin: 0 auto 36px;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        /* Team Section */
+        .team-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 50px;
+        }
+
+        .member-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--text-main);
+            backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
+
+        .member-chip:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .member-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .member-meta {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .member-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .member-id {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Practicals Grid */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--card-accent, var(--primary-gradient));
+            opacity: 0.8;
+            transition: height 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            background: var(--bg-card-hover);
+            border-color: var(--border-glow);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+        }
+
+        .card:hover::before {
+            height: 4px;
+        }
+
+        .card-top {
+            margin-bottom: 20px;
+        }
+
+        .card-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .card-number {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+            line-height: 1.35;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .tech-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .tech-pill {
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-launch {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            background: var(--card-btn-bg, var(--primary-gradient));
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        @media (max-width: 640px) {
+            .nav-inner {
+                height: 64px;
+            }
+            .hero {
+                padding: 40px 0 20px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .team-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .member-chip {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glow Effect -->
+    <div class="ambient-bg">
+        <div class="ambient-blob-1"></div>
+        <div class="ambient-blob-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="top-nav">
+        <div class="container nav-inner">
+            <a href="index.html" class="brand">
+                <div class="brand-badge">G10</div>
+                <div>
+                    <div class="brand-title">Group 10 Practicals</div>
+                    <div class="brand-subtitle">Govt. MCA College, Maninagar</div>
+                </div>
+            </a>
+            
+            <div class="badge-live">
+                <div class="pulse-dot"></div>
+                <span>Deployed on Vercel</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container">
+        
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="pill-badge">
+                <span>🎓</span> Master of Computer Applications (MCA) • Web Technology
+            </div>
+            <h1>
+                Web Technology <span class="gradient-text">Practical Submissions</span>
+            </h1>
+            <p>
+                Interactive laboratory practicals and web applications engineered with HTML5, CSS3, and JavaScript by Group 10.
+            </p>
+
+            <!-- Team Members Bar -->
+            <div class="team-bar">
+                <a href="practical 2/member1.html" class="member-chip" title="View Member Profile">
+                    <div class="member-avatar">RB</div>
+                    <div class="member-meta">
+                        <span class="member-name">Ridham Bambhaniya</span>
+                        <span class="member-id">Enrollment: 26GMCA61</span>
+                    </div>
+                </a>
+
+                <a href="practical 2/member2.html" class="member-chip" title="View Member Profile">
+                    <div class="member-avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">RT</div>
+                    <div class="member-meta">
+                        <span class="member-name">Riya Thakkar</span>
+                        <span class="member-id">Enrollment: 26GMCA33</span>
+                    </div>
+                </a>
+
+                <a href="practical 2/member3.html" class="member-chip" title="View Member Profile">
+                    <div class="member-avatar" style="background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">VS</div>
+                    <div class="member-meta">
+                        <span class="member-name">Vaibhav Senjaliya</span>
+                        <span class="member-id">Enrollment: 26GMCA52</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Projects Grid Section -->
+        <section id="practicals">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">All Practicals & Projects</h2>
+                    <p class="section-subtitle">Click launch to explore the live projects</p>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                
+                <!-- Card 1: Practical 1 -->
+                <article class="card" style="--card-accent: #f59e0b; --card-btn-bg: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <div class="card-top">
+                        <div class="card-badge-row">
+                            <span class="card-tag">HTML Layout</span>
+                            <span class="card-number">01</span>
+                        </div>
+                        <h3 class="card-title">Institutional Webpage</h3>
+                        <p class="card-desc">
+                            Table-structured responsive web portal with student profile details, announcement bulletins, and academic course highlights.
+                        </p>
+                        <div class="tech-chips">
+                            <span class="tech-pill">HTML Tables</span>
+                            <span class="tech-pill">Nested Layouts</span>
+                            <span class="tech-pill">Hyperlinks</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="Practical-1 (26GMCA61 - Web Page).html" class="btn-launch">
+                            Launch Practical 1 →
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Card 2: Practical 2 -->
+                <article class="card" style="--card-accent: #06b6d4; --card-btn-bg: linear-gradient(135deg, #06b6d4, #0284c7);">
+                    <div class="card-top">
+                        <div class="card-badge-row">
+                            <span class="card-tag">CSS Design</span>
+                            <span class="card-number">02</span>
+                        </div>
+                        <h3 class="card-title">Group 10 Team Showcase</h3>
+                        <p class="card-desc">
+                            Modern CSS-styled team portfolio featuring interactive member profile cards, academic history, and tricolor theme header/footer.
+                        </p>
+                        <div class="tech-chips">
+                            <span class="tech-pill">CSS3 Flexbox</span>
+                            <span class="tech-pill">Custom Palette</span>
+                            <span class="tech-pill">Multi-Page Nav</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="practical 2/index.html" class="btn-launch">
+                            Launch Practical 2 →
+                        </a>
+                        <a href="practical 2/about.html" class="btn-secondary" title="View About Us Page">
+                            Team
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Card 3: Practical 3 -->
+                <article class="card" style="--card-accent: #6366f1; --card-btn-bg: linear-gradient(135deg, #6366f1, #a855f7);">
+                    <div class="card-top">
+                        <div class="card-badge-row">
+                            <span class="card-tag">Web App & JS</span>
+                            <span class="card-number">03</span>
+                        </div>
+                        <h3 class="card-title">Railway Reservation Portal</h3>
+                        <p class="card-desc">
+                            Full-featured ticket reservation system with dynamic class fare computation, real-time ticket preview, and search-filterable dataset view.
+                        </p>
+                        <div class="tech-chips">
+                            <span class="tech-pill">JavaScript DOM</span>
+                            <span class="tech-pill">Form Calculation</span>
+                            <span class="tech-pill">Search & Filters</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="Practical 3/index.html" class="btn-launch">
+                            Launch Portal →
+                        </a>
+                        <a href="Practical 3/data.html" class="btn-secondary" title="View Reservation Records">
+                            Data
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Card 4: Practical 4 -->
+                <article class="card" style="--card-accent: #10b981; --card-btn-bg: linear-gradient(135deg, #10b981, #059669);">
+                    <div class="card-top">
+                        <div class="card-badge-row">
+                            <span class="card-tag">Interactive Tool</span>
+                            <span class="card-number">04</span>
+                        </div>
+                        <h3 class="card-title">Keyboard Calculator</h3>
+                        <p class="card-desc">
+                            Clean dark-themed calculator web app supporting dual-input modes: tactile screen button presses and physical keyboard keystroke events.
+                        </p>
+                        <div class="tech-chips">
+                            <span class="tech-pill">Keyboard Events</span>
+                            <span class="tech-pill">CSS Grid Layout</span>
+                            <span class="tech-pill">Dark UI Theme</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="Practical-4.html" class="btn-launch">
+                            Launch Calculator →
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-inner">
+            <p>© 2026 <strong>Group 10</strong> — Government MCA College, Maninagar (GMCA)</p>
+            <ul class="footer-links">
+                <li><a href="Practical-1 (26GMCA61 - Web Page).html">Practical 1</a></li>
+                <li><a href="practical 2/index.html">Practical 2</a></li>
+                <li><a href="Practical 3/index.html">Practical 3</a></li>
+                <li><a href="Practical-4.html">Practical 4</a></li>
+            </ul>
+        </div>
+    </footer>
+
+</body>
+</html>
