@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Calculator — Group 10 | GMCA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Banner -->
+    <header class="flag-header">
+        <h1>Interactive Keyboard Calculator</h1>
+        <p>Practical 4 — JavaScript Event Listeners & Expression Evaluation (Group 10)</p>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        
+        <!-- About Us with CSS Hover Dropdown -->
+        <div class="nav-dropdown">
+            <a href="about.html">About Us ▾</a>
+            <div class="nav-dropdown-content">
+                <a href="member1.html">
+                    <span>Ridham Bambhaniya</span>
+                    <span class="member-badge">26GMCA61</span>
+                </a>
+                <a href="member2.html">
+                    <span>Riya Thakkar</span>
+                    <span class="member-badge">26GMCA33</span>
+                </a>
+                <a href="member3.html">
+                    <span>Vaibhav Senjaliya</span>
+                    <span class="member-badge">26GMCA52</span>
+                </a>
+            </div>
+        </div>
+
+        <a href="data.html">Data</a>
+        <a href="calculator.html" class="active">Calculator</a>
+        <a href="Practical-1 (26GMCA61 - Web Page).html">Practical 1 (HTML)</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="calculator-wrapper">
+            <div class="calc-box">
+                <!-- Display -->
+                <input type="text" id="display" class="calc-display" readonly>
+
+                <!-- Buttons Grid -->
+                <div class="calc-buttons">
+                    <button class="clear" onclick="clearDisplay()">C</button>
+                    <button onclick="appendValue('(')">(</button>
+                    <button onclick="appendValue(')')">)</button>
+                    <button class="operator" onclick="appendValue('/')">÷</button>
+
+                    <button onclick="appendValue('7')">7</button>
+                    <button onclick="appendValue('8')">8</button>
+                    <button onclick="appendValue('9')">9</button>
+                    <button class="operator" onclick="appendValue('*')">×</button>
+
+                    <button onclick="appendValue('4')">4</button>
+                    <button onclick="appendValue('5')">5</button>
+                    <button onclick="appendValue('6')">6</button>
+                    <button class="operator" onclick="appendValue('-')">−</button>
+
+                    <button onclick="appendValue('1')">1</button>
+                    <button onclick="appendValue('2')">2</button>
+                    <button onclick="appendValue('3')">3</button>
+                    <button class="operator" onclick="appendValue('+')">+</button>
+
+                    <button onclick="appendValue('0')">0</button>
+                    <button onclick="appendValue('.')">.</button>
+                    <button class="equal" onclick="calculate()" style="grid-column: span 2;">=</button>
+                </div>
+
+                <div class="calc-instructions">
+                    💡 You can also type directly using your physical keyboard!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="flag-footer">
+        <p>&copy; 2026 Group - 10 | Government MCA College, Maninagar | All Rights Reserved</p>
+        <div class="counter-badge">
+            👁 Total Portal Visits: <span id="visitCounter">0</span>
+        </div>
+    </footer>
+
+    <!-- Calculator Logic Script -->
+    <script>
+        const display = document.getElementById("display");
+
+        function appendValue(val) {
+            if (display.value === "Error") {
+                display.value = "";
+            }
+            display.value += val;
+        }
+
+        function clearDisplay() {
+            display.value = "";
+        }
+
+        function calculate() {
+            if (!display.value) return;
+            try {
+                let result = eval(display.value);
+                display.value = result;
+            } catch (e) {
+                display.value = "Error";
+            }
+        }
+
+        // Computer Keyboard Control
+        document.addEventListener("keydown", function(event) {
+            const key = event.key;
+
+            if ((key >= "0" && key <= "9") || key === "." || key === "(" || key === ")") {
+                appendValue(key);
+            } else if (key === "+") {
+                appendValue("+");
+            } else if (key === "-") {
+                appendValue("-");
+            } else if (key === "*") {
+                appendValue("*");
+            } else if (key === "/") {
+                event.preventDefault();
+                appendValue("/");
+            } else if (key === "Enter" || key === "=") {
+                calculate();
+            } else if (key === "Backspace") {
+                display.value = display.value.slice(0, -1);
+            } else if (key === "Escape" || key.toLowerCase() === "c") {
+                clearDisplay();
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,801 @@
+/* ==========================================================================
+   1. Indian Flag Palette Variables & Global Styles
+   ========================================================================== */
+:root {
+    --saffron: #FF9933;
+    --white: #FFFFFF;
+    --green: #138808;
+    --navy: #000080;
+    --light-ash: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-ash);
+    color: #333;
+}
+
+/* Base Layout Container */
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+}
+
+/* ==========================================================================
+   2. Header, Banner & Navigation Bar
+   ========================================================================== */
+.flag-header {
+    background: linear-gradient(135deg, var(--saffron), #E67E22);
+    color: var(--white);
+    text-align: center;
+    padding: 25px 15px;
+    border-bottom: 5px solid var(--green);
+    position: relative;
+}
+
+.flag-header h1 {
+    margin: 0;
+    font-size: 32px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.flag-header p {
+    margin: 5px 0 0 0;
+    font-size: 15px;
+}
+
+/* Navigation Bar & Links */
+.navbar {
+    background-color: var(--navy);
+    text-align: center;
+    padding: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.navbar a {
+    color: var(--white);
+    text-decoration: none;
+    padding: 8px 16px;
+    margin: 0 4px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.navbar a:hover {
+    background-color: var(--saffron);
+    color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.navbar a.active {
+    background-color: var(--green);
+    color: var(--white);
+}
+
+/* Navigation Bar Dropdown */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--navy);
+    min-width: 280px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    z-index: 1000;
+    text-align: left;
+    padding: 6px 0;
+    border-top: 3px solid var(--saffron);
+}
+
+.nav-dropdown:hover .nav-dropdown-content {
+    display: block;
+}
+
+.nav-dropdown-content a {
+    color: var(--white);
+    padding: 10px 16px;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    border-radius: 0;
+    transition: background 0.2s ease;
+}
+
+.nav-dropdown-content a:hover {
+    background-color: var(--saffron);
+    color: var(--navy);
+    transform: none;
+    box-shadow: none;
+}
+
+.nav-dropdown-content .member-badge {
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.nav-dropdown-content a:hover .member-badge {
+    background: var(--navy);
+    color: var(--white);
+}
+
+/* Footer */
+.flag-footer {
+    background-color: var(--green);
+    color: var(--white);
+    text-align: center;
+    padding: 15px;
+    margin-top: 40px;
+}
+
+/* ==========================================================================
+   3. Overlays & Avatar Components
+   ========================================================================== */
+/* Welcome Overlay */
+#welcomeOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--saffron), var(--white), var(--green));
+    color: var(--navy);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+#welcomeOverlay h1 {
+    font-size: 5em;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+    margin: 0;
+}
+
+/* Top-Left Team Avatars Box */
+.team-avatars-box {
+    background: #ffffff;
+    border: 2px solid var(--saffron);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.team-avatars-box h4 {
+    margin: 0 0 10px 0;
+    color: var(--navy);
+}
+
+.avatar-group {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.avatar-item {
+    text-align: center;
+}
+
+.avatar-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--green);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.avatar-img:hover {
+    transform: scale(1.1);
+    border-color: var(--saffron);
+}
+
+.avatar-name {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   4. Railway Booking Form Styles
+   ========================================================================== */
+.booking-card {
+    background-color: var(--white);
+    border-top: 4px solid var(--saffron);
+    border-bottom: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 10px auto;
+}
+
+.booking-card h3 {
+    margin-top: 0;
+    color: var(--navy);
+    border-bottom: 2px solid var(--saffron);
+    padding-bottom: 8px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #444;
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 5px rgba(0, 0, 128, 0.3);
+}
+
+.price-summary {
+    background-color: #f0f7f0;
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 4px solid var(--green);
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--navy);
+}
+
+.btn-submit {
+    background-color: var(--saffron);
+    color: var(--white);
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: #e67e22;
+}
+
+/* ==========================================================================
+   6. Inline Real-time Error Styling
+   ========================================================================== */
+.error-msg {
+    color: #d9534f;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: block;
+    min-height: 16px;
+}
+
+input.input-error, select.input-error {
+    border-color: #d9534f !important;
+    background-color: #fff8f8;
+}
+
+input.input-valid, select.input-valid {
+    border-color: var(--green) !important;
+}
+/* ==========================================================================
+   5. Team & Profile Detail Cards
+   ========================================================================== */
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.member-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    border-top: 5px solid var(--saffron);
+    border-bottom: 5px solid var(--green);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.member-card img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 3px solid var(--navy);
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.member-card h3 {
+    color: var(--navy);
+    margin: 10px 0 5px 0;
+}
+
+.member-card p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.btn-profile {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--white);
+    background: var(--green);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-profile:hover {
+    background: var(--saffron);
+    color: var(--navy);
+}
+
+/* Individual Profile Card & Details Table */
+.profile-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-width: 650px;
+    margin: 30px auto;
+    border-left: 6px solid var(--navy);
+}
+
+.profile-card img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--saffron);
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.profile-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-table td.label {
+    font-weight: bold;
+    color: var(--navy);
+    width: 40%;
+}
+
+/* ==========================================================================
+   6. Data Dashboard, Tables & Badges
+   ========================================================================== */
+/* Dashboard Stat Widgets */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 15px;
+    border-radius: 8px;
+    border-top: 4px solid var(--navy);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.stat-card h4 {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.stat-card p {
+    margin: 8px 0 0 0;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--navy);
+}
+
+/* Filter & Search Bar */
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-bar input, 
+.filter-bar select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filter-bar input {
+    flex: 1;
+}
+
+/* Data Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.data-table th {
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.data-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Badges & Action Buttons */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.quota-badge {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+.status-badge {
+    background-color: #dcfce7;
+    color: var(--green);
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Page Visit Counter Badge */
+.counter-badge {
+    margin-top: 8px;
+    display: inline-block;
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid var(--saffron);
+}
+
+.counter-badge span {
+    color: var(--saffron);
+}
+
+/* ==========================================================================
+   Candidate Details Hero Section (Professor Requirement)
+   ========================================================================== */
+.candidates-hero {
+    background: #ffffff;
+    border-top: 4px solid var(--saffron);
+    border-bottom: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.candidates-hero-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.candidates-hero-header h2 {
+    margin: 0 0 6px 0;
+    color: var(--navy);
+    font-size: 22px;
+}
+
+.candidates-hero-header p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.candidate-card {
+    background: #fdfdfd;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.candidate-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--saffron);
+}
+
+.candidate-photo {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 3px solid var(--green);
+    object-fit: cover;
+    margin: 0 auto 10px;
+    display: block;
+}
+
+.candidate-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-bottom: 4px;
+}
+
+.candidate-roll {
+    font-size: 13px;
+    color: var(--saffron);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.candidate-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    background-color: var(--navy);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.candidate-btn:hover {
+    background-color: var(--saffron);
+    color: var(--navy);
+}
+
+/* ==========================================================================
+   Practical 4: Keyboard Calculator Styles
+   ========================================================================== */
+.calculator-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 10px 40px;
+}
+
+.calc-box {
+    width: 320px;
+    padding: 22px;
+    background-color: #222;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.calc-display {
+    width: 100%;
+    height: 65px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 28px;
+    text-align: right;
+    font-family: monospace;
+}
+
+.calc-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.calc-buttons button {
+    height: 55px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #444;
+    color: #ffffff;
+    transition: 0.15s ease;
+}
+
+.calc-buttons button:hover {
+    background-color: #666;
+    transform: scale(1.05);
+}
+
+.calc-buttons button:active {
+    transform: scale(0.95);
+}
+
+.calc-buttons button.operator {
+    background-color: var(--saffron);
+    color: #ffffff;
+}
+
+.calc-buttons button.operator:hover {
+    background-color: #e67e22;
+}
+
+.calc-buttons button.clear {
+    background-color: #d9534f;
+}
+
+.calc-buttons button.clear:hover {
+    background-color: #c9302c;
+}
+
+.calc-buttons button.equal {
+    background-color: var(--green);
+}
+
+.calc-buttons button.equal:hover {
+    background-color: #0e6b06;
+}
+
+.calc-instructions {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* ==========================================================================
+   Practical 5: Responsive Layout (Media Queries)
+   ========================================================================== */
+@media screen and (max-width: 850px) {
+    .container {
+        width: 95%;
+        margin: 15px auto;
+    }
+
+    .flag-header h1 {
+        font-size: 22px;
+    }
+
+    .flag-header p {
+        font-size: 13px;
+    }
+
+    /* Convert Table Layout to Block Stacking */
+    .responsive-table,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table td {
+        display: block;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .responsive-table td {
+        padding: 10px 0 !important;
+    }
+
+    .candidates-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .members-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-card {
+        padding: 15px;
+        margin: 0;
+    }
+
+    .navbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 4px;
+    }
+
+    .navbar a {
+        padding: 6px 10px;
+        font-size: 13px;
+        margin: 2px;
+    }
+
+    .nav-dropdown-content {
+        position: static;
+        min-width: 100%;
+        box-shadow: none;
+        margin-top: 4px;
+    }
+}

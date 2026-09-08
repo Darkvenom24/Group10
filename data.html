@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submitted Booking Data — Reservation Portal | GMCA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Banner -->
+    <header class="flag-header">
+        <h1>Railway Reservation Records</h1>
+        <p>Government MCA College, Maninagar Project Dataset — Group 10</p>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        
+        <!-- About Us with CSS Hover Dropdown -->
+        <div class="nav-dropdown">
+            <a href="about.html">About Us ▾</a>
+            <div class="nav-dropdown-content">
+                <a href="member1.html">
+                    <span>Ridham Bambhaniya</span>
+                    <span class="member-badge">26GMCA61</span>
+                </a>
+                <a href="member2.html">
+                    <span>Riya Thakkar</span>
+                    <span class="member-badge">26GMCA33</span>
+                </a>
+                <a href="member3.html">
+                    <span>Vaibhav Senjaliya</span>
+                    <span class="member-badge">26GMCA52</span>
+                </a>
+            </div>
+        </div>
+
+        <a href="data.html" class="active">Data</a>
+        <a href="calculator.html">Calculator</a>
+        <a href="Practical-1 (26GMCA61 - Web Page).html">Practical 1 (HTML)</a>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Summary Widgets -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Bookings</h4>
+                <p id="totalBookingsCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h4>Total Revenue Collected</h4>
+                <p id="totalRevenueAmount">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h4>Active Routes</h4>
+                <p id="activeRoutesCount">0</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+            <input type="text" id="searchInput" onkeyup="filterBookingData()" placeholder="Search passenger name or PNR...">
+            <select id="quotaFilter" onchange="filterBookingData()">
+                <option value="ALL">All Quotas</option>
+                <option value="General">General (GN)</option>
+                <option value="Tatkal">Tatkal (TQ)</option>
+                <option value="Premium Tatkal">Premium Tatkal (PT)</option>
+                <option value="Ladies">Ladies (LD)</option>
+            </select>
+        </div>
+
+        <!-- Reservations Table -->
+        <div id="dataContainer"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="flag-footer">
+        <p>&copy; 2026 Indian Railways Reservation System | Government MCA College, Maninagar | All Rights Reserved</p>
+        <div class="counter-badge">
+            👁 Total Portal Visits: <span id="visitCounter">0</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
