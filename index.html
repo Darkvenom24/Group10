@@ -16,7 +16,7 @@
             scroll-behavior: smooth;
         }
 
-        /* 3-Second Welcome Overlay */
+        /* 3-Second Welcome Overlay (First-Time Visitor Only) */
         #welcomeOverlay {
             position: fixed;
             top: 0;
@@ -25,7 +25,7 @@
             height: 100vh;
             background: rgba(0, 0, 80, 0.94);
             color: #ffffff;
-            display: flex;
+            display: none; /* Controlled dynamically by JS for first-time visitors */
             justify-content: center;
             align-items: center;
             z-index: 99999;
@@ -375,41 +375,19 @@
             <!-- Center Column: Team Members, About Institute & Contact -->
             <td width="56%" style="padding: 20px 30px;">
 
-                <!-- Group 10 Team Candidates Showcase -->
-                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px;">
-                    <h2 style="color: #000080; margin-top: 0; text-align: center; border-bottom: 2px solid #FF9933; padding-bottom: 8px;">
-                        Group 10 — Project Candidates
-                    </h2>
-                    <p align="center" style="color: #64748B; font-size: 14px; margin-bottom: 20px;">
-                        Master of Computer Applications (MCA) — Academic Year 2025–2026
-                    </p>
-
-                    <table width="100%" border="0" cellpadding="10" cellspacing="0">
-                        <tr align="center">
-                            
-                            <!-- Candidate 1: Ridham -->
-                            <td width="33%" style="border-right: 1px solid #F1F5F9;">
-                                <img src="ridham.jpeg" alt="Ridham Bambhaniya" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #FF9933; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                                <h4 style="margin: 10px 0 6px 0; color: #000080; font-size: 16px;">Ridham Bambhaniya</h4>
-                                <a href="member1.html" style="display: inline-block; margin-top: 8px; background: #000080; color: #FFFFFF; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
-                            </td>
-
-                            <!-- Candidate 2: Riya -->
-                            <td width="33%" style="border-right: 1px solid #F1F5F9;">
-                                <img src="riya.jpeg" alt="Riya Thakkar" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #138808; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                                <h4 style="margin: 10px 0 6px 0; color: #000080; font-size: 16px;">Riya Thakkar</h4>
-                                <a href="member2.html" style="display: inline-block; margin-top: 8px; background: #138808; color: #FFFFFF; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
-                            </td>
-
-                            <!-- Candidate 3: Vaibhav -->
-                            <td width="33%">
-                                <img src="vaibhav.jpeg" onerror="this.onerror=null;this.src='temp.jpeg';" alt="Vaibhav Senjaliya" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #0284C7; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                                <h4 style="margin: 10px 0 6px 0; color: #000080; font-size: 16px;">Vaibhav Senjaliya</h4>
-                                <a href="member3.html" style="display: inline-block; margin-top: 8px; background: #0284C7; color: #FFFFFF; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
-                            </td>
-
-                        </tr>
-                    </table>
+                <!-- Portal Live Visit Counter Widget -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #FF9933; border-radius: 8px; padding: 14px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: #EFF6FF; border: 1px solid #BFDBFE; font-size: 18px;">👁</span>
+                        <div>
+                            <span style="font-size: 14px; font-weight: bold; color: #000080; display: block;">Portal Visit Counter</span>
+                            <span style="font-size: 12px; color: #64748B;">Tracking live visitor interactions across Group 10 practicals</span>
+                        </div>
+                    </div>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: #000080; color: #FFFFFF; padding: 6px 16px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,128,0.2);">
+                        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #FF9933; font-weight: bold;">Total Visits:</span>
+                        <span id="visitCounter" style="font-size: 16px; font-weight: bold; color: #FFFFFF;">0</span>
+                    </div>
                 </div>
 
                 <!-- About Our Institute -->
@@ -539,19 +517,43 @@
 
     </table>
 
-    <!-- 3-Second WELCOME Overlay Script -->
+    <!-- First-Time Only Welcome Overlay & Visit Counter Script -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
+            // 1. Show 3-second welcome message ONLY for first-time visitor
             const overlay = document.getElementById('welcomeOverlay');
-            if (overlay) {
+            const hasSeenWelcome = localStorage.getItem('hasSeenGroup10Welcome');
+            if (overlay && !hasSeenWelcome) {
+                overlay.style.display = 'flex';
                 setTimeout(() => {
                     overlay.classList.add('fade-out');
                     setTimeout(() => {
                         overlay.style.display = 'none';
                     }, 500);
                 }, 3000); // 3 seconds display
+                localStorage.setItem('hasSeenGroup10Welcome', 'true');
             }
+
+            // 2. Track & Display Page Visit Counter
+            updateVisitCounter();
         });
+
+        // Increment and render visit counts (synced across all practical pages)
+        function updateVisitCounter() {
+            let totalVisits = parseInt(localStorage.getItem('totalPageVisits')) || 0;
+            totalVisits++;
+            localStorage.setItem('totalPageVisits', totalVisits);
+
+            const pageKey = 'visits_' + window.location.pathname;
+            let pageVisits = parseInt(localStorage.getItem(pageKey)) || 0;
+            pageVisits++;
+            localStorage.setItem(pageKey, pageVisits);
+
+            const visitDisplay = document.getElementById('visitCounter');
+            if (visitDisplay) {
+                visitDisplay.innerText = totalVisits;
+            }
+        }
     </script>
 
 </body>
