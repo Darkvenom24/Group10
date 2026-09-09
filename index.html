@@ -3,211 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian Railways Ticket Booking — Group 10 | GMCA</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Group 10 — Web Technology Practicals | GMCA</title>
 </head>
-<body>
 
-    <!-- Simple 3-Second WELCOME Overlay -->
-    <div id="welcomeOverlay" style="display: none;">
-        <h1>WELCOME</h1>
-    </div>
+<body bgcolor="#f8f9fa" style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
 
-    <!-- Header Banner -->
-    <header class="flag-header">
-        <h1>Indian Railways Reservation Portal</h1>
-        <p>Government MCA College, Maninagar — Web Technology Project (Group 10)</p>
-    </header>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
 
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <a href="index.html" class="active">Home</a>
-        
-        <!-- About Us with CSS Hover Dropdown -->
-        <div class="nav-dropdown">
-            <a href="about.html">About Us ▾</a>
-            <div class="nav-dropdown-content">
-                <a href="member1.html">
-                    <span>Ridham Bambhaniya</span>
-                    <span class="member-badge">26GMCA61</span>
-                </a>
-                <a href="member2.html">
-                    <span>Riya Thakkar</span>
-                    <span class="member-badge">26GMCA33</span>
-                </a>
-                <a href="member3.html">
-                    <span>Vaibhav Senjaliya</span>
-                    <span class="member-badge">26GMCA52</span>
-                </a>
-            </div>
-        </div>
+        <!-- Header -->
+        <tr bgcolor="#FF9933">
+            <th colspan="3" align="center" style="padding: 24px 15px;">
+                <font size="6" color="#FFFFFF" face="'Segoe UI', Arial, sans-serif">
+                    Welcome to Group-10 Webpage
+                </font>
+                <br>
+                <font size="3" color="#FFFFFF" face="'Segoe UI', Arial, sans-serif">
+                    Government MCA College, Maninagar — Web Technology Practicals & Projects
+                </font>
+                <br>
+                <font size="2" color="#FFF3E0" face="'Segoe UI', Arial, sans-serif">
+                    Academic Year 2025–2026 | Master of Computer Applications (MCA)
+                </font>
+            </th>
+        </tr>
 
-        <a href="data.html">Data</a>
-        <a href="calculator.html">Calculator</a>
-        <a href="Practical-1 (26GMCA61 - Web Page).html" title="Original Practical 1 HTML Submission">Practical 1 (HTML)</a>
-    </nav>
+        <!-- Simple Menu Bar (Redirects to all main pages and sections) -->
+        <tr bgcolor="#000080">
+            <td colspan="3" align="center" style="padding: 12px 10px;">
+                <font size="3" color="#FFFFFF" face="'Segoe UI', Arial, sans-serif">
+                    <a href="index.html" style="color: #FF9933; font-weight: bold; text-decoration: none; padding: 0 10px;">Home</a> |
+                    <a href="about.html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">About Us</a> |
+                    <a href="railway.html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Railway Portal (Practical 3)</a> |
+                    <a href="calculator.html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Calculator (Practical 4)</a> |
+                    <a href="Practical-1 (26GMCA61 - Web Page).html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Practical 1 (HTML)</a> |
+                    <a href="practical 2/practical-2(26GMCA61).html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Practical 2 (CSS)</a> |
+                    <a href="data.html" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Booking Data</a> |
+                    <a href="#contact" style="color: #FFFFFF; text-decoration: none; padding: 0 10px;">Contact Us</a>
+                </font>
+            </td>
+        </tr>
 
-    <!-- Main Content Container -->
-    <div class="container">
+        <!-- Main Content Layout -->
+        <tr valign="top">
 
-        <!-- Candidate Details Hero Section (Professor Requirement) -->
-        <div class="candidates-hero">
-            <div class="candidates-hero-header">
-                <h2>Project Candidates (Group 10)</h2>
-                <p>Master of Computer Applications (MCA) — Academic Year 2025–2026</p>
-            </div>
-            <div class="candidates-grid">
-                <!-- Candidate 1 -->
-                <div class="candidate-card">
-                    <img src="ridham.jpeg" alt="Ridham Bambhaniya" class="candidate-photo">
-                    <div class="candidate-name">Ridham Bambhaniya</div>
-                    <div class="candidate-roll">Enrollment: 26GMCA61</div>
-                    <a href="member1.html" class="candidate-btn">View Profile →</a>
+            <!-- Left Column: Latest News & Quick Practicals Menu -->
+            <td width="22%" bgcolor="#FFFFFF" style="padding: 20px; border-right: 1px solid #E2E8F0;">
+                
+                <h3 style="color: #000080; border-bottom: 2px solid #FF9933; padding-bottom: 6px; margin-top: 0;">Latest News</h3>
+                <ol style="padding-left: 20px; line-height: 1.7; font-size: 14px; color: #333333;">
+                    <li>New Admissions 2026 Open</li>
+                    <li>Annual Cultural Event from <b>30 Sept to 5 Oct 2026</b></li>
+                    <li>Seminar on AI & Cloud: <b>15th Oct 2026</b></li>
+                    <li>WTP Lab Practical Submissions Ongoing</li>
+                </ol>
+
+                <br>
+                <h3 style="color: #000080; border-bottom: 2px solid #138808; padding-bottom: 6px;">Practicals Navigation</h3>
+                <ul style="padding-left: 18px; line-height: 1.8; font-size: 14px;">
+                    <li><a href="Practical-1 (26GMCA61 - Web Page).html" style="color: #000080; text-decoration: none;">Practical 1: Basic HTML Webpage</a></li>
+                    <li><a href="practical 2/practical-2(26GMCA61).html" style="color: #000080; text-decoration: none;">Practical 2: HTML & CSS Styling</a></li>
+                    <li><a href="railway.html" style="color: #000080; text-decoration: none;">Practical 3: Railway Booking Portal</a></li>
+                    <li><a href="calculator.html" style="color: #000080; text-decoration: none;">Practical 4: Interactive Calculator</a></li>
+                    <li><a href="Practical-4.html" style="color: #000080; text-decoration: none;">Practical 4: Standalone Lab View</a></li>
+                </ul>
+
+                <br>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px; border-radius: 6px; text-align: center;">
+                    <font size="2" color="#64748B">
+                        <b>Government MCA College</b><br>
+                        K.K. Shastri Educational Campus, Maninagar (E), Ahmedabad - 380008
+                    </font>
                 </div>
-                <!-- Candidate 2 -->
-                <div class="candidate-card">
-                    <img src="https://via.placeholder.com/150/FF9933/FFFFFF?text=Riya" alt="Riya Thakkar" class="candidate-photo">
-                    <div class="candidate-name">Riya Thakkar</div>
-                    <div class="candidate-roll">Enrollment: 26GMCA33</div>
-                    <a href="member2.html" class="candidate-btn">View Profile →</a>
-                </div>
-                <!-- Candidate 3 -->
-                <div class="candidate-card">
-                    <img src="temp.jpeg" alt="Vaibhav Senjaliya" class="candidate-photo">
-                    <div class="candidate-name">Vaibhav Senjaliya</div>
-                    <div class="candidate-roll">Enrollment: 26GMCA52</div>
-                    <a href="member3.html" class="candidate-btn">View Profile →</a>
-                </div>
-            </div>
-        </div>
+            </td>
 
-        <!-- Main Content Area with Practical 5 Responsive Stacking -->
-        <table class="responsive-table" width="100%" cellpadding="10">
-            <tr valign="top">
-                <!-- Left Sidebar: Project Team + News -->
-                <td width="30%">
-                    <!-- Group Member Avatars Top-Left -->
-                    <div class="team-avatars-box">
-                        <h4>Project Team</h4>
-                        <div class="avatar-group">
-                            <div class="avatar-item">
-                                <a href="member1.html">
-                                    <img src="ridham.jpeg" alt="Ridham" class="avatar-img">
-                                </a>
-                                <span class="avatar-name">Ridham</span>
-                            </div>
-                            <div class="avatar-item">
-                                <a href="member2.html">
-                                    <img src="https://via.placeholder.com/150/000080/FFFFFF?text=Riya" alt="Riya" class="avatar-img">
-                                </a>
-                                <span class="avatar-name">Riya</span>
-                            </div>
-                            <div class="avatar-item">
-                                <a href="member3.html">
-                                    <img src="temp.jpeg" alt="Vaibhav" class="avatar-img">
-                                </a>
-                                <span class="avatar-name">Vaibhav</span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Center Column: Team Members, About Institute & Contact -->
+            <td width="56%" style="padding: 20px 30px;">
 
-                    <!-- Railway Bulletins -->
-                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                        <h4 style="color: var(--navy); margin-top: 0;">Railway Bulletins</h4>
-                        <ul style="padding-left: 20px; line-height: 1.6; font-size: 14px;">
-                            <li>Vande Bharat Express route expanded.</li>
-                            <li>Tatkal booking opens at 10:00 AM daily.</li>
-                            <li>Senior Citizen quota policy updates.</li>
-                        </ul>
-                    </div>
-                </td>
+                <!-- Group 10 Team Candidates Showcase -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px;">
+                    <h2 style="color: #000080; margin-top: 0; text-align: center; border-bottom: 2px solid #FF9933; padding-bottom: 8px;">
+                        Group 10 — Project Candidates
+                    </h2>
+                    <p align="center" style="color: #64748B; font-size: 14px; margin-bottom: 20px;">
+                        Master of Computer Applications (MCA) — Academic Year 2025–2026
+                    </p>
 
-                <!-- Main Booking Area -->
-                <td width="70%">
-                    <div class="booking-card">
-                        <h3>Book Train Ticket</h3>
-                        <form id="railwayForm" onsubmit="handleRailwayBooking(event)">
+                    <table width="100%" border="0" cellpadding="10" cellspacing="0">
+                        <tr align="center">
                             
-                            <div class="form-group">
-                                <label for="passengerName">Primary Passenger Full Name:</label>
-                                <input type="text" id="passengerName" placeholder="Enter name as per Govt ID" required>
-                                <span class="error-msg" id="nameError"></span>
-                            </div>
+                            <!-- Candidate 1: Ridham -->
+                            <td width="33%" style="border-right: 1px solid #F1F5F9;">
+                                <img src="ridham.jpeg" alt="Ridham Bambhaniya" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #FF9933; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                <h4 style="margin: 10px 0 4px 0; color: #000080;">Ridham Bambhaniya</h4>
+                                <font size="2" color="#64748B">Enrollment: <b>26GMCA61</b></font><br>
+                                <a href="member1.html" style="display: inline-block; margin-top: 8px; background: #000080; color: #FFFFFF; padding: 5px 14px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
+                            </td>
 
-                            <div class="form-group">
-                                <label for="phone">Mobile Number (10 digits):</label>
-                                <input type="tel" id="phone" placeholder="9876543210" required>
-                                <span class="error-msg" id="phoneError"></span>
-                            </div>
+                            <!-- Candidate 2: Riya -->
+                            <td width="33%" style="border-right: 1px solid #F1F5F9;">
+                                <img src="riya.jpeg" alt="Riya Thakkar" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #138808; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                <h4 style="margin: 10px 0 4px 0; color: #000080;">Riya Thakkar</h4>
+                                <font size="2" color="#64748B">Enrollment: <b>26GMCA33</b></font><br>
+                                <a href="member2.html" style="display: inline-block; margin-top: 8px; background: #138808; color: #FFFFFF; padding: 5px 14px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
+                            </td>
 
-                            <div class="form-group">
-                                <label for="trainSelect">Select Train Route:</label>
-                                <select id="trainSelect" required>
-                                    <option value="">-- Select Train --</option>
-                                    <option value="12958">12958 | ADI SJ RAJDHANI (Ahmedabad to New Delhi - 17:40)</option>
-                                    <option value="20902">20902 | VANDE BHARAT EXP (Ahmedabad to Mumbai Central - 06:00)</option>
-                                    <option value="12833">12833 | ADI HWH EXP (Ahmedabad to Howrah - 00:15)</option>
-                                    <option value="12932">12932 | ADI MMCT DOUBLE DECKER (Ahmedabad to Mumbai - 06:00)</option>
-                                    <option value="22944">22944 | INDB DAUND EXP (Indore to Daund - 16:30)</option>
-                                    <option value="12009">12009 | BCT SHATABDI EXP (Mumbai Central to Ahmedabad - 06:20)</option>
-                                </select>
-                                <span class="error-msg" id="trainError"></span>
-                            </div>
+                            <!-- Candidate 3: Vaibhav -->
+                            <td width="33%">
+                                <img src="vaibhav.jpeg" onerror="this.onerror=null;this.src='temp.jpeg';" alt="Vaibhav Senjaliya" width="110" height="110" style="border-radius: 50%; object-fit: cover; border: 3px solid #0284C7; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                <h4 style="margin: 10px 0 4px 0; color: #000080;">Vaibhav Senjaliya</h4>
+                                <font size="2" color="#64748B">Enrollment: <b>26GMCA52</b></font><br>
+                                <a href="member3.html" style="display: inline-block; margin-top: 8px; background: #0284C7; color: #FFFFFF; padding: 5px 14px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">View Profile →</a>
+                            </td>
 
-                            <div class="form-group">
-                                <label for="travelClass">Select Travel Class:</label>
-                                <select id="travelClass" onchange="calculateRailwayTotal()" required>
-                                    <option value="500">Sleeper (SL) - ₹500</option>
-                                    <option value="1200">AC 3 Tier (3A) - ₹1200</option>
-                                    <option value="1800">AC 2 Tier (2A) - ₹1800</option>
-                                    <option value="3000">Executive / 1st AC (1A) - ₹3000</option>
-                                </select>
-                                <span class="error-msg" id="classError"></span>
-                            </div>
+                        </tr>
+                    </table>
+                </div>
 
-                            <div class="form-group">
-                                <label for="quota">Quota Type:</label>
-                                <select id="quota" required>
-                                    <option value="General">General (GN)</option>
-                                    <option value="Tatkal">Tatkal (TQ)</option>
-                                    <option value="Premium Tatkal">Premium Tatkal (PT)</option>
-                                    <option value="Ladies">Ladies (LD)</option>
-                                </select>
-                            </div>
+                <!-- About Our Institute -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px;">
+                    <h2 style="color: #000080; margin-top: 0;">About Our Institute</h2>
+                    <p style="line-height: 1.7; color: #333333; font-size: 15px;">
+                        At <b>Government MCA College, Maninagar</b>, we provide high-quality education in the field of Computer Applications.
+                        Our experienced faculties, and Principal <b>Dr. Chetan B. Bhatt</b>, are dedicated to imparting both practical and theoretical knowledge to prepare students for real-world software engineering challenges.
+                    </p>
 
-                            <div class="form-group">
-                                <label for="travelDate">Journey Date:</label>
-                                <input type="date" id="travelDate" required>
-                                <span class="error-msg" id="dateError"></span>
-                            </div>
+                    <h3 style="color: #000080; margin-top: 20px;">Our Mission</h3>
+                    <p style="line-height: 1.7; color: #333333; font-size: 15px;">
+                        We aim to produce skilled professionals who excel in their respective fields. With state-of-the-art infrastructure and innovative teaching methods, we strive for academic excellence.
+                    </p>
+                    <ul style="line-height: 1.8; color: #333333; font-size: 14px;">
+                        <li>Equip students with robust knowledge, problem-solving skills, and professional ethics.</li>
+                        <li>Establish close industry-academia interaction for proficient industrial readiness.</li>
+                        <li>Provide a conducive research and learning environment for innovation.</li>
+                    </ul>
+                </div>
 
-                            <div class="form-group">
-                                <label for="passengerQty">Number of Passengers (1-6):</label>
-                                <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()" required>
-                                <span class="error-msg" id="qtyError"></span>
-                            </div>
+                <!-- Featured Practical Portals Quick Launch -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px;">
+                    <h3 style="color: #000080; margin-top: 0; border-bottom: 2px solid #FF9933; padding-bottom: 6px;">
+                        Featured Applications
+                    </h3>
 
-                            <!-- Live Fare Display -->
-                            <div class="price-summary">
-                                Total Estimated Fare: ₹<span id="totalFare">500</span>
-                            </div>
+                    <table width="100%" cellpadding="8" cellspacing="0">
+                        <tr>
+                            <td width="50%" valign="top" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;">
+                                <h4 style="margin: 0 0 6px 0; color: #000080;">🚆 Indian Railways Portal (Practical 3)</h4>
+                                <p style="font-size: 13px; color: #555; margin: 0 0 10px 0;">Interactive booking web application with dynamic pricing, ticket validation, and localStorage reservation records.</p>
+                                <a href="railway.html" style="color: #FF9933; font-weight: bold; font-size: 13px; text-decoration: none;">Launch Railway Portal →</a>
+                            </td>
+                            <td width="50%" valign="top" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;">
+                                <h4 style="margin: 0 0 6px 0; color: #000080;">🧮 Interactive Calculator (Practical 4)</h4>
+                                <p style="font-size: 13px; color: #555; margin: 0 0 10px 0;">Keyboard event-driven expression evaluator supporting arithmetic computations and responsive interface.</p>
+                                <a href="calculator.html" style="color: #138808; font-weight: bold; font-size: 13px; text-decoration: none;">Launch Calculator →</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
-                            <button type="submit" class="btn-submit">Confirm & Book Ticket</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
+                <!-- Contact Form -->
+                <div id="contact" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <h2 style="color: #000080; margin-top: 0;">Contact Us</h2>
+                    <form action="#" method="post" onsubmit="event.preventDefault(); alert('Thank you! Your feedback has been received.');">
+                        <table border="0" cellspacing="8" cellpadding="2" width="100%">
+                            <tr>
+                                <td width="20%"><b>Name:</b></td>
+                                <td width="80%"><input type="text" name="name" required style="width: 80%; padding: 8px; border: 1px solid #CBD5E1; border-radius: 4px;"></td>
+                            </tr>
+                            <tr>
+                                <td><b>Email:</b></td>
+                                <td><input type="email" name="email" required style="width: 80%; padding: 8px; border: 1px solid #CBD5E1; border-radius: 4px;"></td>
+                            </tr>
+                            <tr>
+                                <td valign="top"><b>Message:</b></td>
+                                <td><textarea name="message" rows="4" style="width: 80%; padding: 8px; border: 1px solid #CBD5E1; border-radius: 4px;"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><input type="submit" value="Submit Message" style="background: #FF9933; color: #FFFFFF; border: none; padding: 10px 22px; font-weight: bold; border-radius: 4px; cursor: pointer;"></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
 
-    <!-- Footer -->
-    <footer class="flag-footer">
-        <p>&copy; 2026 Group - 10 | Government MCA College, Maninagar | All Rights Reserved</p>
-        <div class="counter-badge">
-            👁 Total Portal Visits: <span id="visitCounter">0</span>
-        </div>
-    </footer>
+            </td>
 
-    <script src="script.js"></script>
+            <!-- Right Column: Course Details & Important Links -->
+            <td width="22%" bgcolor="#FFFFFF" style="padding: 20px; border-left: 1px solid #E2E8F0;">
+                
+                <h3 style="color: #000080; border-bottom: 2px solid #FF9933; padding-bottom: 6px; margin-top: 0;">Course Details</h3>
+                <table width="100%" cellpadding="6" cellspacing="0" style="font-size: 13px; color: #333333; line-height: 1.5;">
+                    <tr>
+                        <td style="border-bottom: 1px solid #F1F5F9;"><b>Program:</b></td>
+                        <td style="border-bottom: 1px solid #F1F5F9;">MCA (Master of Computer Applications)</td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom: 1px solid #F1F5F9;"><b>Duration:</b></td>
+                        <td style="border-bottom: 1px solid #F1F5F9;">2 Years (4 Semesters)</td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom: 1px solid #F1F5F9;"><b>Intake:</b></td>
+                        <td style="border-bottom: 1px solid #F1F5F9;">120 Students</td>
+                    </tr>
+                    <tr>
+                        <td><b>Affiliation:</b></td>
+                        <td>Gujarat Technological University (GTU)</td>
+                    </tr>
+                </table>
+
+                <br>
+                <h3 style="color: #000080; border-bottom: 2px solid #138808; padding-bottom: 6px;">Important Links</h3>
+                <ul style="padding-left: 18px; line-height: 2; font-size: 14px;">
+                    <li><a href="https://www.gtu.ac.in/" target="_blank" style="color: #000080; text-decoration: none;">GTU Official Website ↗</a></li>
+                    <li><a href="https://nptel.ac.in/" target="_blank" style="color: #000080; text-decoration: none;">NPTEL Online Courses ↗</a></li>
+                    <li><a href="https://www.aicte-india.org/" target="_blank" style="color: #000080; text-decoration: none;">AICTE Portal ↗</a></li>
+                    <li><a href="https://irctc.co.in/" target="_blank" style="color: #000080; text-decoration: none;">IRCTC Official Portal ↗</a></li>
+                </ul>
+
+                <br>
+                <div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 12px; border-radius: 6px; text-align: center;">
+                    <font size="2" color="#9A3412">
+                        <b>Web Technology Project</b><br>
+                        Group 10 Practical Portfolio
+                    </font>
+                </div>
+
+            </td>
+
+        </tr>
+
+        <!-- Footer -->
+        <tr bgcolor="#138808">
+            <td colspan="3" align="center" style="padding: 16px 10px;">
+                <font size="3" color="#FFFFFF" face="'Segoe UI', Arial, sans-serif">
+                    &copy; 2026 <b>Group - 10</b> | Government MCA College, Maninagar. All Rights Reserved.
+                </font>
+                <br>
+                <font size="2" color="#D1FAE5" face="'Segoe UI', Arial, sans-serif">
+                    Ridham Bambhaniya (26GMCA61) &bull; Riya Thakkar (26GMCA33) &bull; Vaibhav Senjaliya (26GMCA52)
+                </font>
+            </td>
+        </tr>
+
+    </table>
+
 </body>
 </html>
