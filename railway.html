@@ -76,116 +76,44 @@
     <!-- Main Content Container -->
     <div class="container">
 
-        <!-- Portal Header Banner -->
-        <div class="rail-portal-banner">
-            <div class="rail-banner-text">
-                <span class="rail-badge">IRCTC / Western Railway Reservation Portal</span>
-                <h2>Passenger Reservation & E-Ticketing System</h2>
-                <p>Fast, secure, and instant ticket booking simulation with live fare computation & PNR issuance.</p>
-            </div>
-            <div class="rail-banner-highlights">
-                <div class="rail-pill">🟢 Tatkal Active</div>
-                <div class="rail-pill">⚡ Instant E-Ticket</div>
-                <div class="rail-pill">📞 RailMadad 139</div>
-            </div>
-        </div>
-
-        <!-- Main Content Area with Responsive Stacking -->
+        <!-- Main Content Area with Practical 5 Responsive Stacking -->
         <table class="responsive-table" width="100%" cellpadding="10">
             <tr valign="top">
-                <!-- Left Sidebar: Bulletins, Quick Services & Helpdesk -->
-                <td width="32%">
-                    <!-- Railway Bulletins & Advisory -->
-                    <div class="rail-side-card">
-                        <div class="rail-card-header">
-                            <span class="card-icon">📢</span>
-                            <h4>Railway Bulletins & Advisory</h4>
-                        </div>
-                        <ul class="bulletin-list">
-                            <li>
-                                <strong>Tatkal Booking:</strong> AC opens at 10:00 AM | Non-AC opens at 11:00 AM daily.
-                            </li>
-                            <li>
-                                <strong>Vande Bharat Exp:</strong> Route 20902 (ADI-MMCT) operates with 100% on-time record.
-                            </li>
-                            <li>
-                                <strong>Mandatory ID:</strong> Carry original Govt Photo ID (Aadhaar / Voter ID / DL) during journey.
-                            </li>
-                            <li>
-                                <strong>Free RailWire WiFi:</strong> High-speed internet enabled across 6,000+ railway stations.
-                            </li>
+                <!-- Left Sidebar: Railway Bulletins -->
+                <td width="30%">
+                    <!-- Railway Bulletins -->
+                    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <h4 style="color: var(--navy); margin-top: 0;">Railway Bulletins</h4>
+                        <ul style="padding-left: 20px; line-height: 1.6; font-size: 14px;">
+                            <li>Vande Bharat Express route expanded.</li>
+                            <li>Tatkal booking opens at 10:00 AM daily.</li>
+                            <li>Senior Citizen quota policy updates.</li>
                         </ul>
-                    </div>
-
-                    <!-- Quick Passenger Services -->
-                    <div class="rail-side-card">
-                        <div class="rail-card-header">
-                            <span class="card-icon">⚡</span>
-                            <h4>Quick Services</h4>
-                        </div>
-                        <div class="quick-links-list">
-                            <a href="data.html" class="quick-link-item">
-                                <span>📋 View Confirmed Bookings</span>
-                                <span class="ql-arrow">→</span>
-                            </a>
-                            <a href="calculator.html" class="quick-link-item">
-                                <span>🧮 Interactive Fare Calculator</span>
-                                <span class="ql-arrow">→</span>
-                            </a>
-                            <a href="index.html" class="quick-link-item">
-                                <span>🏠 Return to Portal Home</span>
-                                <span class="ql-arrow">→</span>
-                            </a>
-                            <a href="about.html" class="quick-link-item">
-                                <span>👥 Group 10 Team Overview</span>
-                                <span class="ql-arrow">→</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- 24x7 Rail Support Helpdesk -->
-                    <div class="rail-side-card help-card">
-                        <div class="rail-card-header">
-                            <span class="card-icon">📞</span>
-                            <h4>Passenger Helpline</h4>
-                        </div>
-                        <p style="font-size: 13px; margin: 5px 0 8px 0; color: #555;">For medical emergency, security, or booking assistance:</p>
-                        <div class="helpline-badge">Dial 139 (Toll Free)</div>
-                        <p style="font-size: 11px; color: #777; margin: 8px 0 0 0;">RailMadad 24×7 Integrated Passenger Assistance</p>
                     </div>
                 </td>
 
                 <!-- Main Booking Area -->
-                <td width="68%">
+                <td width="70%">
                     <div class="booking-card">
-                        <div class="booking-card-header">
-                            <div class="bch-badge">Book Online</div>
-                            <h3>🚆 Train Ticket Reservation</h3>
-                            <p class="bch-subtitle">Fill in primary passenger details and journey preferences to generate your verified e-ticket.</p>
-                        </div>
-
+                        <h3>Book Train Ticket</h3>
                         <form id="railwayForm" onsubmit="handleRailwayBooking(event)">
                             
-                            <!-- Row 1: Passenger Name & Phone -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="passengerName">Primary Passenger Full Name: <span class="req">*</span></label>
-                                    <input type="text" id="passengerName" placeholder="Enter name as per Govt ID" required>
-                                    <span class="error-msg" id="nameError"></span>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="phone">Mobile Number (10 digits): <span class="req">*</span></label>
-                                    <input type="tel" id="phone" placeholder="9876543210" maxlength="10" required>
-                                    <span class="error-msg" id="phoneError"></span>
-                                </div>
+                            <div class="form-group">
+                                <label for="passengerName">Primary Passenger Full Name:</label>
+                                <input type="text" id="passengerName" placeholder="Enter name as per Govt ID" required>
+                                <span class="error-msg" id="nameError"></span>
                             </div>
 
-                            <!-- Row 2: Train Route Selection -->
                             <div class="form-group">
-                                <label for="trainSelect">Select Train Route: <span class="req">*</span></label>
+                                <label for="phone">Mobile Number (10 digits):</label>
+                                <input type="tel" id="phone" placeholder="9876543210" required>
+                                <span class="error-msg" id="phoneError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="trainSelect">Select Train Route:</label>
                                 <select id="trainSelect" required>
-                                    <option value="">-- Select Train & Route --</option>
+                                    <option value="">-- Select Train --</option>
                                     <option value="12958">12958 | ADI SJ RAJDHANI (Ahmedabad to New Delhi - 17:40)</option>
                                     <option value="20902">20902 | VANDE BHARAT EXP (Ahmedabad to Mumbai Central - 06:00)</option>
                                     <option value="12833">12833 | ADI HWH EXP (Ahmedabad to Howrah - 00:15)</option>
@@ -196,66 +124,45 @@
                                 <span class="error-msg" id="trainError"></span>
                             </div>
 
-                            <!-- Row 3: Travel Class & Quota -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="travelClass">Select Travel Class: <span class="req">*</span></label>
-                                    <select id="travelClass" onchange="calculateRailwayTotal()" required>
-                                        <option value="500">Sleeper (SL) - ₹500</option>
-                                        <option value="1200">AC 3 Tier (3A) - ₹1200</option>
-                                        <option value="1800">AC 2 Tier (2A) - ₹1800</option>
-                                        <option value="3000">Executive / 1st AC (1A) - ₹3000</option>
-                                    </select>
-                                    <span class="error-msg" id="classError"></span>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="quota">Quota Category: <span class="req">*</span></label>
-                                    <select id="quota" required>
-                                        <option value="General">General (GN)</option>
-                                        <option value="Tatkal">Tatkal (TQ)</option>
-                                        <option value="Premium Tatkal">Premium Tatkal (PT)</option>
-                                        <option value="Ladies">Ladies (LD)</option>
-                                    </select>
-                                </div>
+                            <div class="form-group">
+                                <label for="travelClass">Select Travel Class:</label>
+                                <select id="travelClass" onchange="calculateRailwayTotal()" required>
+                                    <option value="500">Sleeper (SL) - ₹500</option>
+                                    <option value="1200">AC 3 Tier (3A) - ₹1200</option>
+                                    <option value="1800">AC 2 Tier (2A) - ₹1800</option>
+                                    <option value="3000">Executive / 1st AC (1A) - ₹3000</option>
+                                </select>
+                                <span class="error-msg" id="classError"></span>
                             </div>
 
-                            <!-- Row 4: Journey Date & Passengers Qty -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="travelDate">Journey Date: <span class="req">*</span></label>
-                                    <input type="date" id="travelDate" required>
-                                    <span class="error-msg" id="dateError"></span>
-                                </div>
+                            <div class="form-group">
+                                <label for="quota">Quota Type:</label>
+                                <select id="quota" required>
+                                    <option value="General">General (GN)</option>
+                                    <option value="Tatkal">Tatkal (TQ)</option>
+                                    <option value="Premium Tatkal">Premium Tatkal (PT)</option>
+                                    <option value="Ladies">Ladies (LD)</option>
+                                </select>
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="passengerQty">Number of Passengers (1-6): <span class="req">*</span></label>
-                                    <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()" required>
-                                    <span class="error-msg" id="qtyError"></span>
-                                </div>
+                            <div class="form-group">
+                                <label for="travelDate">Journey Date:</label>
+                                <input type="date" id="travelDate" required>
+                                <span class="error-msg" id="dateError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="passengerQty">Number of Passengers (1-6):</label>
+                                <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()" required>
+                                <span class="error-msg" id="qtyError"></span>
                             </div>
 
                             <!-- Live Fare Display -->
                             <div class="price-summary">
-                                <div class="price-summary-label">
-                                    <span>Fare Calculation (Base × Passengers):</span>
-                                    <small style="display: block; font-weight: normal; color: #555; font-size: 12px;">Dynamic calculation updated in real time</small>
-                                </div>
-                                <div class="price-summary-val">
-                                    Total Estimated Fare: ₹<span id="totalFare">500</span>
-                                </div>
+                                Total Estimated Fare: ₹<span id="totalFare">500</span>
                             </div>
 
-                            <!-- Booking Actions -->
-                            <div class="booking-actions">
-                                <button type="submit" class="btn-submit">Confirm & Book Ticket ➔</button>
-                                <a href="data.html" class="btn-view-bookings">View Confirmed Bookings</a>
-                            </div>
-
-                            <!-- Security Note -->
-                            <div class="form-security-note">
-                                🔒 Secure Academic Reservation • Instant 10-Digit PNR • Government MCA College, Maninagar
-                            </div>
+                            <button type="submit" class="btn-submit">Confirm & Book Ticket</button>
                         </form>
                     </div>
                 </td>
