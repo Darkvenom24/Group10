@@ -78,6 +78,65 @@ body {
     color: var(--white);
 }
 
+/* Navigation Bar Dropdown */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--navy);
+    min-width: 280px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    z-index: 1000;
+    text-align: left;
+    padding: 6px 0;
+    border-top: 3px solid var(--saffron);
+}
+
+.nav-dropdown:hover .nav-dropdown-content {
+    display: block;
+}
+
+.nav-dropdown-content a {
+    color: var(--white);
+    padding: 10px 16px;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    border-radius: 0;
+    transition: background 0.2s ease;
+}
+
+.nav-dropdown-content a:hover {
+    background-color: var(--saffron);
+    color: var(--navy);
+    transform: none;
+    box-shadow: none;
+}
+
+.nav-dropdown-content .member-badge {
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.nav-dropdown-content a:hover .member-badge {
+    background: var(--navy);
+    color: var(--white);
+}
+
 /* Footer */
 .flag-footer {
     background-color: var(--green);
