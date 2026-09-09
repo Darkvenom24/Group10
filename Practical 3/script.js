@@ -1,18 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. Simple Welcome Overlay
-    const overlay = document.getElementById('welcomeOverlay');
-    if (overlay) {
-        const hasVisited = sessionStorage.getItem('hasVisitedRailway');
-        if (!hasVisited) {
-            overlay.style.display = 'flex';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 2500);
-            sessionStorage.setItem('hasVisitedRailway', 'true');
-        }
-    }
-
-    // 2. Track & Display Page Visit Counter
+    // 1. Track & Display Page Visit Counter
     updateVisitCounter();
 
     // 3. Set min date to today for train booking
