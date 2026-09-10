@@ -104,53 +104,123 @@ function setError(inputElem, errorElem, message) {
     }
 }
 
-function validateName() {
+function triggerShake(elem) {
+    if (!elem) return;
+    elem.classList.remove('shake');
+    void elem.offsetWidth; // Force DOM reflow to re-trigger CSS animation
+    elem.classList.add('shake');
+    setTimeout(() => elem.classList.remove('shake'), 400);
+}
+
+// Silent format check for Passenger Name without mutating UI error messages
+function isNameValidSilent() {
+    const nameInput = document.getElementById('passengerName');
+    if (!nameInput) return false;
+    const val = nameInput.value.trim();
+    if (!val || val.length < 3 || val.length > 50) return false;
+    return /^[A-Za-z\s.'-]+$/.test(val);
+}
+
+// Dynamic real-time validation for Passenger Name
+function validateName(isSequentialTrigger = false) {
     const nameInput = document.getElementById('passengerName');
     const nameError = document.getElementById('nameError');
     if (!nameInput || !nameError) return true;
 
     const val = nameInput.value.trim();
-    const nameRegex = /^[A-Z][A-Za-z\s]{2,49}$/;
 
     if (!val) {
-        setError(nameInput, nameError, "Full Name is required.");
+        const msg = isSequentialTrigger
+            ? "⚠️ Please enter Primary Passenger Full Name first before proceeding to other fields!"
+            : "Primary Passenger Full Name is required.";
+        setError(nameInput, nameError, msg);
+        if (isSequentialTrigger) {
+            triggerShake(nameInput);
+        }
         return false;
-    } else if (!nameRegex.test(val)) {
-        setError(nameInput, nameError, "Must start with a capital letter, contain no numbers (3-50 chars).");
-        return false;
-    } else {
-        setError(nameInput, nameError, "");
-        return true;
     }
+
+    if (val.length < 3) {
+        setError(nameInput, nameError, "Full Name must be at least 3 characters long.");
+        return false;
+    }
+
+    if (val.length > 50) {
+        setError(nameInput, nameError, "Full Name cannot exceed 50 characters.");
+        return false;
+    }
+
+    const nameRegex = /^[A-Za-z\s.'-]+$/;
+    if (!nameRegex.test(val)) {
+        setError(nameInput, nameError, "Name must contain only alphabets and spaces (no numbers or special characters).");
+        return false;
+    }
+
+    setError(nameInput, nameError, "");
+    return true;
 }
 
-function validatePhone() {
+// Silent format check for Mobile Number
+function isPhoneValidSilent() {
+    const phoneInput = document.getElementById('phone');
+    if (!phoneInput) return false;
+    const val = phoneInput.value.trim();
+    return /^[6-9]\d{9}$/.test(val);
+}
+
+// Dynamic real-time validation for Mobile Number
+function validatePhone(isSequentialTrigger = false) {
     const phoneInput = document.getElementById('phone');
     const phoneError = document.getElementById('phoneError');
     if (!phoneInput || !phoneError) return true;
 
     const val = phoneInput.value.trim();
-    const phoneRegex = /^[6-9]\d{9}$/;
 
     if (!val) {
-        setError(phoneInput, phoneError, "Mobile number is required.");
+        const msg = isSequentialTrigger
+            ? "⚠️ Please enter 10-digit Mobile Number before proceeding to next fields!"
+            : "Mobile number is required.";
+        setError(phoneInput, phoneError, msg);
+        if (isSequentialTrigger) {
+            triggerShake(phoneInput);
+        }
         return false;
-    } else if (!phoneRegex.test(val)) {
-        setError(phoneInput, phoneError, "Enter a valid 10-digit Indian number starting with 6-9.");
-        return false;
-    } else {
-        setError(phoneInput, phoneError, "");
-        return true;
     }
+
+    if (!/^\d+$/.test(val)) {
+        setError(phoneInput, phoneError, "Mobile number must contain digits only.");
+        return false;
+    }
+
+    if (val.length !== 10) {
+        setError(phoneInput, phoneError, "Mobile number must be exactly 10 digits.");
+        return false;
+    }
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(val)) {
+        setError(phoneInput, phoneError, "Enter a valid Indian mobile number starting with 6, 7, 8, or 9.");
+        return false;
+    }
+
+    setError(phoneInput, phoneError, "");
+    return true;
 }
 
-function validateTrain() {
+// Validation for Train Route selection
+function validateTrain(isSequentialTrigger = false) {
     const select = document.getElementById('trainSelect');
     const err = document.getElementById('trainError');
     if (!select || !err) return true;
 
     if (!select.value) {
-        setError(select, err, "Please select a train route.");
+        const msg = isSequentialTrigger
+            ? "⚠️ Please select a Train Route before choosing journey date!"
+            : "Please select a train route.";
+        setError(select, err, msg);
+        if (isSequentialTrigger) {
+            triggerShake(select);
+        }
         return false;
     } else {
         setError(select, err, "");
@@ -224,7 +294,61 @@ function validateDate() {
     }
 }
 
-// Bind live listeners for real-time error checking
+// Sequential Form Access Handler: Enforces filling fields in mandatory order
+function handleSequentialFieldAccess(targetElem, event) {
+    const nameInput = document.getElementById('passengerName');
+    const phoneInput = document.getElementById('phone');
+    const trainSelect = document.getElementById('trainSelect');
+    const dateInput = document.getElementById('travelDate');
+
+    if (!targetElem || targetElem === nameInput) {
+        return true;
+    }
+
+    // Step 1: Check Passenger Name (Mandatory First)
+    if (!isNameValidSilent()) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        targetElem.blur();
+        validateName(true); // Triggers shake and dynamic warning message
+        nameInput.focus();
+        return false;
+    }
+
+    // Step 2: Check Mobile Number if accessing Train, Class, Quota, Date, Qty
+    if (targetElem !== phoneInput) {
+        if (!isPhoneValidSilent()) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            targetElem.blur();
+            validatePhone(true); // Triggers shake and dynamic warning message
+            phoneInput.focus();
+            return false;
+        }
+    }
+
+    // Step 3: Check Train Selection if accessing Date
+    if (targetElem === dateInput) {
+        if (trainSelect && !trainSelect.value) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            targetElem.blur();
+            validateTrain(true);
+            trainSelect.focus();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Bind live listeners for real-time error checking & sequential flow
 function attachRealTimeValidation() {
     const nameInput = document.getElementById('passengerName');
     const phoneInput = document.getElementById('phone');
@@ -234,30 +358,97 @@ function attachRealTimeValidation() {
     const qtyInput = document.getElementById('passengerQty');
     const dateInput = document.getElementById('travelDate');
 
-    if (nameInput) nameInput.addEventListener('input', validateName);
-    if (phoneInput) phoneInput.addEventListener('input', validatePhone);
-    if (trainSelect) trainSelect.addEventListener('change', validateTrain);
-    if (classSelect) classSelect.addEventListener('change', validateClass);
-    if (quotaSelect) quotaSelect.addEventListener('change', validateQuota);
-    if (qtyInput) qtyInput.addEventListener('input', validateQty);
-    if (dateInput) dateInput.addEventListener('change', validateDate);
+    // Real-time input listeners
+    if (nameInput) {
+        nameInput.addEventListener('input', () => validateName(false));
+        nameInput.addEventListener('blur', () => validateName(false));
+    }
+    if (phoneInput) {
+        phoneInput.addEventListener('input', () => validatePhone(false));
+        phoneInput.addEventListener('blur', () => validatePhone(false));
+    }
+    if (trainSelect) {
+        trainSelect.addEventListener('change', () => validateTrain(false));
+    }
+    if (classSelect) {
+        classSelect.addEventListener('change', () => {
+            validateClass();
+            calculateRailwayTotal();
+        });
+    }
+    if (quotaSelect) {
+        quotaSelect.addEventListener('change', validateQuota);
+    }
+    if (qtyInput) {
+        qtyInput.addEventListener('input', () => {
+            validateQty();
+            calculateRailwayTotal();
+        });
+    }
+    if (dateInput) {
+        dateInput.addEventListener('change', validateDate);
+    }
+
+    // Guard all subsequent fields so user cannot bypass empty preceding fields
+    const subsequentFields = [phoneInput, trainSelect, classSelect, quotaSelect, dateInput, qtyInput];
+
+    subsequentFields.forEach(field => {
+        if (!field) return;
+
+        // Pointerdown / Mousedown intercepts mouse clicks before focus or dropdowns open
+        field.addEventListener('pointerdown', (e) => handleSequentialFieldAccess(field, e));
+        field.addEventListener('mousedown', (e) => handleSequentialFieldAccess(field, e));
+
+        // Focusin catches keyboard Tab navigation
+        field.addEventListener('focusin', (e) => handleSequentialFieldAccess(field, e));
+
+        // Keydown prevents typing if focus somehow transferred
+        field.addEventListener('keydown', (e) => handleSequentialFieldAccess(field, e));
+    });
 }
 
 // Form Submit Handler
 function handleRailwayBooking(event) {
     event.preventDefault();
 
-    // Trigger all individual field validations on submit
+    // Trigger validations in order and focus the first invalid field
     const isNameValid = validateName();
+    if (!isNameValid) {
+        const nameInput = document.getElementById('passengerName');
+        if (nameInput) {
+            triggerShake(nameInput);
+            nameInput.focus();
+        }
+        return false;
+    }
+
     const isPhoneValid = validatePhone();
+    if (!isPhoneValid) {
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            triggerShake(phoneInput);
+            phoneInput.focus();
+        }
+        return false;
+    }
+
     const isTrainValid = validateTrain();
+    if (!isTrainValid) {
+        const trainSelect = document.getElementById('trainSelect');
+        if (trainSelect) {
+            triggerShake(trainSelect);
+            trainSelect.focus();
+        }
+        return false;
+    }
+
     const isClassValid = validateClass();
     const isQuotaValid = validateQuota();
-    const isQtyValid = validateQty();
     const isDateValid = validateDate();
+    const isQtyValid = validateQty();
 
     // Halt if any field is invalid
-    if (!isNameValid || !isPhoneValid || !isTrainValid || !isClassValid || !isQuotaValid || !isQtyValid || !isDateValid) {
+    if (!isClassValid || !isQuotaValid || !isDateValid || !isQtyValid) {
         return false;
     }
 

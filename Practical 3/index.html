@@ -94,23 +94,23 @@
                 <td width="70%">
                     <div class="booking-card">
                         <h3>Book Train Ticket</h3>
-                        <form id="railwayForm" onsubmit="handleRailwayBooking(event)">
+                        <form id="railwayForm" onsubmit="handleRailwayBooking(event)" novalidate>
                             
                             <div class="form-group">
-                                <label for="passengerName">Primary Passenger Full Name:</label>
-                                <input type="text" id="passengerName" placeholder="Enter name as per Govt ID" required>
+                                <label for="passengerName">Primary Passenger Full Name: <span class="required-star">*</span> <span class="order-badge-hint">Step 1 (Mandatory First)</span></label>
+                                <input type="text" id="passengerName" placeholder="Enter full name (e.g. Vaibhav Senjaliya)" autocomplete="off">
 								<span class="error-msg" id="nameError"></span>
                             </div>
 
                             <div class="form-group">
-                                <label for="phone">Mobile Number (10 digits):</label>
-                                <input type="tel" id="phone" placeholder="9876543210" required>
+                                <label for="phone">Mobile Number (10 digits): <span class="required-star">*</span> <span class="order-badge-hint">Step 2</span></label>
+                                <input type="tel" id="phone" placeholder="9876543210" maxlength="10" autocomplete="off">
 								<span class="error-msg" id="phoneError"></span>
                             </div>
 
                             <div class="form-group">
-                                <label for="trainSelect">Select Train Route:</label>
-                                <select id="trainSelect" required>
+                                <label for="trainSelect">Select Train Route: <span class="required-star">*</span> <span class="order-badge-hint">Step 3</span></label>
+                                <select id="trainSelect">
                                     <option value="">-- Select Train --</option>
 									<option value="12958">12958 | ADI SJ RAJDHANI (Ahmedabad to New Delhi - 17:40)</option>
 									<option value="20902">20902 | VANDE BHARAT EXP (Ahmedabad to Mumbai Central - 06:00)</option>
@@ -118,47 +118,47 @@
 									<option value="12932">12932 | ADI MMCT DOUBLE DECKER (Ahmedabad to Mumbai - 06:00)</option>
 									<option value="22944">22944 | INDB DAUND EXP (Indore to Daund - 16:30)</option>
 									<option value="12009">12009 | BCT SHATABDI EXP (Mumbai Central to Ahmedabad - 06:20)</option>
-                                    <span class="error-msg" id="trainError"></span>
                                 </select>
+                                <span class="error-msg" id="trainError"></span>
                             </div>
 
                             <div class="form-group">
                                 <label for="travelClass">Select Travel Class:</label>
-                                <select id="travelClass" onchange="calculateRailwayTotal()" required>
+                                <select id="travelClass" onchange="calculateRailwayTotal()">
                                     <option value="500">Sleeper (SL) - ₹500</option>
                                     <option value="1200">AC 3 Tier (3A) - ₹1200</option>
                                     <option value="1800">AC 2 Tier (2A) - ₹1800</option>
                                     <option value="3000">Executive / 1st AC (1A) - ₹3000</option>
-									<span class="error-msg" id="classError"></span>
                                 </select>
+								<span class="error-msg" id="classError"></span>
                             </div>
 
                             <div class="form-group">
                                 <label for="quota">Quota Type:</label>
-                                <select id="quota" required>
+                                <select id="quota">
                                     <option value="General">General (GN)</option>
                                     <option value="Tatkal">Tatkal (TQ)</option>
 									<option value="Premium Tatkal">Premium Tatkal (PT)</option>
                                     <option value="Ladies">Ladies (LD)</option>
 									<option value="Senior Citizen">Lower Berth / Sr. Citizen (SS)</option>
-									<span class="error-msg" id="quotaError"></span>
                                 </select>
+								<span class="error-msg" id="quotaError"></span>
                             </div>
 
                             <div class="form-group">
-                                <label for="passengerQty">Number of Passengers:</label>
-                                <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()" required>
-								<span class="error-msg" id="qtyError"></span>
-							</div>
-
-                            <div class="form-group">
-                                <label for="travelDate">Date of Journey:</label>
-                                <input type="date" id="travelDate" required>
+                                <label for="travelDate">Date of Journey: <span class="required-star">*</span> <span class="order-badge-hint">Step 4</span></label>
+                                <input type="date" id="travelDate">
 								<span class="error-msg" id="dateError"></span>
 							</div>
 
+                            <div class="form-group">
+                                <label for="passengerQty">Number of Passengers (1-6): <span class="required-star">*</span></label>
+                                <input type="number" id="passengerQty" min="1" max="6" value="1" oninput="calculateRailwayTotal()">
+								<span class="error-msg" id="qtyError"></span>
+							</div>
+
                             <div class="price-summary">
-                                Total Fare: <span id="totalFare">500</span> INR
+                                Total Fare: ₹<span id="totalFare">500</span>
                             </div>
 
                             <button type="submit" class="btn-submit">Book Ticket Now</button>

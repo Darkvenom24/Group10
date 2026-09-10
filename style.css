@@ -149,19 +149,21 @@ body {
 /* ==========================================================================
    3. Overlays & Avatar Components
    ========================================================================== */
-/* Welcome Overlay */
+/* Welcome Overlay - Transparent Background */
 #welcomeOverlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--saffron), var(--white), var(--green));
+    background: transparent;
     color: var(--navy);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 99999;
+    pointer-events: none;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 #welcomeOverlay h1 {
@@ -298,24 +300,55 @@ body {
 }
 
 /* ==========================================================================
-   6. Inline Real-time Error Styling
+   6. Inline Real-time Error Styling & Sequential Validation
    ========================================================================== */
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake {
+    animation: inputShake 0.38s ease-in-out;
+}
+
 .error-msg {
     color: #d9534f;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
-    margin-top: 4px;
+    margin-top: 5px;
     display: block;
-    min-height: 16px;
+    min-height: 18px;
+    transition: all 0.2s ease;
 }
 
 input.input-error, select.input-error {
     border-color: #d9534f !important;
-    background-color: #fff8f8;
+    background-color: #fff8f8 !important;
+    box-shadow: 0 0 6px rgba(217, 83, 79, 0.35) !important;
 }
 
 input.input-valid, select.input-valid {
     border-color: var(--green) !important;
+    background-color: #f7fff7 !important;
+    box-shadow: 0 0 6px rgba(19, 136, 8, 0.25) !important;
+}
+
+.required-star {
+    color: #d9534f;
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+.order-badge-hint {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--navy);
+    background: #e8f0fe;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
 }
 /* ==========================================================================
    5. Team & Profile Detail Cards
