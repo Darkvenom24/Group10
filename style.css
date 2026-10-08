@@ -137,6 +137,86 @@ body {
     color: var(--white);
 }
 
+/* ==========================================================================
+   Nested Dropdown Menus for PHP Practicals
+   ========================================================================== */
+.nav-nested-dropdown {
+    position: relative;
+}
+
+.nav-nested-dropdown > a.nested-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-nested-dropdown > a.nested-trigger:hover,
+.nav-nested-dropdown:hover > a.nested-trigger {
+    background-color: var(--saffron);
+    color: var(--navy);
+}
+
+.nested-arrow {
+    font-size: 11px;
+    color: var(--saffron);
+    margin-left: 8px;
+    transition: transform 0.2s;
+}
+
+.nav-nested-dropdown:hover > a.nested-trigger .nested-arrow {
+    color: var(--navy);
+    transform: translateX(3px);
+}
+
+.nav-nested-content {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: var(--navy);
+    min-width: 310px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    border-radius: 4px;
+    border-left: 3px solid var(--saffron);
+    padding: 6px 0;
+    z-index: 1050;
+}
+
+.nav-nested-dropdown:hover > .nav-nested-content {
+    display: block;
+}
+
+.nav-nested-content a {
+    color: var(--white);
+    padding: 9px 16px;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    border-radius: 0;
+    transition: background 0.2s ease;
+}
+
+.nav-nested-content a:hover {
+    background-color: var(--saffron);
+    color: var(--navy);
+}
+
+.nav-nested-content a:hover .member-badge {
+    background: var(--navy);
+    color: var(--white);
+}
+
 /* Footer */
 .flag-footer {
     background-color: var(--green);
@@ -846,4 +926,444 @@ select.input-valid {
         box-shadow: none;
         margin-top: 4px;
     }
+
+    .nav-nested-content {
+        position: static !important;
+        box-shadow: none !important;
+        border-left: 2px solid var(--saffron) !important;
+        background: rgba(0, 0, 80, 0.95) !important;
+        min-width: 100% !important;
+    }
 }
+
+/* ==========================================================================
+   Practical 9-12: PHP Lab UI, Code Highlighting, Terminal & CRUD Components
+   ========================================================================== */
+.php-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-php { background: #777BB4; color: #FFFFFF; }
+.badge-mysql { background: #00758F; color: #FFFFFF; }
+.badge-saffron { background: var(--saffron); color: var(--navy); }
+.badge-green { background: var(--green); color: #FFFFFF; }
+.badge-navy { background: var(--navy); color: #FFFFFF; }
+.badge-muted { background: #E2E8F0; color: #475569; }
+
+.lab-meta-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-left: 4px solid var(--saffron);
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.lab-meta-title {
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.lab-meta-sub {
+    font-size: 12px;
+    color: #64748B;
+}
+
+.php-lab-card {
+    background: #FFFFFF;
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.php-lab-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.php-card-header {
+    background: linear-gradient(135deg, #000080 0%, #1a1a9e 100%);
+    color: #FFFFFF;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--saffron);
+}
+
+.php-card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.php-card-body {
+    padding: 22px;
+}
+
+.input-group-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.php-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.php-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.php-form-control {
+    padding: 10px 14px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+}
+
+.php-form-control:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(0, 0, 128, 0.12);
+}
+
+.btn-php-action {
+    background: var(--navy);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 128, 0.2);
+}
+
+.btn-php-action:hover {
+    background: var(--saffron);
+    color: var(--navy);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: #F1F5F9;
+    color: #334155;
+    border: 1px solid #CBD5E1;
+}
+
+.btn-secondary:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+/* Tabs inside practical card */
+.php-tab-nav {
+    display: flex;
+    border-bottom: 2px solid #E2E8F0;
+    margin-bottom: 18px;
+    gap: 4px;
+}
+
+.php-tab-btn {
+    background: none;
+    border: none;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #64748B;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s ease;
+}
+
+.php-tab-btn:hover {
+    color: var(--navy);
+}
+
+.php-tab-btn.active {
+    color: var(--navy);
+    border-bottom: 2px solid var(--saffron);
+    background: rgba(255, 153, 51, 0.08);
+    border-radius: 4px 4px 0 0;
+}
+
+/* Terminal / Output Display */
+.php-terminal {
+    background: #0F172A;
+    color: #F8FAFC;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    margin-top: 15px;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.terminal-header {
+    background: #1E293B;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+}
+
+.terminal-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot-red { background: #EF4444; }
+.dot-yellow { background: #F59E0B; }
+.dot-green { background: #10B981; }
+
+.terminal-title {
+    font-size: 11px;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.terminal-body {
+    padding: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    min-height: 70px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #38BDF8;
+}
+
+.terminal-body .echo-success {
+    color: #4ADE80;
+    font-weight: 600;
+}
+
+.terminal-body .echo-highlight {
+    color: #FACC15;
+    font-weight: bold;
+}
+
+.terminal-body .echo-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38BDF8;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Code Viewer & Highlighting */
+.php-code-container {
+    background: #1E1E1E;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.code-header-bar {
+    background: #252526;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333333;
+}
+
+.code-header-filename {
+    color: #CCCCCC;
+    font-size: 12px;
+    font-family: 'Consolas', monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.code-copy-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #E2E8F0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.code-copy-btn:hover {
+    background: var(--saffron);
+    color: var(--navy);
+    border-color: var(--saffron);
+}
+
+.php-code-pre {
+    margin: 0;
+    padding: 16px;
+    color: #D4D4D4;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    overflow-x: auto;
+    background: #1E1E1E;
+}
+
+/* Modal Dialog Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #FFFFFF;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalPop 0.25s ease-out;
+}
+
+@keyframes modalPop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+    background: var(--navy);
+    color: #FFFFFF;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--saffron);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+/* Auth Card for Index Page */
+.auth-widget-box {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+}
+
+.auth-header-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #E2E8F0;
+    padding-bottom: 8px;
+}
+
+.auth-tab-link {
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    color: #64748B;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.auth-tab-link.active {
+    background: var(--navy);
+    color: #FFFFFF;
+}
+
+.auth-demo-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    background: #F8FAFC;
+    border-radius: 6px;
+    border: 1px dashed #CBD5E1;
+}
+
+.auth-chip-btn {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: var(--navy);
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-chip-btn:hover {
+    background: var(--saffron);
+    color: var(--navy);
+    border-color: var(--saffron);
+}

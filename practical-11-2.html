@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practical 11.2 — Dynamic Time Greeting | GMCA Group 10</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .clock-display-card {
+            background: linear-gradient(135deg, #000080 0%, #1e1e9a 100%);
+            color: #FFFFFF;
+            border-radius: 10px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+            border: 2px solid var(--saffron);
+        }
+        .clock-time {
+            font-size: 38px;
+            font-family: 'Consolas', monospace;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #FFD700;
+            margin: 6px 0;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .clock-date {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .greeting-badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 22px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+        }
+        .greet-morning { background: #F59E0B; color: #FFFFFF; }
+        .greet-afternoon { background: #3B82F6; color: #FFFFFF; }
+        .greet-evening { background: #8B5CF6; color: #FFFFFF; }
+        .greet-night { background: #1E293B; color: #38BDF8; border: 1px solid #38BDF8; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Banner -->
+    <header class="flag-header">
+        <h1>Practical 11.2: Date, Time & Greeting</h1>
+        <p>Government MCA College, Maninagar — Web Technology Practical (Group 10)</p>
+    </header>
+
+    <!-- Navigation Bar with Nested PHP Submenus -->
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+
+        <div class="nav-dropdown">
+            <a href="about.html">About Us ▾</a>
+            <div class="nav-dropdown-content">
+                <a href="member1.html"><span>Ridham Bambhaniya</span><span class="member-badge">26GMCA61</span></a>
+                <a href="member2.html"><span>Riya Thakkar</span><span class="member-badge">26GMCA33</span></a>
+                <a href="member3.html"><span>Vaibhav Senjaliya</span><span class="member-badge">26GMCA52</span></a>
+                <a href="about.html" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold;">
+                    <span>All Team Overview</span><span>→</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-dropdown">
+            <a href="#">Practicals ▾</a>
+            <div class="nav-dropdown-content">
+                <a href="Practical-1 (26GMCA61 - Web Page).html"><span>Practical 1 (HTML Webpage)</span><span class="member-badge">HTML</span></a>
+                <a href="index.html"><span>Practical 2 (HTML & CSS Webpage)</span><span class="member-badge">CSS</span></a>
+                <a href="railway.html"><span>Practical 3 (Railway Portal)</span><span class="member-badge">Web App</span></a>
+                <a href="calculator.html"><span>Practical 4 (Interactive Calculator)</span><span class="member-badge">JS Calc</span></a>
+                <a href="Practical-4.html"><span>Practical 4 (Standalone Lab View)</span><span class="member-badge">Lab</span></a>
+                <a href="practical-7.html"><span>Practical 7 (Student Data Form)</span><span class="member-badge">Form</span></a>
+                <a href="php-practicals.html" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold; background: rgba(255,153,51,0.2);">
+                    <span>PHP Practicals (9, 10, 11, 12)</span><span class="member-badge" style="background:var(--saffron); color:var(--navy);">PHP</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-dropdown">
+            <a href="php-practicals.html" class="active">PHP Practicals ▾</a>
+            <div class="nav-dropdown-content">
+                <div class="nav-nested-dropdown">
+                    <a href="practical-9-1.html" class="nested-trigger">
+                        <span>9. PHP Basics</span>
+                        <span class="nested-arrow">▸</span>
+                    </a>
+                    <div class="nav-nested-content">
+                        <a href="practical-9-1.html"><span>9.1 Max of 3 Numbers</span><span class="member-badge">Logic</span></a>
+                        <a href="practical-9-2.html"><span>9.2 Print 1 to N</span><span class="member-badge">Loop</span></a>
+                        <a href="practical-9-3.html"><span>9.3 3 Pyramid Patterns</span><span class="member-badge">Patterns</span></a>
+                    </div>
+                </div>
+
+                <div class="nav-nested-dropdown">
+                    <a href="practical-10-1.html" class="nested-trigger">
+                        <span>10. PHP Array</span>
+                        <span class="nested-arrow">▸</span>
+                    </a>
+                    <div class="nav-nested-content">
+                        <a href="practical-10-1.html"><span>10.1 Array Operations</span><span class="member-badge">Array</span></a>
+                        <a href="practical-10-2.html"><span>10.2 String Name & Size</span><span class="member-badge">String</span></a>
+                    </div>
+                </div>
+
+                <div class="nav-nested-dropdown">
+                    <a href="practical-11-1.html" class="nested-trigger" style="background: var(--saffron); color: var(--navy); font-weight: bold;">
+                        <span>11. PHP Control Structures</span>
+                        <span class="nested-arrow">▸</span>
+                    </a>
+                    <div class="nav-nested-content" style="display: block;">
+                        <a href="practical-11-1.html"><span>11.1 Max & Min Number</span><span class="member-badge">If-Else</span></a>
+                        <a href="practical-11-2.html" style="background: rgba(255, 153, 51, 0.25); font-weight: bold;">
+                            <span>11.2 Date/Time & Greeting</span><span class="member-badge" style="background: var(--saffron); color: var(--navy);">Active</span>
+                        </a>
+                        <a href="practical-11-3.html"><span>11.3 User Profile & Form</span><span class="member-badge">Form</span></a>
+                        <a href="practical-11-4.html"><span>11.4 String Functions (5 Tasks)</span><span class="member-badge">Functions</span></a>
+                    </div>
+                </div>
+
+                <div class="nav-nested-dropdown">
+                    <a href="practical-12.html" class="nested-trigger">
+                        <span>12. PHP Database & CRUD</span>
+                        <span class="nested-arrow">▸</span>
+                    </a>
+                    <div class="nav-nested-content">
+                        <a href="practical-12.html"><span>12.0 DB Connection & CRUD</span><span class="member-badge">MySQL</span></a>
+                        <a href="index.html#authSection"><span>12.1 Index Registration & Login</span><span class="member-badge">Auth</span></a>
+                        <a href="practical-7.html"><span>12.2 Practical 7 (Data Entry Form)</span><span class="member-badge">Form 7</span></a>
+                        <a href="practical-7-data.html"><span>12.3 Practical 7 Form Data (CRUD)</span><span class="member-badge">CRUD</span></a>
+                    </div>
+                </div>
+
+                <a href="php-practicals.html" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold; background: rgba(255,255,255,0.06);">
+                    <span>⚡ All-in-One PHP Interactive Hub</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+        <a href="data.html">Booking Data</a>
+        <a href="practical-7-data.html">Student Data</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#contact">Contact</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Meta Bar -->
+        <div class="lab-meta-bar">
+            <div>
+                <span class="lab-meta-title">Practical 11.2: Date, Time & Dynamic Time-Based Greeting</span>
+                <div class="lab-meta-sub">Unit 11: PHP Control Structures | PHP date() Function & Decision Structures</div>
+            </div>
+            <div>
+                <span class="php-badge badge-php">PHP 8.2 Execution</span>
+                <span class="php-badge badge-green" style="margin-left: 6px;">Live on Vercel</span>
+            </div>
+        </div>
+
+        <!-- Problem Statement Card -->
+        <div class="php-lab-card">
+            <div class="php-card-header">
+                <h3><span>📋</span> Problem Statement & Objective</h3>
+                <span class="php-badge badge-saffron">Practical 11.2</span>
+            </div>
+            <div class="php-card-body">
+                <p style="margin: 0; line-height: 1.6; font-size: 14.5px; color: #334155;">
+                    <strong>Requirement:</strong> Write a PHP program to display current date and time and display Good Morning / Good Afternoon / Good Evening message according to current time.
+                    Uses <code>date("H")</code> to inspect the 24-hour hour index and triggers dynamic greetings using conditional statements (<code>if-elseif-else</code>).
+                </p>
+            </div>
+        </div>
+
+        <!-- Interactive Runner Card -->
+        <div class="php-lab-card">
+            <div class="php-card-header">
+                <h3><span>⚡</span> Interactive Live Clock & PHP Greeting Evaluator</h3>
+                <div class="php-tab-nav" style="border: none; margin: 0;">
+                    <button class="php-tab-btn active" onclick="switchTab('runTab', 'codeTab', this)">Run Clock</button>
+                    <button class="php-tab-btn" onclick="switchTab('codeTab', 'runTab', this)">PHP Source Code</button>
+                </div>
+            </div>
+            <div class="php-card-body">
+
+                <!-- Run Tab -->
+                <div id="runTab">
+
+                    <!-- Visual Clock Display -->
+                    <div class="clock-display-card">
+                        <div class="clock-date" id="liveDate">Loading date...</div>
+                        <div class="clock-time" id="liveTime">00:00:00 AM</div>
+                        <div id="greetingContainer">
+                            <span class="greeting-badge greet-morning" id="greetingBadge">Good Morning! 🌅</span>
+                        </div>
+                    </div>
+
+                    <!-- Time Simulation Controls -->
+                    <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--navy); font-size: 14px;">🧪 Test Different Time Slots (Simulation Slider):</h4>
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <input type="range" id="hourSlider" min="0" max="23" value="10" style="flex: 1; min-width: 200px;" oninput="onSliderChange(this.value)">
+                            <span style="font-weight: bold; font-family: monospace; font-size: 16px; color: var(--navy);" id="sliderValDisplay">10:00 (10 AM)</span>
+                            <button type="button" class="btn-php-action btn-secondary" onclick="resetToRealTime()">↺ Sync Real Clock</button>
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
+                            <button type="button" class="auth-chip-btn" onclick="setSimulatedHour(9)">09:00 AM (Morning)</button>
+                            <button type="button" class="auth-chip-btn" onclick="setSimulatedHour(14)">02:00 PM (Afternoon)</button>
+                            <button type="button" class="auth-chip-btn" onclick="setSimulatedHour(19)">07:00 PM (Evening)</button>
+                            <button type="button" class="auth-chip-btn" onclick="setSimulatedHour(23)">11:00 PM (Night)</button>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Output Box -->
+                    <div class="php-terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot dot-red"></span>
+                                <span class="terminal-dot dot-yellow"></span>
+                                <span class="terminal-dot dot-green"></span>
+                            </div>
+                            <span class="terminal-title">PHP 8.2 Standard Output (STDOUT)</span>
+                            <span class="echo-badge" id="execTime">0.0015s</span>
+                        </div>
+                        <div class="terminal-body" id="outputBody"></div>
+                    </div>
+                </div>
+
+                <!-- Source Code Tab -->
+                <div id="codeTab" style="display: none;">
+                    <div class="php-code-container">
+                        <div class="code-header-bar">
+                            <span class="code-header-filename">📄 practical11_2.php</span>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="code-copy-btn" onclick="PhpEngine.copyCode('rawPhpCode', this)">📋 Copy Code</button>
+                                <a href="php/practical11_2.php" download class="code-copy-btn" style="text-decoration: none;">⭳ Download .php</a>
+                            </div>
+                        </div>
+                        <pre class="php-code-pre" id="rawPhpCode">&lt;?php
+/**
+ * Practical 11.2: Display current date and time and dynamic greeting
+ * Group 10 — Government MCA College, Maninagar (GMCA)
+ */
+
+date_default_timezone_set('Asia/Kolkata');
+
+$currentDate = date("l, d F Y");
+$currentTime = date("h:i:s A");
+$hour = (int)date("H"); // 24-hour hour integer (0 to 23)
+
+echo "Current Date: " . $currentDate . "&lt;br&gt;\n";
+echo "Current Time: " . $currentTime . "&lt;br&gt;\n";
+
+// Decision making using if-elseif-else
+if ($hour &gt;= 5 &amp;&amp; $hour &lt; 12) {
+    $greeting = "Good Morning! 🌅";
+} elseif ($hour &gt;= 12 &amp;&amp; $hour &lt; 17) {
+    $greeting = "Good Afternoon! ☀️";
+} elseif ($hour &gt;= 17 &amp;&amp; $hour &lt; 21) {
+    $greeting = "Good Evening! 🌇";
+} else {
+    $greeting = "Good Night! 🌙";
+}
+
+echo "&lt;h2&gt;Greeting: $greeting&lt;/h2&gt;";
+?&gt;</pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="flag-footer">
+        <p>&copy; 2026 <b>Group - 10</b> | Government MCA College, Maninagar. All Rights Reserved.</p>
+        <p style="font-size: 13px; margin-top: 5px; opacity: 0.9;">Ridham Bambhaniya &bull; Riya Thakkar &bull; Vaibhav Senjaliya</p>
+    </footer>
+
+    <script src="php_engine.js"></script>
+    <script>
+        let isSimulated = false;
+        let simHour = 10;
+
+        function switchTab(showId, hideId, btn) {
+            document.getElementById(showId).style.display = 'block';
+            document.getElementById(hideId).style.display = 'none';
+            const buttons = btn.parentElement.querySelectorAll('.php-tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('liveDate').innerText = dateStr;
+
+            let hour = isSimulated ? simHour : now.getHours();
+            let minutes = isSimulated ? '00' : String(now.getMinutes()).padStart(2, '0');
+            let seconds = isSimulated ? '00' : String(now.getSeconds()).padStart(2, '0');
+            let ampm = hour >= 12 ? 'PM' : 'AM';
+            let hour12 = hour % 12 || 12;
+
+            document.getElementById('liveTime').innerText = `${String(hour12).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+
+            // Greeting decision logic
+            let greeting = '';
+            let badgeClass = '';
+            let conditionExpl = '';
+
+            if (hour >= 5 && hour < 12) {
+                greeting = 'Good Morning! 🌅';
+                badgeClass = 'greet-morning';
+                conditionExpl = '$hour >= 5 && $hour < 12 (05:00 - 11:59)';
+            } else if (hour >= 12 && hour < 17) {
+                greeting = 'Good Afternoon! ☀️';
+                badgeClass = 'greet-afternoon';
+                conditionExpl = '$hour >= 12 && $hour < 17 (12:00 - 16:59)';
+            } else if (hour >= 17 && hour < 21) {
+                greeting = 'Good Evening! 🌇';
+                badgeClass = 'greet-evening';
+                conditionExpl = '$hour >= 17 && $hour < 21 (17:00 - 20:59)';
+            } else {
+                greeting = 'Good Night! 🌙';
+                badgeClass = 'greet-night';
+                conditionExpl = 'else branch (21:00 - 04:59)';
+            }
+
+            const badge = document.getElementById('greetingBadge');
+            badge.className = 'greeting-badge ' + badgeClass;
+            badge.innerText = greeting;
+
+            // Terminal
+            document.getElementById('outputBody').innerHTML = `[PHP 8.2 Execution - GET /practical11_2.php]
+date_default_timezone_set('Asia/Kolkata');
+
+Formatted Server Outputs:
+  date("l, d F Y"):  ${dateStr}
+  date("h:i:s A"):    ${String(hour12).padStart(2, '0')}:${minutes}:${seconds} ${ampm}
+  date("H"):          ${hour} (24-Hour Integer)
+
+Condition Branch Triggered:
+  ${conditionExpl}
+
+--------------------------------------------------
+<span class="echo-success">echo Greeting Output:</span>
+<span class="echo-highlight">${greeting}</span>
+Mode: ${isSimulated ? `Simulated Test Hour (${hour}:00)` : 'Live Real-Time Sync'}`;
+        }
+
+        function onSliderChange(val) {
+            isSimulated = true;
+            simHour = parseInt(val);
+            let ampm = simHour >= 12 ? 'PM' : 'AM';
+            let h12 = simHour % 12 || 12;
+            document.getElementById('sliderValDisplay').innerText = `${String(h12).padStart(2, '0')}:00 ${ampm} (${simHour}:00)`;
+            updateClock();
+        }
+
+        function setSimulatedHour(h) {
+            document.getElementById('hourSlider').value = h;
+            onSliderChange(h);
+        }
+
+        function resetToRealTime() {
+            isSimulated = false;
+            const now = new Date();
+            document.getElementById('hourSlider').value = now.getHours();
+            let h = now.getHours();
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12 || 12;
+            document.getElementById('sliderValDisplay').innerText = `${String(h12).padStart(2, '0')}:00 ${ampm} (Live)`;
+            updateClock();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(() => {
+                if (!isSimulated) updateClock();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
