@@ -1,0 +1,114 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <span>Practical 3</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🚆</span> Practical 3: Indian Railways Booking Portal</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="#/booking-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">View Booked Tickets (Data) →</a>
+                <span class="php-badge badge-php">Interactive Web App</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Objective:</b> Build a responsive ticket reservation system featuring client-side form validation, dynamic DOM fare estimation, and persistent data storage.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 20px;">
+            <!-- Booking Form -->
+            <form ng-submit="submitBooking()" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
+                    Reservation Parameters
+                </h3>
+
+                <div class="php-form-group">
+                    <label>Select Express Train:</label>
+                    <select ng-model="booking.train" class="php-form-control" required>
+                        <option ng-repeat="t in trains" value="{{t.name}}">{{t.name}}</option>
+                    </select>
+                </div>
+
+                <div class="input-group-row">
+                    <div class="php-form-group">
+                        <label>Travel Class:</label>
+                        <select ng-model="booking.travelClass" class="php-form-control">
+                            <option value="SL">Sleeper (SL) — ₹500 base</option>
+                            <option value="3A">AC 3 Tier (3A) — ₹1200 base</option>
+                            <option value="2A">AC 2 Tier (2A) — ₹1800 base</option>
+                            <option value="1A">AC 1st Class (1A) — ₹3000 base</option>
+                        </select>
+                    </div>
+                    <div class="php-form-group">
+                        <label>Quota:</label>
+                        <select ng-model="booking.quota" class="php-form-control">
+                            <option value="GN">General Quota (GN)</option>
+                            <option value="TQ">Tatkal Quota (TQ +30%)</option>
+                            <option value="LD">Ladies Quota (LD)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group-row">
+                    <div class="php-form-group">
+                        <label>Passengers Count:</label>
+                        <input type="number" ng-model="booking.passengers" min="1" max="6" class="php-form-control" required>
+                    </div>
+                    <div class="php-form-group">
+                        <label>Date of Journey:</label>
+                        <input type="date" ng-model="booking.date" class="php-form-control" required>
+                    </div>
+                </div>
+
+                <div class="input-group-row">
+                    <div class="php-form-group">
+                        <label>Primary Passenger Name:</label>
+                        <input type="text" ng-model="booking.name" class="php-form-control" placeholder="e.g. Ridham Bambhaniya" required>
+                    </div>
+                    <div class="php-form-group">
+                        <label>10-Digit Mobile Number:</label>
+                        <input type="tel" ng-model="booking.phone" class="php-form-control" placeholder="9876543210" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-php-action" style="width: 100%; margin-top: 8px;">
+                    🎟 Confirm Ticket & Save to System
+                </button>
+
+                <div ng-if="successMessage" style="margin-top: 14px; background: #DCFCE7; border: 1px solid #86EFAC; color: #166534; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 13.5px;">
+                    {{successMessage}}
+                </div>
+            </form>
+
+            <!-- Dynamic Fare Summary Card -->
+            <div style="background: #FFFFFF; border: 1.5px solid var(--navy); border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); height: fit-content;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--green); padding-bottom: 6px;">
+                    Dynamic Fare Estimation
+                </h3>
+                <div style="font-size: 13px; color: #64748B; margin-bottom: 12px;">Live calculation using AngularJS 2-way binding:</div>
+
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;">
+                    <span>Train Class:</span>
+                    <b>{{booking.travelClass}}</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;">
+                    <span>Class Multiplier:</span>
+                    <span>+₹{{classMultiplier[booking.travelClass] || 500}}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;">
+                    <span>Passengers:</span>
+                    <b>{{booking.passengers}}</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;">
+                    <span>Quota:</span>
+                    <span>{{booking.quota}} ({{booking.quota==='TQ' ? '+30%' : 'Standard'}})</span>
+                </div>
+
+                <div style="margin-top: 16px; background: #FFF7ED; border: 1px solid #FFD8A8; border-radius: 6px; padding: 14px; text-align: center;">
+                    <div style="font-size: 12px; color: #9A3412; font-weight: 700; text-transform: uppercase;">Total Estimated Fare</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--saffron);">₹{{calculateFare()}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

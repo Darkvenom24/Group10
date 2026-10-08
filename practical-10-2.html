@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script id="spa-bridge">
+    if (window.location.search.indexOf('standalone=true') === -1) {
+        window.location.replace('index.html#/php/10-2');
+    }
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practical 10.2 — Print Name & String Size | GMCA Group 10</title>

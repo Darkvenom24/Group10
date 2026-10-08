@@ -1,0 +1,244 @@
+<div class="spa-view-enter">
+    <!-- Top Welcome Banner & Visit Counter -->
+    <div style="background: linear-gradient(135deg, #000080, #00004d); color: #FFFFFF; border-radius: 10px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0, 0, 128, 0.15); border-left: 6px solid var(--saffron);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <span class="php-badge badge-php" style="margin-bottom: 8px;">MCA Semester 1 — Web Technology</span>
+                <h1 style="margin: 6px 0; font-size: 26px; color: #FFFFFF; font-weight: 800;">
+                    Group 10 — Academic Web Portal & Practicals Hub
+                </h1>
+                <p style="margin: 0; color: #E2E8F0; font-size: 14.5px;">
+                    Government MCA College, Maninagar (K.K. Shastri Campus, Ahmedabad) • Single Page Application
+                </p>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.12); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">👁</span>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; text-transform: uppercase; color: var(--saffron); font-weight: 700;">Visits</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #FFFFFF;">{{visitCount}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Practicals Navigation Pills -->
+    <div class="practical-pills">
+        <span style="font-size: 12px; font-weight: 700; color: var(--navy); align-self: center; margin-right: 4px;">Jump to:</span>
+        <a href="#/practical/1" class="practical-pill">P1: HTML</a>
+        <a href="#/practical/2" class="practical-pill">P2: CSS</a>
+        <a href="#/practical/3" class="practical-pill">P3: Railway</a>
+        <a href="#/practical/4" class="practical-pill">P4: Calculator</a>
+        <a href="#/practical/7" class="practical-pill">P7: Student Form</a>
+        <a href="#/practical/7-data" class="practical-pill">P7: Records (CRUD)</a>
+        <a href="#/php/hub" class="practical-pill" style="border-color: var(--saffron); color: var(--navy); font-weight: bold;">⚡ PHP Hub (9-12)</a>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
+        <!-- Left Column: Institute Info, Auth & Student Records -->
+        <div>
+            <!-- About Institute Card -->
+            <div class="spa-card">
+                <div class="spa-header-bar">
+                    <h2><span>🏛</span> About Our Institute</h2>
+                    <span class="php-badge badge-navy">GMCA Maninagar</span>
+                </div>
+                <p style="line-height: 1.7; color: #334155; font-size: 14.5px; margin-top: 0;">
+                    At <b>Government MCA College, Maninagar</b>, we provide high-quality education in Computer Applications.
+                    Under Principal <b>Dr. Chetan B. Bhatt</b> and dedicated faculty, students master both theory and hands-on web engineering.
+                </p>
+                <div style="background: #F8FAFC; border-left: 4px solid var(--green); padding: 12px 16px; border-radius: 4px; font-size: 13.5px; color: #1E293B;">
+                    <b>Mission:</b> Equip students with robust software development skills, professional ethics, and research mindset for the evolving IT industry.
+                </div>
+            </div>
+
+            <!-- Practical 12: Authentication Section (Clean, Professional) -->
+            <div class="spa-card">
+                <div class="spa-header-bar">
+                    <h2><span>🔐</span> Practical 12: Authentication & Session</h2>
+                    <span class="php-badge badge-php">MySQL Auth</span>
+                </div>
+
+                <!-- Logged In View -->
+                <div ng-if="currentUser" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <img ng-src="{{currentUser.avatar || 'temp.jpeg'}}" onerror="this.src='temp.jpeg'" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--green);">
+                            <div>
+                                <div style="font-size: 16px; font-weight: 700; color: #166534;">{{currentUser.full_name}}</div>
+                                <div style="font-size: 13px; color: #15803D;">Enrollment: <b>{{currentUser.enrollment_no}}</b> | Role: {{currentUser.role}}</div>
+                            </div>
+                        </div>
+                        <button type="button" ng-click="logout()" class="btn-php-action btn-secondary" style="font-size: 12.5px; padding: 6px 14px;">
+                            Logout
+                        </button>
+                    </div>
+
+                    <!-- Post-Login Practical 7 Instruction -->
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #86EFAC;">
+                        <div ng-if="!userRecord">
+                            <p style="margin: 0 0 10px 0; font-size: 13.5px; color: #14532D; font-weight: 600;">
+                                👉 <b>Action Required (Practical 12):</b> Please submit your academic & project data in <b>Practical no. 7</b>:
+                            </p>
+                            <a href="#/practical/7" class="btn-php-action" style="background: var(--green); text-decoration: none; font-size: 13px;">
+                                📝 Fill Practical no. 7 Form Now →
+                            </a>
+                        </div>
+                        <div ng-if="userRecord" style="background: #FFFFFF; border: 1px solid #86EFAC; border-radius: 6px; padding: 12px; margin-top: 8px;">
+                            <span class="php-badge badge-green" style="font-size: 11px;">Practical 7 Submitted</span>
+                            <div style="font-size: 14px; font-weight: 700; color: var(--navy); margin-top: 4px;">{{userRecord.project_title}}</div>
+                            <div style="font-size: 12.5px; color: #475569; margin-top: 2px;">Tech: {{userRecord.technology_stack}} | Roll: {{userRecord.roll_no}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logged Out View -->
+                <div ng-if="!currentUser">
+                    <div class="auth-header-tabs">
+                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Login</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='register'}" ng-click="activeTab='register'">Register</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div ng-if="activeTab==='login'">
+                        <form ng-submit="submitLogin()">
+                            <div class="input-group-row">
+                                <div class="php-form-group">
+                                    <label>Username, Email, or Enrollment:</label>
+                                    <input type="text" ng-model="loginModel.usernameOrEnroll" class="php-form-control" placeholder="e.g. 26GMCA52 or vaibhav52" required>
+                                </div>
+                                <div class="php-form-group">
+                                    <label>Password:</label>
+                                    <input type="password" ng-model="loginModel.password" class="php-form-control" placeholder="password123" required>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+                                <button type="submit" class="btn-php-action">🔑 Login to System</button>
+                                <span style="font-size: 12px; color: #64748B;">Quick demo:</span>
+                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA52', 'password123')">Vaibhav</button>
+                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA61', 'password123')">Ridham</button>
+                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA33', 'password123')">Riya</button>
+                            </div>
+                            <div ng-if="loginError" style="color: #DC2626; font-size: 13px; margin-top: 8px;">{{loginError}}</div>
+                        </form>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div ng-if="activeTab==='register'">
+                        <form ng-submit="submitRegister()">
+                            <div class="input-group-row">
+                                <div class="php-form-group">
+                                    <label>Full Name:</label>
+                                    <input type="text" ng-model="regModel.full_name" class="php-form-control" placeholder="Student Name" required>
+                                </div>
+                                <div class="php-form-group">
+                                    <label>Enrollment No:</label>
+                                    <input type="text" ng-model="regModel.enrollment_no" class="php-form-control" placeholder="26GMCA99" required>
+                                </div>
+                            </div>
+                            <div class="input-group-row">
+                                <div class="php-form-group">
+                                    <label>Email Address:</label>
+                                    <input type="email" ng-model="regModel.email" class="php-form-control" placeholder="student@gmca.ac.in" required>
+                                </div>
+                                <div class="php-form-group">
+                                    <label>Password:</label>
+                                    <input type="password" ng-model="regModel.password" class="php-form-control" placeholder="Choose password" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-php-action" style="background: var(--green); margin-top: 8px;">📝 Register & Auto-Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practical 12 Requirement: Display Details of Practical 7 Data on Index Page -->
+            <div class="spa-card">
+                <div class="spa-header-bar">
+                    <h2><span>📋</span> Practical 7 Submissions (Database Records)</h2>
+                    <a href="#/practical/7-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">
+                        Full CRUD Dashboard →
+                    </a>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse: collapse; font-size: 13px; text-align: left;">
+                        <thead>
+                            <tr bgcolor="#000080" style="color: #FFFFFF;">
+                                <th>Enrollment</th>
+                                <th>Name</th>
+                                <th>Project Title</th>
+                                <th>Tech Stack</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="r in recentRecords" style="border-bottom: 1px solid #E2E8F0;">
+                                <td><b>{{r.enrollment_no}}</b></td>
+                                <td>{{r.student_name}}</td>
+                                <td>{{r.project_title}}</td>
+                                <td><span class="php-badge badge-php" style="font-size: 11px;">{{r.technology_stack}}</span></td>
+                                <td>
+                                    <a href="#/practical/7-data" style="color: var(--navy); font-weight: 600; text-decoration: none;">View</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Quick Links & Team Leads -->
+        <div>
+            <!-- Team Overview Card -->
+            <div class="spa-card" style="padding: 18px;">
+                <h3 style="margin: 0 0 12px 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
+                    👥 Group 10 Team Leads
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="#/member/1" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                        <img src="ridham.jpeg" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Ridham Bambhaniya</div>
+                            <div style="font-size: 11px; color: #64748B;">26GMCA61 • Lead</div>
+                        </div>
+                    </a>
+                    <a href="#/member/2" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                        <img src="riya.jpeg" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Riya Thakkar</div>
+                            <div style="font-size: 11px; color: #64748B;">26GMCA33 • Member</div>
+                        </div>
+                    </a>
+                    <a href="#/member/3" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                        <img src="vaibhav.jpeg" onerror="this.src='temp.jpeg'" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Vaibhav Senjaliya</div>
+                            <div style="font-size: 11px; color: #64748B;">26GMCA52 • Member</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Featured Practical Portals -->
+            <div class="spa-card" style="padding: 18px;">
+                <h3 style="margin: 0 0 12px 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--green); padding-bottom: 6px;">
+                    🚀 Featured Applications
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="#/practical/3" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #EFF6FF; border: 1px solid #BFDBFE;">
+                        <div style="font-size: 13px; font-weight: 700; color: #1E40AF;">🚆 Railway Booking Portal</div>
+                        <div style="font-size: 11.5px; color: #3B82F6;">Dynamic fare calculation & validation</div>
+                    </a>
+                    <a href="#/practical/4" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #FEF3C7; border: 1px solid #FDE68A;">
+                        <div style="font-size: 13px; font-weight: 700; color: #92400E;">🧮 Interactive Calculator</div>
+                        <div style="font-size: 11.5px; color: #B45309;">Keyboard listeners & evaluation</div>
+                    </a>
+                    <a href="#/php/hub" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #FFF7ED; border: 1px solid #FFEDD5;">
+                        <div style="font-size: 13px; font-weight: 700; color: #C2410C;">⚡ PHP Practicals (9-12)</div>
+                        <div style="font-size: 11.5px; color: #EA580C;">Live interactive execution hub</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

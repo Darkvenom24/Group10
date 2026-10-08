@@ -1,0 +1,56 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>10.2 String Name & Size</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🔤</span> 10.2: Print Name & String Size (Argument Passing)</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="php/practical10_2.php" target="_blank" class="btn-php-action btn-secondary" style="font-size: 11.5px;">Download Raw PHP ⬇</a>
+                <span class="php-badge badge-php">Practical 10.2</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Problem Statement:</b> Write a PHP program:<br>
+            10.2.1 to print your name.<br>
+            10.2.2 to print the size of a string. Pass string as an argument.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
+                    Function Parameters
+                </h3>
+                <div class="php-form-group">
+                    <label>10.2.1 Student/Author Name:</label>
+                    <input type="text" ng-model="studentName" class="php-form-control">
+                </div>
+                <div class="php-form-group">
+                    <label>10.2.2 String Argument to Pass ($inputString):</label>
+                    <textarea ng-model="sampleString" ng-change="calculateString()" rows="3" class="php-form-control"></textarea>
+                </div>
+                <button type="button" ng-click="calculateString()" class="btn-php-action" style="width: 100%;">
+                    ⚡ Execute String Functions
+                </button>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1.5px solid var(--navy); border-radius: 8px; padding: 20px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--green); padding-bottom: 6px;">
+                    PHP Function Results
+                </h3>
+
+                <div style="margin-bottom: 14px; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
+                    <div style="font-size: 12px; color: #64748B; font-weight: bold;">10.2.1 PRINT YOUR NAME:</div>
+                    <div style="font-size: 18px; font-weight: bold; color: var(--navy); margin-top: 4px;">{{studentName}}</div>
+                </div>
+
+                <div style="background: #FFF7ED; padding: 14px; border-radius: 6px; border: 1px solid #FFD8A8;">
+                    <div style="font-size: 12px; color: #9A3412; font-weight: bold;">10.2.2 STRING SIZE (strlen):</div>
+                    <div style="font-size: 32px; font-weight: 800; color: var(--saffron); margin: 4px 0;">{{strLength}} <span style="font-size: 14px; font-weight: normal; color: #64748B;">bytes / characters</span></div>
+                    <div style="font-size: 12.5px; color: #475569;">Word Count: <b>{{wordCount}}</b> words</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

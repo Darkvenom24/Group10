@@ -1,0 +1,56 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <span>Practical 4</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🧮</span> Practical 4: Interactive Keyboard Calculator</h2>
+            <span class="php-badge badge-php">JavaScript & Grid</span>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Objective:</b> Construct a calculator with expression parsing, arithmetic precedence evaluation, dual mouse/keyboard listeners, and responsive CSS grid arrangement.
+        </p>
+
+        <div style="display: flex; justify-content: center; margin-top: 24px;">
+            <div style="width: 320px; background: #1E293B; border-radius: 14px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 2px solid var(--saffron);">
+                <!-- Display -->
+                <div style="background: #0F172A; color: #38BDF8; font-family: 'Consolas', monospace; font-size: 28px; font-weight: bold; text-align: right; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; min-height: 40px; word-break: break-all; border: 1px solid #334155;">
+                    {{display}}
+                </div>
+
+                <!-- Keypad Grid -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                    <button type="button" ng-click="clear()" style="padding: 14px; border-radius: 8px; border: none; background: #EF4444; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">C</button>
+                    <button type="button" ng-click="backspace()" style="padding: 14px; border-radius: 8px; border: none; background: #64748B; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">⌫</button>
+                    <button type="button" ng-click="pressKey('/')" style="padding: 14px; border-radius: 8px; border: none; background: var(--saffron); color: var(--navy); font-size: 18px; font-weight: bold; cursor: pointer;">÷</button>
+                    <button type="button" ng-click="pressKey('*')" style="padding: 14px; border-radius: 8px; border: none; background: var(--saffron); color: var(--navy); font-size: 18px; font-weight: bold; cursor: pointer;">×</button>
+
+                    <button type="button" ng-click="pressKey('7')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">7</button>
+                    <button type="button" ng-click="pressKey('8')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">8</button>
+                    <button type="button" ng-click="pressKey('9')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">9</button>
+                    <button type="button" ng-click="pressKey('-')" style="padding: 14px; border-radius: 8px; border: none; background: var(--saffron); color: var(--navy); font-size: 18px; font-weight: bold; cursor: pointer;">−</button>
+
+                    <button type="button" ng-click="pressKey('4')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">4</button>
+                    <button type="button" ng-click="pressKey('5')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">5</button>
+                    <button type="button" ng-click="pressKey('6')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">6</button>
+                    <button type="button" ng-click="pressKey('+')" style="padding: 14px; border-radius: 8px; border: none; background: var(--saffron); color: var(--navy); font-size: 18px; font-weight: bold; cursor: pointer;">+</button>
+
+                    <button type="button" ng-click="pressKey('1')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">1</button>
+                    <button type="button" ng-click="pressKey('2')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">2</button>
+                    <button type="button" ng-click="pressKey('3')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">3</button>
+                    <button type="button" ng-click="evaluate()" style="grid-row: span 2; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #FFFFFF; font-size: 22px; font-weight: bold; cursor: pointer;">=</button>
+
+                    <button type="button" ng-click="pressKey('0')" style="grid-column: span 2; padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">0</button>
+                    <button type="button" ng-click="pressKey('.')" style="padding: 14px; border-radius: 8px; border: none; background: #334155; color: #FFFFFF; font-size: 18px; font-weight: bold; cursor: pointer;">.</button>
+                </div>
+
+                <!-- History -->
+                <div ng-if="history.length > 0" style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #334155; font-size: 11.5px; color: #94A3B8;">
+                    <div style="font-weight: bold; margin-bottom: 4px;">Recent Calculations:</div>
+                    <div ng-repeat="h in history track by $index">{{h}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

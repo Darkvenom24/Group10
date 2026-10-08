@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script id="spa-bridge">
+    if (window.location.search.indexOf('standalone=true') === -1) {
+        window.location.replace('index.html#/php/11-2');
+    }
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practical 11.2 — Dynamic Time Greeting | GMCA Group 10</title>

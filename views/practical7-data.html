@@ -1,0 +1,150 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/practical/7">Practical 7</a> <span>/</span> <span>Student Records (CRUD)</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>📊</span> Practical 7: Student Records & Practical 12 CRUD Operations</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="#/practical/7" class="btn-php-action" style="font-size: 12px; text-decoration: none;">+ New Submission (P7)</a>
+                <button type="button" ng-click="exportCsv()" class="btn-php-action btn-secondary" style="font-size: 12px;">📥 Export CSV</button>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Practical 12 Architecture:</b> Performs full relational CRUD operations (Create, Read, Update, Delete) against the <code>practical7_students</code> table with simulated SQL execution and reactive client state.
+        </p>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom: 16px; display: flex; gap: 12px;">
+            <input type="text" ng-model="searchKeyword" class="php-form-control" placeholder="🔍 Search by student name, enrollment, or project title..." style="max-width: 450px;">
+        </div>
+
+        <!-- Student Records Table -->
+        <div style="overflow-x: auto; border: 1px solid #E2E8F0; border-radius: 8px;">
+            <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr bgcolor="#000080" style="color: #FFFFFF;">
+                        <th>ID</th>
+                        <th>Enrollment</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Div/Roll</th>
+                        <th>Project Title</th>
+                        <th>Tech Stack</th>
+                        <th>Actions (CRUD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="r in records | filter:searchKeyword" style="border-bottom: 1px solid #E2E8F0;" ng-class="{'bg-active': selectedRecord.id === r.id}">
+                        <td>#{{r.id}}</td>
+                        <td><b>{{r.enrollment_no}}</b></td>
+                        <td>{{r.student_name}}</td>
+                        <td>{{r.email}}</td>
+                        <td>{{r.division}}-{{r.roll_no}}</td>
+                        <td>{{r.project_title}}</td>
+                        <td><span class="php-badge badge-php" style="font-size: 10.5px;">{{r.technology_stack}}</span></td>
+                        <td>
+                            <div style="display: flex; gap: 4px;">
+                                <button type="button" ng-click="viewDossier(r)" class="btn-php-action btn-secondary" style="font-size: 11px; padding: 3px 8px;">👁 Read</button>
+                                <button type="button" ng-click="openEditModal(r)" class="btn-php-action" style="font-size: 11px; padding: 3px 8px; background: #2563EB;">✏ Edit</button>
+                                <button type="button" ng-click="deleteRecord(r.id)" class="btn-php-action" style="font-size: 11px; padding: 3px 8px; background: #DC2626;">🗑 Del</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr ng-if="(records | filter:searchKeyword).length === 0">
+                        <td colspan="8" style="text-align: center; color: #94A3B8; padding: 20px;">No student records found matching your query.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Simulated SQL Query Log -->
+        <div style="margin-top: 24px;">
+            <div style="background: #1E1E1E; border-radius: 8px; overflow: hidden; border: 1px solid #333333;">
+                <div style="background: #2D2D2D; padding: 8px 14px; font-size: 12px; font-weight: bold; color: var(--saffron); display: flex; justify-content: space-between;">
+                    <span>⚡ Simulated MySQL Relational Query Log (PDO Transactions)</span>
+                    <span style="color: #86EFAC;">● Live Connected</span>
+                </div>
+                <div style="padding: 12px; max-height: 140px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 12px; color: #38BDF8; line-height: 1.6;">
+                    <div ng-repeat="q in queryLogs track by $index">
+                        <span style="color: #64748B;">[{{q.timestamp}}]</span> {{q.query}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Dossier Modal -->
+        <div class="modal-overlay" ng-style="{display: isViewModalOpen ? 'flex' : 'none'}">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3>Student Record Dossier: {{selectedRecord.enrollment_no}}</h3>
+                    <button type="button" class="modal-close" ng-click="closeViewModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-size: 13.5px;">
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td width="30%" style="color: #64748B;">Student Name:</td><td><b>{{selectedRecord.student_name}}</b></td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Enrollment No:</td><td>{{selectedRecord.enrollment_no}}</td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Email Address:</td><td>{{selectedRecord.email}}</td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Contact Phone:</td><td>{{selectedRecord.phone}}</td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Division & Roll:</td><td>Division {{selectedRecord.division}}, Roll No {{selectedRecord.roll_no}}</td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Project Title:</td><td><b>{{selectedRecord.project_title}}</b></td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">Technology Stack:</td><td>{{selectedRecord.technology_stack}}</td></tr>
+                        <tr style="border-bottom: 1px solid #E2E8F0;"><td style="color: #64748B;">GitHub Repo:</td><td><a ng-href="{{selectedRecord.github_repo}}" target="_blank" style="color: var(--navy);">{{selectedRecord.github_repo}}</a></td></tr>
+                        <tr><td style="color: #64748B;">Submission Date:</td><td>{{selectedRecord.submission_date}}</td></tr>
+                    </table>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="button" class="btn-php-action btn-secondary" ng-click="closeViewModal()">Close Dossier</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal-overlay" ng-style="{display: isEditModalOpen ? 'flex' : 'none'}">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3>Edit Student Record #{{editRecord.id}}</h3>
+                    <button type="button" class="modal-close" ng-click="closeEditModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form ng-submit="saveEdit()">
+                        <div class="input-group-row">
+                            <div class="php-form-group">
+                                <label>Student Name:</label>
+                                <input type="text" ng-model="editRecord.student_name" class="php-form-control" required>
+                            </div>
+                            <div class="php-form-group">
+                                <label>Enrollment No:</label>
+                                <input type="text" ng-model="editRecord.enrollment_no" class="php-form-control" required>
+                            </div>
+                        </div>
+                        <div class="input-group-row">
+                            <div class="php-form-group">
+                                <label>Email:</label>
+                                <input type="email" ng-model="editRecord.email" class="php-form-control" required>
+                            </div>
+                            <div class="php-form-group">
+                                <label>Roll No:</label>
+                                <input type="text" ng-model="editRecord.roll_no" class="php-form-control" required>
+                            </div>
+                        </div>
+                        <div class="php-form-group">
+                            <label>Project Title:</label>
+                            <input type="text" ng-model="editRecord.project_title" class="php-form-control" required>
+                        </div>
+                        <div class="php-form-group">
+                            <label>Technology Stack:</label>
+                            <input type="text" ng-model="editRecord.technology_stack" class="php-form-control" required>
+                        </div>
+                        <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+                            <button type="button" class="btn-php-action btn-secondary" ng-click="closeEditModal()">Cancel</button>
+                            <button type="submit" class="btn-php-action" style="background: var(--green);">Save Changes (UPDATE)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

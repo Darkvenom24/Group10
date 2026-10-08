@@ -1,0 +1,60 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>11.1 Max & Min Number</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>⚖️</span> 11.1: Maximum and Minimum Number (If-Else Statements)</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="php/practical11_1.php" target="_blank" class="btn-php-action btn-secondary" style="font-size: 11.5px;">Download Raw PHP ⬇</a>
+                <span class="php-badge badge-php">Practical 11.1</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Problem Statement:</b> Create a PHP script that uses if-else and switch-case statements for decision-making. Write a PHP program to find out maximum and minimum number.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
+                    Input Values
+                </h3>
+                <div class="php-form-group">
+                    <label>First Number ($n1):</label>
+                    <input type="number" ng-model="n1" ng-change="evaluate()" class="php-form-control">
+                </div>
+                <div class="php-form-group">
+                    <label>Second Number ($n2):</label>
+                    <input type="number" ng-model="n2" ng-change="evaluate()" class="php-form-control">
+                </div>
+                <div class="php-form-group">
+                    <label>Third Number ($n3):</label>
+                    <input type="number" ng-model="n3" ng-change="evaluate()" class="php-form-control">
+                </div>
+                <button type="button" ng-click="evaluate()" class="btn-php-action" style="width: 100%;">
+                    ⚡ Evaluate Extremes
+                </button>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1.5px solid var(--navy); border-radius: 8px; padding: 20px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--green); padding-bottom: 6px;">
+                    Decision-Making Results
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+                    <div style="background: #FFF7ED; border: 1px solid #FFD8A8; border-radius: 8px; padding: 16px; text-align: center;">
+                        <span style="font-size: 11px; font-weight: bold; color: #9A3412; text-transform: uppercase;">MAXIMUM NUMBER</span>
+                        <div style="font-size: 32px; font-weight: 800; color: var(--saffron);">{{max}}</div>
+                    </div>
+                    <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px; text-align: center;">
+                        <span style="font-size: 11px; font-weight: bold; color: #1E40AF; text-transform: uppercase;">MINIMUM NUMBER</span>
+                        <div style="font-size: 32px; font-weight: 800; color: #2563EB;">{{min}}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; font-size: 13px; color: #475569; background: #F8FAFC; padding: 12px; border-radius: 6px;">
+                    <b>Spread Difference (Range):</b> {{max - min}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

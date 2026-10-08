@@ -1,0 +1,85 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <span>Practical 7</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>📝</span> Practical 7: Student Academic & Project Registration Form</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="#/practical/7-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">View Records (CRUD) →</a>
+                <span class="php-badge badge-php">Practical 7</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Objective:</b> Capture complete student academic credentials and capstone project specifications. Connected directly to Practical 12's MySQL relational schema (<code>practical7_students</code> table).
+        </p>
+
+        <form ng-submit="submitForm()" style="background: #F8FAFC; border: 1.5px solid #E2E8F0; padding: 24px; border-radius: 8px; margin-top: 16px;">
+            <div class="input-group-row">
+                <div class="php-form-group">
+                    <label>Student Enrollment No (GMCA):</label>
+                    <input type="text" ng-model="student.enrollment_no" class="php-form-control" placeholder="e.g. 26GMCA52" required>
+                </div>
+                <div class="php-form-group">
+                    <label>Student Full Name:</label>
+                    <input type="text" ng-model="student.student_name" class="php-form-control" placeholder="e.g. Vaibhav Senjaliya" required>
+                </div>
+            </div>
+
+            <div class="input-group-row">
+                <div class="php-form-group">
+                    <label>Email Address:</label>
+                    <input type="email" ng-model="student.email" class="php-form-control" placeholder="student@gmca.ac.in" required>
+                </div>
+                <div class="php-form-group">
+                    <label>Contact Phone Number:</label>
+                    <input type="tel" ng-model="student.phone" class="php-form-control" placeholder="9876543210" required>
+                </div>
+            </div>
+
+            <div class="input-group-row">
+                <div class="php-form-group">
+                    <label>Division:</label>
+                    <select ng-model="student.division" class="php-form-control">
+                        <option value="A">Division A</option>
+                        <option value="B">Division B</option>
+                    </select>
+                </div>
+                <div class="php-form-group">
+                    <label>Class Roll No:</label>
+                    <input type="text" ng-model="student.roll_no" class="php-form-control" placeholder="52" required>
+                </div>
+                <div class="php-form-group">
+                    <label>Academic Semester:</label>
+                    <select ng-model="student.semester" class="php-form-control">
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="php-form-group">
+                <label>Assigned Project Title:</label>
+                <input type="text" ng-model="student.project_title" class="php-form-control" placeholder="e.g. Interactive Web Technology Portal & PHP Engine" required>
+            </div>
+
+            <div class="input-group-row">
+                <div class="php-form-group">
+                    <label>Elective Technology Stack:</label>
+                    <input type="text" ng-model="student.technology_stack" class="php-form-control" placeholder="e.g. AngularJS, PHP, MySQL, CSS3" required>
+                </div>
+                <div class="php-form-group">
+                    <label>GitHub Repository URL:</label>
+                    <input type="url" ng-model="student.github_repo" class="php-form-control" placeholder="https://github.com/..." required>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button type="submit" class="btn-php-action" style="padding: 10px 24px; font-size: 14px;">
+                    💾 Save Record to Database (SQL INSERT)
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

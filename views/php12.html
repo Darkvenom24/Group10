@@ -1,0 +1,78 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>12. PHP Database Connection & CRUD</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🗄</span> Practical 12: Database Connection with PHP & CRUD Operations</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="php/schema.sql" target="_blank" class="btn-php-action btn-secondary" style="font-size: 11.5px;">Download SQL Schema ⬇</a>
+                <span class="php-badge badge-php">Practical 12</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Problem Statement:</b> Connect a PHP script to a MySQL database and perform CRUD operations.<br>
+            • Make registration, login page on your index page.<br>
+            • After login, user must fill the data in Practical no.7.<br>
+            • Make separate page to display that form data in proper way.<br>
+            • Use that data to display details on index page.
+        </p>
+
+        <!-- 4-Step Practical 12 Workflow Verification -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 20px;">
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px; border-left: 4px solid var(--saffron);">
+                <div style="font-size: 12px; font-weight: bold; color: var(--saffron);">STEP 1: AUTHENTICATION</div>
+                <h4 style="margin: 6px 0; color: var(--navy);">Index Login & Register</h4>
+                <p style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Users table schema with secure credential checking and active session storage.</p>
+                <a href="#/" class="btn-php-action" style="font-size: 11px; text-decoration: none;">Go to Index Auth →</a>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px; border-left: 4px solid var(--green);">
+                <div style="font-size: 12px; font-weight: bold; color: var(--green);">STEP 2: ENFORCED ENTRY</div>
+                <h4 style="margin: 6px 0; color: var(--navy);">Fill Practical 7 Data</h4>
+                <p style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Student academic and project registration form pre-populated from logged-in user.</p>
+                <a href="#/practical/7" class="btn-php-action" style="font-size: 11px; text-decoration: none;">Go to Practical 7 →</a>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px; border-left: 4px solid var(--navy);">
+                <div style="font-size: 12px; font-weight: bold; color: var(--navy);">STEP 3: PROPER DISPLAY</div>
+                <h4 style="margin: 6px 0; color: var(--navy);">Separate CRUD Page</h4>
+                <p style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Full table with View Dossier modal, inline Edit, Delete, search filters, and query logs.</p>
+                <a href="#/practical/7-data" class="btn-php-action" style="font-size: 11px; text-decoration: none;">View CRUD Data Page →</a>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px; border-left: 4px solid #7C3AED;">
+                <div style="font-size: 12px; font-weight: bold; color: #7C3AED;">STEP 4: SYNC TO INDEX</div>
+                <h4 style="margin: 6px 0; color: var(--navy);">Index Details Display</h4>
+                <p style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Logged-in student's Practical 7 submission card displayed on the home page.</p>
+                <a href="#/" class="btn-php-action" style="font-size: 11px; text-decoration: none;">Verify on Index →</a>
+            </div>
+        </div>
+
+        <!-- Connection Code Showcase -->
+        <div style="margin-top: 24px; background: #1E1E1E; border-radius: 8px; overflow: hidden; border: 1px solid #333;">
+            <div style="background: #2D2D2D; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold; color: var(--saffron); font-size: 13px;">php/config.php — Database Connection Options</span>
+                <span style="font-size: 12px; color: #94A3B8;">MySQL PDO & mysqli</span>
+            </div>
+            <pre style="margin: 0; padding: 16px; color: #D4D4D4; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; overflow-x: auto;">
+&lt;?php
+// PDO Connection Configuration (Recommended for Secure CRUD with Prepared Statements)
+$host = 'localhost';
+$dbname = 'gmca_practicals';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+} catch (PDOException $e) {
+    die("Database Connection Failed: " . $e->getMessage());
+}
+?&gt;</pre>
+        </div>
+    </div>
+</div>

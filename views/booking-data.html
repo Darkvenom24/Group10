@@ -1,0 +1,45 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/practical/3">Practical 3</a> <span>/</span> <span>Booking Records</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🎫</span> Indian Railways Saved Reservations</h2>
+            <a href="#/practical/3" class="btn-php-action" style="font-size: 12px; text-decoration: none;">+ Book New Ticket</a>
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #E2E8F0; border-radius: 8px;">
+            <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr bgcolor="#000080" style="color: #FFFFFF;">
+                        <th>PNR</th>
+                        <th>Passenger Name</th>
+                        <th>Train Name</th>
+                        <th>Class</th>
+                        <th>Passengers</th>
+                        <th>Date</th>
+                        <th>Total Fare</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="b in bookings" style="border-bottom: 1px solid #E2E8F0;">
+                        <td><b>{{b.pnr}}</b></td>
+                        <td>{{b.name}}</td>
+                        <td>{{b.train}}</td>
+                        <td><span class="php-badge badge-php">{{b.travelClass}}</span></td>
+                        <td>{{b.passengers}}</td>
+                        <td>{{b.date}}</td>
+                        <td><b style="color: var(--saffron);">₹{{b.totalFare}}</b></td>
+                        <td>
+                            <button type="button" ng-click="deleteBooking(b.id)" class="btn-php-action" style="font-size: 11px; padding: 3px 8px; background: #DC2626;">Cancel</button>
+                        </td>
+                    </tr>
+                    <tr ng-if="bookings.length === 0">
+                        <td colspan="8" style="text-align: center; color: #94A3B8; padding: 20px;">No reservation records currently stored in system.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

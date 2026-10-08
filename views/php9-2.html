@@ -1,0 +1,62 @@
+<div class="spa-view-enter">
+    <div class="spa-card">
+        <div class="spa-breadcrumb">
+            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>9.2 Print 1 to N</span>
+        </div>
+        <div class="spa-header-bar">
+            <h2><span>🔢</span> 9.2: Print 1 to N Numbers with Loop Statistics</h2>
+            <div style="display: flex; gap: 8px;">
+                <a href="php/practical9_2.php" target="_blank" class="btn-php-action btn-secondary" style="font-size: 11.5px;">Download Raw PHP ⬇</a>
+                <span class="php-badge badge-php">Practical 9.2</span>
+            </div>
+        </div>
+
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
+            <b>Problem Statement:</b> Write a PHP program to print 1 to N numbers, where N is entered by user.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; margin-top: 20px;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px; height: fit-content;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
+                    Target Number (N)
+                </h3>
+                <div class="php-form-group">
+                    <label>Enter Value of N (Max 200):</label>
+                    <input type="number" ng-model="n" min="1" max="200" ng-change="generate()" class="php-form-control">
+                </div>
+                <button type="button" ng-click="generate()" class="btn-php-action" style="width: 100%;">
+                    🔄 Generate Sequence
+                </button>
+            </div>
+
+            <!-- Sequence Display -->
+            <div style="background: #FFFFFF; border: 1.5px solid var(--navy); border-radius: 8px; padding: 20px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--green); padding-bottom: 6px; display: flex; justify-content: space-between;">
+                    <span>Generated Sequence (1 to {{n}})</span>
+                    <span style="font-size: 12px; color: #64748B;">Total Elements: {{numbers.length}}</span>
+                </h3>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 220px; overflow-y: auto; padding: 12px; background: #F8FAFC; border-radius: 6px; border: 1px solid #E2E8F0; margin-bottom: 16px;">
+                    <span ng-repeat="num in numbers" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; font-size: 13px; font-weight: bold;" ng-style="{'background': num % 2 === 0 ? '#EFF6FF' : '#FEF3C7', 'color': num % 2 === 0 ? '#1E40AF' : '#92400E', 'border': num % 2 === 0 ? '1px solid #BFDBFE' : '1px solid #FDE68A'}">
+                        {{num}}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+                    <div style="background: #F1F5F9; padding: 10px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #64748B; font-weight: bold;">CUMULATIVE SUM</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--navy);">{{stats.total}}</div>
+                    </div>
+                    <div style="background: #EFF6FF; padding: 10px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #3B82F6; font-weight: bold;">EVEN NUMBERS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1D4ED8;">{{stats.evens}}</div>
+                    </div>
+                    <div style="background: #FEF3C7; padding: 10px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #D97706; font-weight: bold;">ODD NUMBERS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #B45309;">{{stats.odds}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
