@@ -65,26 +65,27 @@ body {
 .portal-nav .nav-item,
 .navbar > a,
 .portal-nav > a {
-    color: var(--white);
+    color: #FFFFFF !important;
     text-decoration: none;
-    padding: 8px 14px;
+    padding: 9px 15px;
     margin: 2px;
     font-weight: 600;
     font-size: 13.5px;
     border-radius: 6px;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, color 0.15s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     position: relative;
+    cursor: pointer;
 }
 
 .navbar > a:hover,
 .portal-nav > a:hover,
 .nav-dropdown > a:hover,
 .nav-item:hover {
-    background-color: rgba(255, 153, 51, 0.2);
-    color: var(--saffron);
+    background-color: rgba(255, 153, 51, 0.25) !important;
+    color: var(--saffron) !important;
 }
 
 /* Active navigation item styling: Clean indicator, never shifts or overlaps */
@@ -99,14 +100,17 @@ body {
 /* Base Dropdown Container */
 .nav-dropdown {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 
-.nav-dropdown > a {
-    color: var(--white);
+.nav-dropdown > a,
+.portal-nav > a,
+.navbar > a {
+    color: #FFFFFF !important;
     text-decoration: none;
-    padding: 8px 14px;
-    margin: 2px;
+    padding: 10px 16px;
+    margin: 0 2px;
     font-weight: 600;
     font-size: 13.5px;
     border-radius: 6px;
@@ -114,97 +118,168 @@ body {
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+
+.nav-dropdown > a:hover,
+.portal-nav > a:hover,
+.navbar > a:hover,
+.nav-dropdown.dropdown-open > a {
+    background-color: rgba(255, 153, 51, 0.25) !important;
+    color: var(--saffron) !important;
 }
 
 /* Standard Dropdown Content (For About Us and Practicals) */
 .nav-dropdown-content {
     display: none;
     position: absolute;
-    top: calc(100% + 4px);
+    top: 100%; /* ZERO GAP */
     left: 0;
-    background-color: var(--navy);
+    background-color: #000055 !important;
     min-width: 290px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
     border-radius: 8px;
-    z-index: 2000;
+    z-index: 3000;
     text-align: left;
     padding: 8px 0;
-    border-top: 3px solid var(--saffron);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 3.5px solid var(--saffron);
 }
 
-.nav-dropdown:hover > .nav-dropdown-content {
-    display: block;
-    animation: dropFadeIn 0.2s ease-out;
+/* Invisible Hitbox Bridge: Prevents dropdown from vanishing when cursor moves */
+.nav-dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -15px;
+    right: -15px;
+    height: 20px;
+    background: transparent;
+    pointer-events: auto;
+}
+
+/* Pure CSS Hover & Click Toggle Open */
+.nav-dropdown:hover > .nav-dropdown-content,
+.nav-dropdown.dropdown-open > .nav-dropdown-content {
+    display: block !important;
+    animation: navDropFade 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes navDropFade {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 4px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }
 
 .nav-dropdown-content a {
-    color: var(--white);
-    padding: 9px 16px;
+    color: #FFFFFF !important;
+    padding: 10px 16px;
     text-decoration: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 500;
     margin: 0;
     border-radius: 0;
-    transition: all 0.15s ease;
+    transition: background 0.12s ease, color 0.12s ease;
     border-left: 3px solid transparent;
 }
 
+.nav-dropdown-content a span {
+    color: #FFFFFF !important;
+}
+
 .nav-dropdown-content a:hover {
-    background-color: rgba(255, 153, 51, 0.15);
-    color: var(--saffron);
+    background-color: rgba(255, 153, 51, 0.22) !important;
+    color: var(--saffron) !important;
     border-left-color: var(--saffron);
 }
 
+.nav-dropdown-content a:hover span {
+    color: var(--saffron) !important;
+}
+
 .nav-dropdown-content a.active {
-    background-color: rgba(19, 136, 8, 0.25) !important;
+    background-color: rgba(19, 136, 8, 0.3) !important;
     color: #86EFAC !important;
     border-left-color: var(--green) !important;
     font-weight: bold;
 }
 
+.nav-dropdown-content a.active span {
+    color: #86EFAC !important;
+}
+
 .nav-dropdown-content .member-badge {
     font-size: 11px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--saffron) !important;
+    color: var(--navy) !important;
     padding: 2px 7px;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.3px;
 }
 
 /* ==========================================================================
-   PHP Practicals Mega-Menu (Multi-Column, NEVER Overlaps)
+   PHP Practicals Mega-Menu (Multi-Column, NEVER Overlaps, Zero Lag)
    ========================================================================== */
 .php-mega-dropdown {
-    position: static !important; /* Drops relative to full navbar bar */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
 }
 
 .php-mega-menu {
     display: none;
     position: absolute;
-    top: 100%;
+    top: 100%; /* ZERO GAP */
     left: 50%;
-    transform: translateX(-50%);
-    width: 96%;
+    transform: translate3d(-50%, 0, 0);
+    width: 95vw;
     max-width: 1060px;
-    background-color: #000066; /* Deepest Navy */
+    background-color: #000055 !important;
     border-radius: 10px;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-top: 4px solid var(--saffron);
-    z-index: 2500;
-    padding: 16px 20px 12px 20px;
-    animation: dropFadeIn 0.2s ease-out;
+    z-index: 3500;
+    padding: 16px 20px 14px 20px;
 }
 
-.php-mega-dropdown:hover .php-mega-menu {
-    display: block;
+/* Invisible Hitbox Bridge for Mega Menu */
+.php-mega-menu::before {
+    content: '';
+    position: absolute;
+    top: -24px;
+    left: -20px;
+    right: -20px;
+    height: 24px;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.php-mega-dropdown:hover > .php-mega-menu,
+.php-mega-dropdown.dropdown-open > .php-mega-menu {
+    display: block !important;
+    animation: megaDropFade 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes megaDropFade {
+    from {
+        opacity: 0;
+        transform: translate3d(-50%, 4px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(-50%, 0, 0);
+    }
 }
 
 .php-mega-grid {
@@ -216,10 +291,10 @@ body {
 .php-mega-col {
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .php-mega-col-title {
@@ -237,94 +312,112 @@ body {
 }
 
 .php-mega-col-title .col-num {
-    background: rgba(255, 153, 51, 0.2);
+    background: rgba(255, 153, 51, 0.25);
+    color: #FFD8A8;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 11px;
 }
 
 .php-mega-item {
-    color: #E2E8F0;
+    color: #FFFFFF !important;
     text-decoration: none;
-    padding: 7px 10px;
+    padding: 8px 10px;
     margin: 2px 0;
     border-radius: 5px;
     font-size: 12.5px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.15s ease;
+    transition: background 0.12s ease, color 0.12s ease;
     border-left: 2px solid transparent;
 }
 
+.php-mega-item span {
+    color: #FFFFFF !important;
+}
+
 .php-mega-item:hover {
-    background: rgba(255, 153, 51, 0.18);
-    color: #FFFFFF;
+    background: rgba(255, 153, 51, 0.25) !important;
     border-left-color: var(--saffron);
-    transform: translateX(2px);
+}
+
+.php-mega-item:hover span {
+    color: var(--saffron) !important;
 }
 
 .php-mega-item.active {
-    background: rgba(19, 136, 8, 0.28) !important;
-    color: #86EFAC !important;
+    background: rgba(19, 136, 8, 0.3) !important;
     border-left-color: var(--green) !important;
     font-weight: 600;
 }
 
+.php-mega-item.active span {
+    color: #86EFAC !important;
+}
+
 .php-mega-item .item-tag {
     font-size: 10px;
-    padding: 1px 5px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #CBD5E1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF !important;
+    font-weight: 600;
 }
 
 .php-mega-item:hover .item-tag {
-    background: var(--saffron);
-    color: var(--navy);
+    background: var(--saffron) !important;
+    color: var(--navy) !important;
     font-weight: bold;
 }
 
 .php-mega-footer {
     margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
+    background: transparent;
 }
 
-.php-mega-footer a {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 5px;
-    transition: all 0.2s;
+/* High-Contrast Standalone & Footer Action Button (Fixes Image 1 & 2) */
+.hub-link,
+.php-mega-footer a.hub-link {
+    background: #FF9933 !important;
+    color: #000055 !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    border: none !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.15s ease !important;
 }
 
-.php-mega-footer .hub-link {
-    background: linear-gradient(135deg, var(--saffron), #E67E22);
-    color: var(--navy);
-    font-weight: 700;
+.hub-link span,
+.php-mega-footer a.hub-link span {
+    color: #000055 !important;
+    font-weight: 800 !important;
 }
 
-.php-mega-footer .hub-link:hover {
-    filter: brightness(1.1);
+.hub-link:hover,
+.php-mega-footer a.hub-link:hover {
+    background: #FFA74F !important;
+    color: #000000 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35) !important;
 }
 
-@keyframes dropFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.hub-link:hover span,
+.php-mega-footer a.hub-link:hover span {
+    color: #000000 !important;
 }
 
 /* Footer */
@@ -1050,20 +1143,25 @@ select.input-valid {
    Practical 9-12: PHP Lab UI, Code Highlighting, Terminal & CRUD Components
    ========================================================================== */
 .php-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
-    text-transform: uppercase;
+    line-height: 1.2;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: middle;
 }
-.badge-php { background: #777BB4; color: #FFFFFF; }
-.badge-mysql { background: #00758F; color: #FFFFFF; }
-.badge-saffron { background: var(--saffron); color: var(--navy); }
-.badge-green { background: var(--green); color: #FFFFFF; }
-.badge-navy { background: var(--navy); color: #FFFFFF; }
-.badge-muted { background: #E2E8F0; color: #475569; }
+.badge-php { background: #3B82F6; color: #FFFFFF !important; box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3); }
+.badge-mysql { background: #00758F; color: #FFFFFF !important; }
+.badge-saffron { background: var(--saffron); color: var(--navy) !important; font-weight: 800; }
+.badge-green { background: var(--green); color: #FFFFFF !important; }
+.badge-navy { background: var(--navy); color: #FFFFFF !important; }
+.badge-muted { background: #E2E8F0; color: #475569 !important; }
 
 .lab-meta-bar {
     display: flex;

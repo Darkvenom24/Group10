@@ -336,6 +336,15 @@
     app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthService', function ($scope, $location, $rootScope, AuthService) {
         $scope.mobileMenuOpen = false;
         $scope.currentUser = AuthService.getCurrentUser();
+        $scope.activeDropdown = null;
+
+        $scope.toggleDropdown = function (name, $event) {
+            if ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+            }
+            $scope.activeDropdown = ($scope.activeDropdown === name) ? null : name;
+        };
 
         $scope.toggleMobileMenu = function () {
             $scope.mobileMenuOpen = !$scope.mobileMenuOpen;
@@ -343,7 +352,17 @@
 
         $scope.closeMenu = function () {
             $scope.mobileMenuOpen = false;
+            $scope.activeDropdown = null;
         };
+
+        // Close clicked dropdown when clicking anywhere outside
+        angular.element(document).on('click', function () {
+            if ($scope.activeDropdown) {
+                $scope.$applyAsync(function () {
+                    $scope.activeDropdown = null;
+                });
+            }
+        });
 
         $scope.isActive = function (route) {
             var currentPath = $location.path();
@@ -351,6 +370,11 @@
             if (route !== '/' && currentPath.indexOf(route) === 0) return true;
             return false;
         };
+
+        $rootScope.$on('$routeChangeSuccess', function () {
+            $scope.activeDropdown = null;
+            $scope.mobileMenuOpen = false;
+        });
 
         $rootScope.$on('authChanged', function (event, user) {
             $scope.currentUser = user;

@@ -33,27 +33,27 @@
         </div>
     </header>
 
-    <!-- Navigation Bar (AngularJS SPA Controller, Clean & Non-Overlapping Mega Menu) -->
-    <nav class="portal-nav" ng-controller="NavController">
-        <a href="#/" class="nav-item" ng-class="{active: isActive('/')}">Home</a>
+    <!-- Navigation Bar (AngularJS SPA Controller, Click & Hover Ready, ZERO Gap, ZERO Lag) -->
+    <nav class="portal-nav" ng-controller="NavController" ng-click="$event.stopPropagation()">
+        <a href="#/" class="nav-item" ng-class="{active: isActive('/')}" ng-click="closeMenu()">Home</a>
 
         <!-- About Us Dropdown -->
-        <div class="nav-dropdown">
-            <a class="nav-item" ng-class="{active: isActive('/about') || isActive('/member')}">About Us ▾</a>
+        <div class="nav-dropdown" ng-class="{'dropdown-open': activeDropdown === 'about'}">
+            <a class="nav-item" ng-class="{active: isActive('/about') || isActive('/member')}" ng-click="toggleDropdown('about', $event)">About Us ▾</a>
             <div class="nav-dropdown-content">
-                <a href="#/member/1" ng-class="{active: isActive('/member/1')}">
+                <a href="#/member/1" ng-class="{active: isActive('/member/1')}" ng-click="closeMenu()">
                     <span>Ridham Bambhaniya</span>
                     <span class="member-badge">26GMCA61</span>
                 </a>
-                <a href="#/member/2" ng-class="{active: isActive('/member/2')}">
+                <a href="#/member/2" ng-class="{active: isActive('/member/2')}" ng-click="closeMenu()">
                     <span>Riya Thakkar</span>
                     <span class="member-badge">26GMCA33</span>
                 </a>
-                <a href="#/member/3" ng-class="{active: isActive('/member/3')}">
+                <a href="#/member/3" ng-class="{active: isActive('/member/3')}" ng-click="closeMenu()">
                     <span>Vaibhav Senjaliya</span>
                     <span class="member-badge">26GMCA52</span>
                 </a>
-                <a href="#/about" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold;">
+                <a href="#/about" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold;" ng-click="closeMenu()">
                     <span>All Team Overview</span>
                     <span>→</span>
                 </a>
@@ -61,43 +61,43 @@
         </div>
 
         <!-- Practicals Dropdown -->
-        <div class="nav-dropdown">
-            <a class="nav-item" ng-class="{active: isActive('/practical')}">Practicals ▾</a>
+        <div class="nav-dropdown" ng-class="{'dropdown-open': activeDropdown === 'practicals'}">
+            <a class="nav-item" ng-class="{active: isActive('/practical')}" ng-click="toggleDropdown('practicals', $event)">Practicals ▾</a>
             <div class="nav-dropdown-content">
-                <a href="#/practical/1" ng-class="{active: isActive('/practical/1')}">
+                <a href="#/practical/1" ng-class="{active: isActive('/practical/1')}" ng-click="closeMenu()">
                     <span>Practical 1 (HTML Webpage)</span>
                     <span class="member-badge">HTML</span>
                 </a>
-                <a href="#/practical/2" ng-class="{active: isActive('/practical/2')}">
+                <a href="#/practical/2" ng-class="{active: isActive('/practical/2')}" ng-click="closeMenu()">
                     <span>Practical 2 (HTML & CSS Webpage)</span>
                     <span class="member-badge">CSS</span>
                 </a>
-                <a href="#/practical/3" ng-class="{active: isActive('/practical/3')}">
+                <a href="#/practical/3" ng-class="{active: isActive('/practical/3')}" ng-click="closeMenu()">
                     <span>Practical 3 (Railway Portal)</span>
                     <span class="member-badge">Web App</span>
                 </a>
-                <a href="#/practical/4" ng-class="{active: isActive('/practical/4')}">
+                <a href="#/practical/4" ng-class="{active: isActive('/practical/4')}" ng-click="closeMenu()">
                     <span>Practical 4 (Interactive Calculator)</span>
                     <span class="member-badge">JS Calc</span>
                 </a>
-                <a href="#/practical/7" ng-class="{active: isActive('/practical/7')}">
+                <a href="#/practical/7" ng-class="{active: isActive('/practical/7')}" ng-click="closeMenu()">
                     <span>Practical 7 (Student Data Form)</span>
                     <span class="member-badge">Form</span>
                 </a>
-                <a href="#/practical/7-data" ng-class="{active: isActive('/practical/7-data')}">
+                <a href="#/practical/7-data" ng-class="{active: isActive('/practical/7-data')}" ng-click="closeMenu()">
                     <span>Practical 7 Form Data (CRUD)</span>
                     <span class="member-badge">CRUD</span>
                 </a>
-                <a href="#/php/hub" style="border-top: 1px solid rgba(255,255,255,0.15); font-weight: bold; background: rgba(255,153,51,0.2);">
-                    <span>PHP Practicals (9, 10, 11, 12)</span>
-                    <span class="member-badge" style="background:var(--saffron); color:var(--navy);">PHP</span>
+                <a href="#/php/hub" class="hub-link" style="border-top: 1px solid rgba(255,255,255,0.2);" ng-click="closeMenu()">
+                    <span>⚡ PHP Practicals (9, 10, 11, 12)</span>
+                    <span class="member-badge" style="background:#000055; color:#FFFFFF;">PHP</span>
                 </a>
             </div>
         </div>
 
-        <!-- PHP Practicals Multi-Column Mega Dropdown (NEVER Overlaps) -->
-        <div class="nav-dropdown php-mega-dropdown">
-            <a class="nav-item" ng-class="{active: isActive('/php')}">PHP Practicals ▾</a>
+        <!-- PHP Practicals Multi-Column Mega Dropdown (NEVER Overlaps, Zero Gap, Zero Lag) -->
+        <div class="nav-dropdown php-mega-dropdown" ng-class="{'dropdown-open': activeDropdown === 'php'}">
+            <a class="nav-item" ng-class="{active: isActive('/php')}" ng-click="toggleDropdown('php', $event)">PHP Practicals ▾</a>
             <div class="php-mega-menu">
                 <div class="php-mega-grid">
                     <!-- Column 1: 9. PHP Basics -->
@@ -106,15 +106,15 @@
                             <span>9. PHP Basics</span>
                             <span class="col-num">09</span>
                         </div>
-                        <a href="#/php/9-1" class="php-mega-item" ng-class="{active: isActive('/php/9-1')}">
+                        <a href="#/php/9-1" class="php-mega-item" ng-class="{active: isActive('/php/9-1')}" ng-click="closeMenu()">
                             <span>9.1 Max of 3 Numbers</span>
                             <span class="item-tag">Logic</span>
                         </a>
-                        <a href="#/php/9-2" class="php-mega-item" ng-class="{active: isActive('/php/9-2')}">
+                        <a href="#/php/9-2" class="php-mega-item" ng-class="{active: isActive('/php/9-2')}" ng-click="closeMenu()">
                             <span>9.2 Print 1 to N</span>
                             <span class="item-tag">Loop</span>
                         </a>
-                        <a href="#/php/9-3" class="php-mega-item" ng-class="{active: isActive('/php/9-3')}">
+                        <a href="#/php/9-3" class="php-mega-item" ng-class="{active: isActive('/php/9-3')}" ng-click="closeMenu()">
                             <span>9.3 3 Pyramid Patterns</span>
                             <span class="item-tag">Patterns</span>
                         </a>
@@ -126,11 +126,11 @@
                             <span>10. PHP Array</span>
                             <span class="col-num">10</span>
                         </div>
-                        <a href="#/php/10-1" class="php-mega-item" ng-class="{active: isActive('/php/10-1')}">
+                        <a href="#/php/10-1" class="php-mega-item" ng-class="{active: isActive('/php/10-1')}" ng-click="closeMenu()">
                             <span>10.1 Array Operations</span>
                             <span class="item-tag">Array</span>
                         </a>
-                        <a href="#/php/10-2" class="php-mega-item" ng-class="{active: isActive('/php/10-2')}">
+                        <a href="#/php/10-2" class="php-mega-item" ng-class="{active: isActive('/php/10-2')}" ng-click="closeMenu()">
                             <span>10.2 String Name & Size</span>
                             <span class="item-tag">String</span>
                         </a>
@@ -142,19 +142,19 @@
                             <span>11. Control Structures</span>
                             <span class="col-num">11</span>
                         </div>
-                        <a href="#/php/11-1" class="php-mega-item" ng-class="{active: isActive('/php/11-1')}">
+                        <a href="#/php/11-1" class="php-mega-item" ng-class="{active: isActive('/php/11-1')}" ng-click="closeMenu()">
                             <span>11.1 Max & Min Number</span>
                             <span class="item-tag">If-Else</span>
                         </a>
-                        <a href="#/php/11-2" class="php-mega-item" ng-class="{active: isActive('/php/11-2')}">
+                        <a href="#/php/11-2" class="php-mega-item" ng-class="{active: isActive('/php/11-2')}" ng-click="closeMenu()">
                             <span>11.2 Date/Time & Greeting</span>
                             <span class="item-tag">Clock</span>
                         </a>
-                        <a href="#/php/11-3" class="php-mega-item" ng-class="{active: isActive('/php/11-3')}">
+                        <a href="#/php/11-3" class="php-mega-item" ng-class="{active: isActive('/php/11-3')}" ng-click="closeMenu()">
                             <span>11.3 User Profile & Form</span>
                             <span class="item-tag">Form</span>
                         </a>
-                        <a href="#/php/11-4" class="php-mega-item" ng-class="{active: isActive('/php/11-4')}">
+                        <a href="#/php/11-4" class="php-mega-item" ng-class="{active: isActive('/php/11-4')}" ng-click="closeMenu()">
                             <span>11.4 String Functions (5 Tasks)</span>
                             <span class="item-tag">Functions</span>
                         </a>
@@ -166,19 +166,19 @@
                             <span>12. Database & CRUD</span>
                             <span class="col-num">12</span>
                         </div>
-                        <a href="#/php/12" class="php-mega-item" ng-class="{active: isActive('/php/12')}">
+                        <a href="#/php/12" class="php-mega-item" ng-class="{active: isActive('/php/12')}" ng-click="closeMenu()">
                             <span>12.0 DB Connection Guide</span>
                             <span class="item-tag">MySQL</span>
                         </a>
-                        <a href="#/" class="php-mega-item">
+                        <a href="#/" class="php-mega-item" ng-click="closeMenu()">
                             <span>12.1 Index Auth & Login</span>
                             <span class="item-tag">Auth</span>
                         </a>
-                        <a href="#/practical/7" class="php-mega-item" ng-class="{active: isActive('/practical/7')}">
+                        <a href="#/practical/7" class="php-mega-item" ng-class="{active: isActive('/practical/7')}" ng-click="closeMenu()">
                             <span>12.2 Practical 7 (Data Form)</span>
                             <span class="item-tag">Form 7</span>
                         </a>
-                        <a href="#/practical/7-data" class="php-mega-item" ng-class="{active: isActive('/practical/7-data')}">
+                        <a href="#/practical/7-data" class="php-mega-item" ng-class="{active: isActive('/practical/7-data')}" ng-click="closeMenu()">
                             <span>12.3 Practical 7 Form Data</span>
                             <span class="item-tag">CRUD</span>
                         </a>
@@ -187,14 +187,14 @@
 
                 <!-- Mega-Menu Bottom Action Bar -->
                 <div class="php-mega-footer">
-                    <span style="font-size: 12px; color: #CBD5E1;">Government MCA College, Maninagar • WTP Practical Series 9 to 12</span>
-                    <a href="#/php/hub" class="hub-link">⚡ Open All-in-One PHP Interactive Hub →</a>
+                    <span style="font-size: 12.5px; color: #FFFFFF; font-weight: 500;">Government MCA College, Maninagar • WTP Practical Series 9 to 12</span>
+                    <a href="#/php/hub" class="hub-link" ng-click="closeMenu()">⚡ Open All-in-One PHP Interactive Hub →</a>
                 </div>
             </div>
         </div>
 
-        <a href="#/practical/7-data" class="nav-item" ng-class="{active: isActive('/practical/7-data')}">Student Data</a>
-        <a href="#/booking-data" class="nav-item" ng-class="{active: isActive('/booking-data')}">Booking Data</a>
+        <a href="#/practical/7-data" class="nav-item" ng-class="{active: isActive('/practical/7-data')}" ng-click="closeMenu()">Student Data</a>
+        <a href="#/booking-data" class="nav-item" ng-class="{active: isActive('/booking-data')}" ng-click="closeMenu()">Booking Data</a>
     </nav>
 
     <!-- Single Page Application Main Container (Views injected dynamically) -->
