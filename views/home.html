@@ -99,31 +99,11 @@
                 <!-- Logged Out View with 1-Click Profile Selector -->
                 <div ng-if="!currentUser">
                     <p style="font-size: 13.5px; color: #475569; margin-top: 0; line-height: 1.6;">
-                        <b>Instructions:</b> Access is restricted to authenticated users. Choose your profile below for instant 1-click login, or enter your credentials.
+                        <b>Instructions:</b> Access to practicals and database records is restricted to authenticated users. Please log in with your credentials or register a new student account below.
                     </p>
 
-                    <!-- Profile Selector Cards (Ridham, Riya, Vaibhav) -->
-                    <div style="margin-bottom: 16px;">
-                        <div style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; margin-bottom: 8px;">
-                            Quick 1-Click Profile Selection:
-                        </div>
-                        <div class="user-cards-grid">
-                            <div ng-repeat="m in teamMembers" class="user-select-card" ng-class="{'selected': selectedProfileId === m.id}" ng-click="selectProfile(m)">
-                                <img ng-src="{{m.avatar}}" onerror="this.src='temp.jpeg'" alt="{{m.full_name}}">
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="font-size: 13px; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{m.full_name}}</div>
-                                    <div style="font-size: 11px; color: #64748B;">{{m.enrollment_no}} • {{m.role}}</div>
-                                    <button type="button" ng-click="quickLoginAs(m); $event.stopPropagation();" class="auth-chip-btn" style="margin-top: 4px; padding: 2px 8px; font-size: 10.5px;">
-                                        ⚡ Login as {{m.full_name.split(' ')[0]}}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Auth Header Tabs -->
                     <div class="auth-header-tabs">
-                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Manual Login</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Login</button>
                         <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='register'}" ng-click="activeTab='register'">Register New Student</button>
                     </div>
 
