@@ -481,44 +481,348 @@
     }]);
 
     // Practical 3 Controller (Indian Railways Booking Portal)
-    app.controller('Practical3Controller', ['$scope', 'RailwayService', 'AuthService', function ($scope, RailwayService, AuthService) {
+    app.controller('Practical3Controller', ['$scope', '$timeout', 'RailwayService', 'AuthService', function ($scope, $timeout, RailwayService, AuthService) {
         $scope.currentUser = AuthService.getCurrentUser();
 
+        // Authentic Express Train Routes from Original Indian Railways Portal
         $scope.trains = [
-            { code: '12957', name: '12957 - Ahmedabad Swarna Jayanti Rajdhani', baseFare: 800 },
-            { code: '12009', name: '12009 - Mumbai Central Vande Bharat Express', baseFare: 950 },
-            { code: '22953', name: '22953 - Gujarat SF Express', baseFare: 400 },
-            { code: '19038', name: '19038 - Avadh Express', baseFare: 350 }
+            { code: '12958', name: '12958 | ADI SJ RAJDHANI (Ahmedabad to New Delhi - 17:40)' },
+            { code: '20902', name: '20902 | VANDE BHARAT EXP (Ahmedabad to Mumbai Central - 06:00)' },
+            { code: '12833', name: '12833 | ADI HWH EXP (Ahmedabad to Howrah - 00:15)' },
+            { code: '12932', name: '12932 | ADI MMCT DOUBLE DECKER (Ahmedabad to Mumbai - 06:00)' },
+            { code: '22944', name: '22944 | INDB DAUND EXP (Indore to Daund - 16:30)' },
+            { code: '12009', name: '12009 | BCT SHATABDI EXP (Mumbai Central to Ahmedabad - 06:20)' }
         ];
 
+        // Min Date constraint: cannot book in the past
+        $scope.minDate = new Date().toISOString().split('T')[0];
+
+        // Blank form model so validations trigger dynamically
         $scope.booking = {
-            train: $scope.trains[0].name,
+            passengerName: '',
+            phone: '',
+            train: '',
             travelClass: 'SL',
             quota: 'GN',
-            passengers: 1,
-            date: new Date().toISOString().substring(0, 10),
-            passengerName: $scope.currentUser ? $scope.currentUser.full_name : '',
-            phone: '9876543210'
+            date: '',
+            passengers: 1
         };
 
-        $scope.classMultiplier = { 'SL': 500, '3A': 1200, '2A': 1800, '1A': 3000 };
+        // Real-time state trackers
+        $scope.errors = {};
+        $scope.touched = {};
+        $scope.shakeFields = {};
+        $scope.sequentialWarning = '';
+        $scope.submitErrorBanner = '';
+        $scope.confirmedTicket = null;
 
+        // Trigger CSS shake animation on field
+        $scope.triggerShake = function (fieldName) {
+            $scope.shakeFields[fieldName] = true;
+            $timeout(function () {
+                $scope.shakeFields[fieldName] = false;
+            }, 400);
+        };
+
+        // Silent format check for Passenger Name without mutating UI error messages
+        $scope.isNameValidSilent = function () {
+            var val = ($scope.booking.passengerName || '').trim();
+            if (!val || val.length < 3 || val.length > 50) return false;
+            return /^[A-Za-z\s.'-]+$/.test(val);
+        };
+
+        // Dynamic real-time validation for Passenger Name
+        $scope.validateName = function (isSequentialTrigger) {
+            var val = ($scope.booking.passengerName || '').trim();
+
+            if (!val) {
+                $scope.errors.passengerName = isSequentialTrigger
+                    ? "⚠️ Please enter Primary Passenger Full Name first before proceeding to other fields!"
+                    : "Primary Passenger Full Name is required.";
+                if (isSequentialTrigger) {
+                    $scope.triggerShake('passengerName');
+                }
+                return false;
+            }
+
+            if (val.length < 3) {
+                $scope.errors.passengerName = "Full Name must be at least 3 characters long.";
+                return false;
+            }
+
+            if (val.length > 50) {
+                $scope.errors.passengerName = "Full Name cannot exceed 50 characters.";
+                return false;
+            }
+
+            // CRITICAL CHECK: Name must NOT contain numbers or special characters
+            var nameRegex = /^[A-Za-z\s.'-]+$/;
+            if (!nameRegex.test(val)) {
+                $scope.errors.passengerName = "Name must contain only alphabets and spaces (no numbers or special characters).";
+                return false;
+            }
+
+            $scope.errors.passengerName = '';
+            if ($scope.sequentialWarning && $scope.sequentialWarning.indexOf('Name') !== -1) {
+                $scope.sequentialWarning = '';
+            }
+            return true;
+        };
+
+        // Silent format check for Mobile Number
+        $scope.isPhoneValidSilent = function () {
+            var val = ($scope.booking.phone || '').trim();
+            return /^[6-9]\d{9}$/.test(val);
+        };
+
+        // Dynamic real-time validation for Mobile Number
+        $scope.validatePhone = function (isSequentialTrigger) {
+            var val = ($scope.booking.phone || '').trim();
+
+            if (!val) {
+                $scope.errors.phone = isSequentialTrigger
+                    ? "⚠️ Please enter 10-digit Mobile Number before proceeding to next fields!"
+                    : "Mobile number is required.";
+                if (isSequentialTrigger) {
+                    $scope.triggerShake('phone');
+                }
+                return false;
+            }
+
+            if (!/^\d+$/.test(val)) {
+                $scope.errors.phone = "Mobile number must contain digits only.";
+                return false;
+            }
+
+            if (val.length !== 10) {
+                $scope.errors.phone = "Mobile number must be exactly 10 digits.";
+                return false;
+            }
+
+            var phoneRegex = /^[6-9]\d{9}$/;
+            if (!phoneRegex.test(val)) {
+                $scope.errors.phone = "Enter a valid Indian mobile number starting with 6, 7, 8, or 9.";
+                return false;
+            }
+
+            $scope.errors.phone = '';
+            if ($scope.sequentialWarning && $scope.sequentialWarning.indexOf('Mobile') !== -1) {
+                $scope.sequentialWarning = '';
+            }
+            return true;
+        };
+
+        // Validation for Train Route selection
+        $scope.validateTrain = function (isSequentialTrigger) {
+            if (!$scope.booking.train) {
+                $scope.errors.train = isSequentialTrigger
+                    ? "⚠️ Please select a Train Route before choosing journey date!"
+                    : "Please select a train route.";
+                if (isSequentialTrigger) {
+                    $scope.triggerShake('train');
+                }
+                return false;
+            }
+            $scope.errors.train = '';
+            if ($scope.sequentialWarning && $scope.sequentialWarning.indexOf('Train') !== -1) {
+                $scope.sequentialWarning = '';
+            }
+            return true;
+        };
+
+        $scope.validateClass = function () {
+            if (!$scope.booking.travelClass) {
+                $scope.errors.travelClass = "Please select a travel class.";
+                return false;
+            }
+            $scope.errors.travelClass = '';
+            return true;
+        };
+
+        $scope.validateQuota = function () {
+            if (!$scope.booking.quota) {
+                $scope.errors.quota = "Please select a booking quota.";
+                return false;
+            }
+            $scope.errors.quota = '';
+            return true;
+        };
+
+        $scope.validateQty = function () {
+            var qty = parseInt($scope.booking.passengers, 10);
+            if (isNaN(qty) || qty < 1 || qty > 6) {
+                $scope.errors.passengers = "Passengers count must be between 1 and 6.";
+                return false;
+            }
+            $scope.errors.passengers = '';
+            return true;
+        };
+
+        $scope.validateDate = function () {
+            if (!$scope.booking.date) {
+                $scope.errors.date = "Please select a travel date.";
+                return false;
+            }
+            var selected = new Date($scope.booking.date);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (selected < today) {
+                $scope.errors.date = "Travel date cannot be in the past.";
+                return false;
+            }
+            $scope.errors.date = '';
+            return true;
+        };
+
+        // Sequential Form Access Handler: Enforces filling fields in mandatory order
+        $scope.handleSequentialFieldAccess = function (targetField, event) {
+            // Step 1: Check Passenger Name (Mandatory First)
+            if (targetField !== 'passengerName' && !$scope.isNameValidSilent()) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                $scope.touched.passengerName = true;
+                $scope.validateName(true);
+                $scope.sequentialWarning = "⚠️ Sequential Order Notice: Please enter Primary Passenger Full Name first (alphabets only) before proceeding to other fields!";
+                $timeout(function () {
+                    var el = document.getElementById('passengerName');
+                    if (el) el.focus();
+                }, 50);
+                return false;
+            }
+
+            // Step 2: Check Mobile Number
+            if (targetField !== 'passengerName' && targetField !== 'phone') {
+                if (!$scope.isPhoneValidSilent()) {
+                    if (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    $scope.touched.phone = true;
+                    $scope.validatePhone(true);
+                    $scope.sequentialWarning = "⚠️ Sequential Order Notice: Please enter a valid 10-digit Indian Mobile Number (starting with 6-9) before proceeding!";
+                    $timeout(function () {
+                        var el = document.getElementById('phone');
+                        if (el) el.focus();
+                    }, 50);
+                    return false;
+                }
+            }
+
+            // Step 3: Check Train Selection if accessing Date
+            if (targetField === 'date' && !$scope.booking.train) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                $scope.touched.train = true;
+                $scope.validateTrain(true);
+                $scope.sequentialWarning = "⚠️ Sequential Order Notice: Please select an Express Train Route before choosing journey date!";
+                $timeout(function () {
+                    var el = document.getElementById('trainSelect');
+                    if (el) el.focus();
+                }, 50);
+                return false;
+            }
+
+            return true;
+        };
+
+        // Fare Multipliers & Calculation
+        $scope.classMultiplier = { 'SL': 500, '3A': 1200, '2A': 1800, '1A': 3000 };
         $scope.calculateFare = function () {
             var mult = $scope.classMultiplier[$scope.booking.travelClass] || 500;
-            var quotaMult = ($scope.booking.quota === 'TQ') ? 1.3 : 1.0;
+            var quotaMult = 1.0;
+            if ($scope.booking.quota === 'TQ') quotaMult = 1.3;
+            else if ($scope.booking.quota === 'PT') quotaMult = 1.5;
             var base = 300;
             var perPassenger = (base + mult) * quotaMult;
             return Math.round(perPassenger * ($scope.booking.passengers || 1));
         };
 
+        // Submit Booking Handler: Strict Validation Guard & Block with Custom Messages
         $scope.submitBooking = function () {
-            if (!$scope.booking.passengerName || !$scope.booking.phone) {
-                alert('Please enter passenger full name and contact number.');
-                return;
+            $scope.sequentialWarning = '';
+            $scope.submitErrorBanner = '';
+            $scope.confirmedTicket = null;
+
+            // Touch all fields
+            $scope.touched.passengerName = true;
+            $scope.touched.phone = true;
+            $scope.touched.train = true;
+            $scope.touched.travelClass = true;
+            $scope.touched.quota = true;
+            $scope.touched.date = true;
+            $scope.touched.passengers = true;
+
+            // Run validations
+            var isName = $scope.validateName(false);
+            var isPhone = $scope.validatePhone(false);
+            var isTrain = $scope.validateTrain(false);
+            var isClass = $scope.validateClass();
+            var isQuota = $scope.validateQuota();
+            var isDate = $scope.validateDate();
+            var isQty = $scope.validateQty();
+
+            // Block submission if any field is empty or format invalid
+            if (!isName || !isPhone || !isTrain || !isClass || !isQuota || !isDate || !isQty) {
+                var missing = [];
+                if (!isName) { missing.push('Passenger Name (Letters only)'); $scope.triggerShake('passengerName'); }
+                if (!isPhone) { missing.push('10-digit Mobile (6-9)'); $scope.triggerShake('phone'); }
+                if (!isTrain) { missing.push('Train Route'); $scope.triggerShake('train'); }
+                if (!isClass) { missing.push('Travel Class'); $scope.triggerShake('travelClass'); }
+                if (!isQuota) { missing.push('Quota'); $scope.triggerShake('quota'); }
+                if (!isDate) { missing.push('Journey Date'); $scope.triggerShake('date'); }
+                if (!isQty) { missing.push('Passenger Count (1-6)'); $scope.triggerShake('passengers'); }
+
+                $scope.submitErrorBanner = "⚠️ Submission Blocked: Please resolve the errors in [" + missing.join(', ') + "] before confirming your ticket.";
+
+                // Focus on the first erroneous field
+                $timeout(function () {
+                    if (!isName) { var el = document.getElementById('passengerName'); if (el) el.focus(); }
+                    else if (!isPhone) { var el = document.getElementById('phone'); if (el) el.focus(); }
+                    else if (!isTrain) { var el = document.getElementById('trainSelect'); if (el) el.focus(); }
+                    else if (!isDate) { var el = document.getElementById('travelDate'); if (el) el.focus(); }
+                }, 50);
+
+                return false;
             }
-            $scope.booking.totalFare = $scope.calculateFare();
-            var saved = RailwayService.save(angular.copy($scope.booking), $scope.currentUser);
-            $scope.successMessage = 'Booking confirmed! PNR: ' + saved.pnr + ' | Amount: ₹' + saved.totalFare + ' (Saved to your personal account)';
+
+            // Valid! Create booking record
+            var totalFare = $scope.calculateFare();
+            var pnrNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+
+            var bookingRecord = {
+                pnr: pnrNumber,
+                passengerName: $scope.booking.passengerName.trim(),
+                phone: $scope.booking.phone.trim(),
+                train: $scope.booking.train,
+                travelClass: $scope.booking.travelClass,
+                quota: $scope.booking.quota,
+                passengers: parseInt($scope.booking.passengers, 10),
+                date: $scope.booking.date,
+                totalFare: totalFare,
+                status: 'Confirmed'
+            };
+
+            var saved = RailwayService.save(bookingRecord, $scope.currentUser);
+            $scope.confirmedTicket = saved;
+
+            // Reset inputs for subsequent bookings
+            $scope.booking = {
+                passengerName: '',
+                phone: '',
+                train: '',
+                travelClass: 'SL',
+                quota: 'GN',
+                date: '',
+                passengers: 1
+            };
+            $scope.touched = {};
+            $scope.errors = {};
+
+            return true;
         };
     }]);
 

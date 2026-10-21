@@ -20,72 +20,188 @@
         </div>
 
         <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
-            <b>Objective:</b> Build a responsive ticket reservation system featuring client-side form validation, dynamic DOM fare estimation, and persistent individual user data storage.
+            <b>Objective:</b> Build a responsive ticket reservation system featuring client-side form validation, dynamic DOM fare estimation, real-time input format verification, sequential access guard, and persistent individual user data storage.
         </p>
+
+        <!-- Sequential Access Warning Alert Banner -->
+        <div ng-if="sequentialWarning" class="sequential-warning-banner">
+            <span>{{sequentialWarning}}</span>
+        </div>
+
+        <!-- Form Submission Blocked Alert Banner -->
+        <div ng-if="submitErrorBanner" class="form-blocked-banner">
+            <span>{{submitErrorBanner}}</span>
+        </div>
+
+        <!-- Booking Confirmed Ticket Card -->
+        <div ng-if="confirmedTicket" class="booking-confirm-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #86EFAC; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <span style="font-size: 12px; font-weight: 700; color: #15803D; text-transform: uppercase;">Ticket Reserved Successfully</span>
+                    <h3 style="margin: 2px 0 0 0; color: #166534; font-size: 20px;">PNR: {{confirmedTicket.pnr}}</h3>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="php-badge badge-green" style="font-size: 12px;">STATUS: {{confirmedTicket.status}}</span>
+                    <a href="#/booking-data" class="btn-php-action" style="font-size: 12px; text-decoration: none; padding: 6px 14px;">Open My Bookings ➔</a>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13.5px; color: #1E293B;">
+                <div><b>Passenger:</b> {{confirmedTicket.passengerName}}</div>
+                <div><b>Mobile:</b> {{confirmedTicket.phone}}</div>
+                <div><b>Date:</b> {{confirmedTicket.date}}</div>
+                <div><b>Train:</b> {{confirmedTicket.train}}</div>
+                <div><b>Class & Quota:</b> {{confirmedTicket.travelClass}} ({{confirmedTicket.quota}})</div>
+                <div><b>Passengers:</b> {{confirmedTicket.passengers}}</div>
+                <div><b>Total Fare Paid:</b> <span style="font-weight: 800; color: #15803D; font-size: 16px;">₹{{confirmedTicket.totalFare}}</span></div>
+            </div>
+        </div>
 
         <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 20px;">
             <!-- Booking Form -->
-            <form ng-submit="submitBooking()" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px;">
-                <h3 style="margin-top: 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
-                    Reservation Parameters
+            <form ng-submit="submitBooking()" novalidate style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 22px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: var(--navy); font-size: 16.5px; border-bottom: 2px solid var(--saffron); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Ticket Reservation Form</span>
+                    <span style="font-size: 11px; font-weight: normal; color: #64748B;">* All fields mandatory</span>
                 </h3>
 
+                <!-- Step 1: Passenger Name (Mandatory First, No Numbers) -->
                 <div class="php-form-group">
-                    <label>Select Express Train:</label>
-                    <select ng-model="booking.train" class="php-form-control" required>
+                    <label for="passengerName">
+                        Primary Passenger Full Name: <span class="required-star">*</span>
+                        <span class="order-badge-hint">Step 1 (Mandatory First)</span>
+                    </label>
+                    <input type="text"
+                           id="passengerName"
+                           ng-model="booking.passengerName"
+                           ng-change="validateName(false)"
+                           ng-blur="touched.passengerName = true; validateName(false)"
+                           ng-class="{'input-error': touched.passengerName && errors.passengerName, 'input-valid': touched.passengerName && !errors.passengerName, 'shake': shakeFields.passengerName}"
+                           class="php-form-control"
+                           placeholder="Enter full name (alphabets only, e.g. Vaibhav Senjaliya)"
+                           autocomplete="off">
+                    <span class="error-msg" id="nameError">{{errors.passengerName}}</span>
+                </div>
+
+                <!-- Step 2: 10-Digit Mobile Number -->
+                <div class="php-form-group">
+                    <label for="phone">
+                        Mobile Number (10 digits): <span class="required-star">*</span>
+                        <span class="order-badge-hint">Step 2</span>
+                    </label>
+                    <input type="tel"
+                           id="phone"
+                           maxlength="10"
+                           ng-model="booking.phone"
+                           ng-focus="handleSequentialFieldAccess('phone', $event)"
+                           ng-click="handleSequentialFieldAccess('phone', $event)"
+                           ng-change="validatePhone(false)"
+                           ng-blur="touched.phone = true; validatePhone(false)"
+                           ng-class="{'input-error': touched.phone && errors.phone, 'input-valid': touched.phone && !errors.phone, 'shake': shakeFields.phone}"
+                           class="php-form-control"
+                           placeholder="10-digit Indian mobile (starts with 6, 7, 8, 9)"
+                           autocomplete="off">
+                    <span class="error-msg" id="phoneError">{{errors.phone}}</span>
+                </div>
+
+                <!-- Step 3: Express Train Route -->
+                <div class="php-form-group">
+                    <label for="trainSelect">
+                        Select Express Train Route: <span class="required-star">*</span>
+                        <span class="order-badge-hint">Step 3</span>
+                    </label>
+                    <select id="trainSelect"
+                            ng-model="booking.train"
+                            ng-focus="handleSequentialFieldAccess('train', $event)"
+                            ng-click="handleSequentialFieldAccess('train', $event)"
+                            ng-change="validateTrain(false)"
+                            ng-blur="touched.train = true; validateTrain(false)"
+                            ng-class="{'input-error': touched.train && errors.train, 'input-valid': touched.train && !errors.train, 'shake': shakeFields.train}"
+                            class="php-form-control">
+                        <option value="">-- Select Train Route --</option>
                         <option ng-repeat="t in trains" value="{{t.name}}">{{t.name}}</option>
                     </select>
+                    <span class="error-msg" id="trainError">{{errors.train}}</span>
                 </div>
 
+                <!-- Travel Class & Quota Type -->
                 <div class="input-group-row">
                     <div class="php-form-group">
-                        <label>Travel Class:</label>
-                        <select ng-model="booking.travelClass" class="php-form-control">
-                            <option value="SL">Sleeper (SL) — ₹500 base</option>
-                            <option value="3A">AC 3 Tier (3A) — ₹1200 base</option>
-                            <option value="2A">AC 2 Tier (2A) — ₹1800 base</option>
-                            <option value="1A">AC 1st Class (1A) — ₹3000 base</option>
+                        <label for="travelClass">Select Travel Class: <span class="required-star">*</span></label>
+                        <select id="travelClass"
+                                ng-model="booking.travelClass"
+                                ng-focus="handleSequentialFieldAccess('travelClass', $event)"
+                                ng-click="handleSequentialFieldAccess('travelClass', $event)"
+                                ng-change="validateClass()"
+                                ng-class="{'input-error': touched.travelClass && errors.travelClass, 'input-valid': touched.travelClass && !errors.travelClass}"
+                                class="php-form-control">
+                            <option value="SL">Sleeper (SL) - ₹500 base</option>
+                            <option value="3A">AC 3 Tier (3A) - ₹1200 base</option>
+                            <option value="2A">AC 2 Tier (2A) - ₹1800 base</option>
+                            <option value="1A">Executive / 1st AC (1A) - ₹3000 base</option>
                         </select>
+                        <span class="error-msg" id="classError">{{errors.travelClass}}</span>
                     </div>
+
                     <div class="php-form-group">
-                        <label>Quota:</label>
-                        <select ng-model="booking.quota" class="php-form-control">
-                            <option value="GN">General Quota (GN)</option>
-                            <option value="TQ">Tatkal Quota (TQ +30%)</option>
-                            <option value="LD">Ladies Quota (LD)</option>
+                        <label for="quota">Quota Type: <span class="required-star">*</span></label>
+                        <select id="quota"
+                                ng-model="booking.quota"
+                                ng-focus="handleSequentialFieldAccess('quota', $event)"
+                                ng-click="handleSequentialFieldAccess('quota', $event)"
+                                ng-change="validateQuota()"
+                                ng-class="{'input-error': touched.quota && errors.quota, 'input-valid': touched.quota && !errors.quota}"
+                                class="php-form-control">
+                            <option value="GN">General (GN)</option>
+                            <option value="TQ">Tatkal (TQ +30%)</option>
+                            <option value="PT">Premium Tatkal (PT +50%)</option>
+                            <option value="LD">Ladies (LD)</option>
                         </select>
+                        <span class="error-msg" id="quotaError">{{errors.quota}}</span>
                     </div>
                 </div>
 
+                <!-- Step 4: Journey Date & Passengers Count -->
                 <div class="input-group-row">
                     <div class="php-form-group">
-                        <label>Passengers Count:</label>
-                        <input type="number" ng-model="booking.passengers" min="1" max="6" class="php-form-control" required>
+                        <label for="travelDate">
+                            Journey Date: <span class="required-star">*</span>
+                            <span class="order-badge-hint">Step 4</span>
+                        </label>
+                        <input type="date"
+                               id="travelDate"
+                               min="{{minDate}}"
+                               ng-model="booking.date"
+                               ng-focus="handleSequentialFieldAccess('date', $event)"
+                               ng-click="handleSequentialFieldAccess('date', $event)"
+                               ng-change="validateDate()"
+                               ng-blur="touched.date = true; validateDate()"
+                               ng-class="{'input-error': touched.date && errors.date, 'input-valid': touched.date && !errors.date, 'shake': shakeFields.date}"
+                               class="php-form-control">
+                        <span class="error-msg" id="dateError">{{errors.date}}</span>
                     </div>
+
                     <div class="php-form-group">
-                        <label>Date of Journey:</label>
-                        <input type="date" ng-model="booking.date" class="php-form-control" required>
+                        <label for="passengerQty">
+                            Number of Passengers (1-6): <span class="required-star">*</span>
+                        </label>
+                        <input type="number"
+                               id="passengerQty"
+                               min="1"
+                               max="6"
+                               ng-model="booking.passengers"
+                               ng-focus="handleSequentialFieldAccess('passengers', $event)"
+                               ng-click="handleSequentialFieldAccess('passengers', $event)"
+                               ng-change="validateQty()"
+                               ng-blur="touched.passengers = true; validateQty()"
+                               ng-class="{'input-error': touched.passengers && errors.passengers, 'input-valid': touched.passengers && !errors.passengers, 'shake': shakeFields.passengers}"
+                               class="php-form-control">
+                        <span class="error-msg" id="qtyError">{{errors.passengers}}</span>
                     </div>
                 </div>
 
-                <div class="input-group-row">
-                    <div class="php-form-group">
-                        <label>Primary Passenger Name:</label>
-                        <input type="text" ng-model="booking.passengerName" class="php-form-control" placeholder="Passenger Name" required>
-                    </div>
-                    <div class="php-form-group">
-                        <label>10-Digit Mobile Number:</label>
-                        <input type="tel" ng-model="booking.phone" class="php-form-control" placeholder="9876543210" pattern="[0-9]{10}" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-php-action" style="width: 100%; margin-top: 8px;">
+                <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">
                     🎟 Confirm Ticket & Save to System
                 </button>
-
-                <div ng-if="successMessage" style="margin-top: 14px; background: #DCFCE7; border: 1px solid #86EFAC; color: #166534; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 13.5px;">
-                    ✅ {{successMessage}}
-                </div>
             </form>
 
             <!-- Dynamic Fare Summary Card -->
@@ -108,13 +224,23 @@
                     <b>{{booking.passengers}}</b>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;">
-                    <span>Quota:</span>
-                    <span>{{booking.quota}} ({{booking.quota==='TQ' ? '+30%' : 'Standard'}})</span>
+                    <span>Quota Multiplier:</span>
+                    <span>{{booking.quota}} ({{booking.quota==='TQ' ? '+30%' : (booking.quota==='PT' ? '+50%' : 'Standard')}})</span>
                 </div>
 
                 <div style="margin-top: 16px; background: #FFF7ED; border: 1px solid #FFD8A8; border-radius: 6px; padding: 14px; text-align: center;">
                     <div style="font-size: 12px; color: #9A3412; font-weight: 700; text-transform: uppercase;">Total Estimated Fare</div>
                     <div style="font-size: 28px; font-weight: 800; color: var(--saffron);">₹{{calculateFare()}}</div>
+                </div>
+
+                <div style="margin-top: 14px; font-size: 12px; color: #64748B; line-height: 1.5; background: #F8FAFC; padding: 10px; border-radius: 6px;">
+                    <b>💡 Real-time Validation Rules:</b>
+                    <ul style="padding-left: 18px; margin: 4px 0 0 0;">
+                        <li>Step 1: Passenger Name strictly alphabetic (no digits).</li>
+                        <li>Step 2: Mobile must be 10 digits starting with 6-9.</li>
+                        <li>Step 3: Route must be picked before choosing date.</li>
+                        <li>Step 4: Journey date cannot be in the past.</li>
+                    </ul>
                 </div>
             </div>
         </div>

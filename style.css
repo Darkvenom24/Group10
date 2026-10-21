@@ -2128,4 +2128,106 @@ select.input-valid {
     border-radius: 50%;
     object-fit: cover;
 }
+
+/* ==========================================================================
+   Railway Portal Form Real-Time Validation, Sequential Warnings & Shake
+   ========================================================================== */
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake {
+    animation: inputShake 0.38s ease-in-out !important;
+}
+
+.error-msg {
+    color: #DC2626;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 5px;
+    display: block;
+    min-height: 18px;
+    transition: all 0.2s ease;
+}
+
+input.input-error,
+select.input-error,
+.php-form-control.input-error {
+    border-color: #DC2626 !important;
+    background-color: #FEF2F2 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
+}
+
+input.input-valid,
+select.input-valid,
+.php-form-control.input-valid {
+    border-color: #16A34A !important;
+    background-color: #F0FDF4 !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
+}
+
+.required-star {
+    color: #DC2626;
+    font-weight: bold;
+    margin-left: 3px;
+}
+
+.order-badge-hint {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--navy);
+    background: #E0E7FF;
+    border: 1px solid #C7D2FE;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.sequential-warning-banner {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-left: 5px solid #F59E0B;
+    color: #92400E;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+    animation: inputShake 0.38s ease-in-out;
+}
+
+.form-blocked-banner {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-left: 5px solid #DC2626;
+    color: #991B1B;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+    animation: inputShake 0.38s ease-in-out;
+}
+
+.booking-confirm-card {
+    background: #F0FDF4;
+    border: 1.5px solid #86EFAC;
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 20px;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.12);
+}
+
 
