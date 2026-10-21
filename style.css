@@ -1717,4 +1717,407 @@ select.input-valid {
         flex-direction: column;
         align-items: stretch;
     }
-}
+}
+
+/* ==========================================================================
+   16. VS Code Style IDE, PHP Runtime Playground & Account System
+   ========================================================================== */
+
+/* Split-screen Playground Layout */
+.php-playground-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 18px;
+}
+
+@media (max-width: 960px) {
+    .php-playground-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* VS Code Code Editor */
+.vscode-editor {
+    background: #1E1E1E;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+}
+
+.vscode-header {
+    background: #252526;
+    border-bottom: 1px solid #333333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    height: 38px;
+}
+
+.vscode-tab {
+    background: #1E1E1E;
+    color: #CCCCCC;
+    font-size: 12.5px;
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 2px solid var(--saffron);
+    height: 100%;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.vscode-tab .tab-icon {
+    color: #8892BF;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.vscode-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vscode-badge {
+    background: #007ACC;
+    color: #FFFFFF;
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.vscode-body {
+    display: flex;
+    min-height: 420px;
+    max-height: 620px;
+    overflow: auto;
+    background: #1E1E1E;
+}
+
+.vscode-gutter {
+    background: #1E1E1E;
+    color: #5A5A5A;
+    padding: 14px 10px 14px 12px;
+    text-align: right;
+    font-size: 12.5px;
+    line-height: 1.6;
+    user-select: none;
+    border-right: 1px solid #2D2D2D;
+    min-width: 32px;
+}
+
+.vscode-code {
+    padding: 14px 16px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #D4D4D4;
+    overflow-x: auto;
+    flex: 1;
+    white-space: pre;
+    font-family: inherit;
+}
+
+/* VS Code Syntax Highlighting Tokens */
+.tok-tag { color: #E06C75; font-weight: 700; }
+.tok-kw { color: #C678DD; font-weight: 600; }
+.tok-var { color: #61AFEF; font-weight: 600; }
+.tok-str { color: #98C379; }
+.tok-num { color: #D19A66; }
+.tok-fn { color: #E5C07B; }
+.tok-cm { color: #7F848E; font-style: italic; }
+.tok-op { color: #56B6C2; }
+.tok-type { color: #E5C07B; }
+
+/* PHP Runtime Panel (Right Side) */
+.runtime-panel {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.runtime-header {
+    background: linear-gradient(135deg, #000080, #00004d);
+    color: #FFFFFF;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--saffron);
+}
+
+.runtime-header h3 {
+    margin: 0;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.runtime-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.runtime-input-section {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 14px;
+}
+
+.runtime-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Run PHP Script Button */
+.btn-run-php {
+    background: linear-gradient(135deg, #138808, #0E6806);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(19, 136, 8, 0.3);
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-run-php:hover {
+    background: linear-gradient(135deg, #16A34A, #138808);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(19, 136, 8, 0.4);
+}
+
+.btn-run-php:active {
+    transform: translateY(1px);
+}
+
+.btn-run-php.running {
+    background: #475569;
+    cursor: wait;
+}
+
+/* Runtime Status Bar */
+.runtime-status-bar {
+    background: #0F172A;
+    color: #94A3B8;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 11.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.runtime-status-bar .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+.status-pill.ready { color: #38BDF8; }
+.status-pill.success { color: #4ADE80; }
+.status-pill.running { color: #FACC15; }
+
+/* Runtime Output Box */
+.runtime-output-wrapper {
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.runtime-output-tabs {
+    background: #F1F5F9;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+}
+
+.runtime-output-tab {
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.runtime-output-tab.active {
+    color: var(--navy);
+    background: #FFFFFF;
+    border-bottom-color: var(--saffron);
+}
+
+.runtime-output-content {
+    padding: 16px;
+    background: #FFFFFF;
+    min-height: 120px;
+}
+
+.runtime-stdout {
+    background: #0F172A;
+    color: #38BDF8;
+    padding: 14px;
+    font-family: 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 4px;
+}
+
+/* User Account Selector Cards */
+.user-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.user-select-card {
+    background: #F8FAFC;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+}
+
+.user-select-card:hover {
+    border-color: var(--saffron);
+    background: #FFFBF5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.user-select-card.selected {
+    border-color: var(--navy);
+    background: #EFF6FF;
+    box-shadow: 0 2px 8px rgba(0, 0, 128, 0.12);
+}
+
+.user-select-card img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Empty State Design (Call Logs / Private Forms) */
+.empty-data-state {
+    text-align: center;
+    padding: 36px 24px;
+    background: #F8FAFC;
+    border: 2px dashed #CBD5E1;
+    border-radius: 10px;
+    margin: 16px 0;
+}
+
+.empty-data-icon {
+    font-size: 44px;
+    margin-bottom: 12px;
+}
+
+.empty-data-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 8px 0;
+}
+
+.empty-data-desc {
+    font-size: 13.5px;
+    color: #475569;
+    max-width: 580px;
+    margin: 0 auto 16px auto;
+    line-height: 1.6;
+}
+
+.empty-privacy-note {
+    background: #FFFBEB;
+    border-left: 4px solid #F59E0B;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: #92400E;
+    max-width: 580px;
+    margin: 0 auto 18px auto;
+    text-align: left;
+    line-height: 1.5;
+}
+
+/* Access Restriction Notification */
+.access-restricted-banner {
+    background: #FEF2F2;
+    border: 1.5px solid #FCA5A5;
+    border-left: 5px solid #EF4444;
+    color: #991B1B;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+}
+
+.nav-user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #FFFFFF;
+    margin-left: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.nav-user-chip img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+

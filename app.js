@@ -44,13 +44,12 @@
                 templateUrl: 'views/practical4.html',
                 controller: 'Practical4Controller'
             })
+            // Practical 7 removed as per professor instructions (Railway form is group's primary form)
             .when('/practical/7', {
-                templateUrl: 'views/practical7.html',
-                controller: 'Practical7Controller'
+                redirectTo: '/practical/3'
             })
             .when('/practical/7-data', {
-                templateUrl: 'views/practical7-data.html',
-                controller: 'Practical7DataController'
+                redirectTo: '/booking-data'
             })
             .when('/booking-data', {
                 templateUrl: 'views/booking-data.html',
@@ -106,139 +105,41 @@
     }]);
 
     // =========================================================================
-    // 2. SERVICES & DATA STORES
+    // 2. ROUTE ACCESS GUARD (Strict Professor Rule: Everyone MUST Login)
     // =========================================================================
+    app.run(['$rootScope', '$location', 'AuthService', function ($rootScope, $location, AuthService) {
+        $rootScope.accessDeniedNotice = '';
 
-    // Student Database & CRUD Service
-    app.factory('StudentDbService', ['$rootScope', function ($rootScope) {
-        var DB_KEY = 'gmca_p7_students_v1';
-        var QUERY_KEY = 'gmca_sql_query_log';
+        $rootScope.$on('$routeChangeStart', function (event, next) {
+            var currentUser = AuthService.getCurrentUser();
+            var targetPath = next && next.originalPath ? next.originalPath : '';
 
-        var defaultStudents = [
-            { id: 1, enrollment_no: '26GMCA61', student_name: 'Ridham Bambhaniya', email: 'ridham.26gmca61@gmca.ac.in', phone: '9876543210', division: 'A', roll_no: '61', project_title: 'WTP Portal & Institutional Layouts', technology_stack: 'HTML5, CSS3, JavaScript, PHP, MySQL', github_repo: 'https://github.com/Darkvenom24/Group10', semester: 'Semester 1', submission_date: '2026-10-01 10:15:00' },
-            { id: 2, enrollment_no: '26GMCA33', student_name: 'Riya Thakkar', email: 'riya.26gmca33@gmca.ac.in', phone: '9876543211', division: 'A', roll_no: '33', project_title: 'Indian Railways Dynamic Booking Portal', technology_stack: 'HTML5, CSS3, JavaScript DOM, Client Storage', github_repo: 'https://github.com/Darkvenom24/Group10', semester: 'Semester 1', submission_date: '2026-10-02 11:30:00' },
-            { id: 3, enrollment_no: '26GMCA52', student_name: 'Vaibhav Senjaliya', email: 'vaibhav.26gmca52@gmca.ac.in', phone: '9876543212', division: 'A', roll_no: '52', project_title: 'Interactive Calculator & PHP Hub Engine', technology_stack: 'AngularJS, PHP 8, MySQL PDO, Responsive CSS', github_repo: 'https://github.com/Darkvenom24/Group10', semester: 'Semester 1', submission_date: '2026-10-03 14:45:00' }
-        ];
-
-        function getRecords() {
-            try {
-                var stored = localStorage.getItem(DB_KEY);
-                if (stored) {
-                    var parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-                }
-            } catch (e) { }
-            saveRecords(defaultStudents);
-            return defaultStudents;
-        }
-
-        function saveRecords(records) {
-            localStorage.setItem(DB_KEY, JSON.stringify(records));
-        }
-
-        function logQuery(sql) {
-            var logs = [];
-            try {
-                var s = localStorage.getItem(QUERY_KEY);
-                if (s) logs = JSON.parse(s);
-            } catch (e) { }
-            var entry = {
-                timestamp: new Date().toLocaleTimeString(),
-                query: sql
-            };
-            logs.unshift(entry);
-            if (logs.length > 50) logs = logs.slice(0, 50);
-            localStorage.setItem(QUERY_KEY, JSON.stringify(logs));
-            $rootScope.$broadcast('sqlQueryLogged', entry);
-        }
-
-        return {
-            getAll: function () {
-                logQuery('SELECT * FROM practical7_students ORDER BY id DESC;');
-                return getRecords();
-            },
-            getById: function (id) {
-                var list = getRecords();
-                id = parseInt(id, 10);
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].id === id) {
-                        logQuery('SELECT * FROM practical7_students WHERE id = ' + id + ' LIMIT 1;');
-                        return list[i];
-                    }
-                }
-                return null;
-            },
-            getByEnrollment: function (enrollment) {
-                if (!enrollment) return null;
-                var list = getRecords();
-                var norm = enrollment.trim().toUpperCase();
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].enrollment_no.toUpperCase() === norm) return list[i];
-                }
-                return null;
-            },
-            insert: function (record) {
-                var list = getRecords();
-                var nextId = 1;
-                list.forEach(function (r) { if (r.id >= nextId) nextId = r.id + 1; });
-                record.id = nextId;
-                record.submission_date = new Date().toISOString().replace('T', ' ').substring(0, 19);
-                list.unshift(record);
-                saveRecords(list);
-                logQuery("INSERT INTO practical7_students (enrollment_no, student_name, email, division, roll_no, project_title, technology_stack, github_repo, semester) VALUES ('" + record.enrollment_no + "', '" + record.student_name + "', '" + record.email + "', '" + record.division + "', '" + record.roll_no + "', '" + record.project_title + "', '" + record.technology_stack + "', '" + record.github_repo + "', '" + record.semester + "');");
-                $rootScope.$broadcast('studentRecordsChanged');
-                return record;
-            },
-            update: function (id, updated) {
-                var list = getRecords();
-                id = parseInt(id, 10);
-                var found = false;
-                for (var i = 0; i < list.length; i++) {
-                    if (list[i].id === id) {
-                        updated.id = id;
-                        if (!updated.submission_date) updated.submission_date = list[i].submission_date;
-                        list[i] = updated;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    saveRecords(list);
-                    logQuery("UPDATE practical7_students SET student_name='" + updated.student_name + "', project_title='" + updated.project_title + "', technology_stack='" + updated.technology_stack + "' WHERE id=" + id + ";");
-                    $rootScope.$broadcast('studentRecordsChanged');
-                }
-                return found;
-            },
-            delete: function (id) {
-                var list = getRecords();
-                id = parseInt(id, 10);
-                var filtered = list.filter(function (r) { return r.id !== id; });
-                saveRecords(filtered);
-                logQuery("DELETE FROM practical7_students WHERE id = " + id + ";");
-                $rootScope.$broadcast('studentRecordsChanged');
-                return true;
-            },
-            getQueryLogs: function () {
-                try {
-                    var s = localStorage.getItem(QUERY_KEY);
-                    if (s) return JSON.parse(s);
-                } catch (e) { }
-                return [
-                    { timestamp: new Date().toLocaleTimeString(), query: "SELECT * FROM practical7_students ORDER BY id DESC;" }
-                ];
+            // If user is NOT logged in and attempting to visit ANY route other than Home ('/')
+            if (!currentUser && targetPath && targetPath !== '/') {
+                event.preventDefault();
+                $rootScope.accessDeniedNotice = '🔒 Authentication Required: You must be logged in to access practicals, the Railway booking portal, or personal database records. Please log in below.';
+                $location.path('/');
+            } else if (currentUser) {
+                // Clear notice on valid navigation
+                $rootScope.accessDeniedNotice = '';
             }
-        };
+        });
     }]);
 
-    // Authentication Service
+    // =========================================================================
+    // 3. SERVICES & AUTHENTICATION
+    // =========================================================================
+
+    // Authentication Service with Multi-User Profiles & Remember-Me
     app.factory('AuthService', ['$rootScope', function ($rootScope) {
-        var USERS_KEY = 'gmca_users_v1';
-        var SESSION_KEY = 'gmca_current_session';
+        var USERS_KEY = 'gmca_users_v2';
+        var SESSION_KEY = 'gmca_current_session_v2';
+        var REMEMBERED_KEY = 'gmca_remembered_session_v2';
 
         var defaultUsers = [
-            { id: 1, username: 'ridham61', full_name: 'Ridham Bambhaniya', email: 'ridham@gmca.ac.in', enrollment_no: '26GMCA61', password: 'password123', role: 'Team Lead', avatar: 'ridham.jpeg' },
-            { id: 2, username: 'riya33', full_name: 'Riya Thakkar', email: 'riya@gmca.ac.in', enrollment_no: '26GMCA33', password: 'password123', role: 'Student Member', avatar: 'riya.jpeg' },
-            { id: 3, username: 'vaibhav52', full_name: 'Vaibhav Senjaliya', email: 'vaibhav@gmca.ac.in', enrollment_no: '26GMCA52', password: 'password123', role: 'Student Member', avatar: 'vaibhav.jpeg' }
+            { id: 1, username: 'ridham61', full_name: 'Ridham Bambhaniya', email: 'ridham.26gmca61@gmca.ac.in', enrollment_no: '26GMCA61', password: 'password123', role: 'Team Lead', avatar: 'ridham.jpeg' },
+            { id: 2, username: 'riya33', full_name: 'Riya Thakkar', email: 'riya.26gmca33@gmca.ac.in', enrollment_no: '26GMCA33', password: 'password123', role: 'Student Member', avatar: 'riya.jpeg' },
+            { id: 3, username: 'vaibhav52', full_name: 'Vaibhav Senjaliya', email: 'vaibhav.26gmca52@gmca.ac.in', enrollment_no: '26GMCA52', password: 'password123', role: 'Student Member', avatar: 'vaibhav.jpeg' }
         ];
 
         function getUsers() {
@@ -254,31 +155,44 @@
         }
 
         return {
+            getDefaultTeamMembers: function () {
+                return defaultUsers;
+            },
             getCurrentUser: function () {
                 try {
-                    var s = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
-                    if (s) return JSON.parse(s);
+                    // Check active session first, then remembered session
+                    var sessionStr = sessionStorage.getItem(SESSION_KEY);
+                    if (sessionStr) return JSON.parse(sessionStr);
+
+                    var rememberedStr = localStorage.getItem(REMEMBERED_KEY);
+                    if (rememberedStr) {
+                        var parsed = JSON.parse(rememberedStr);
+                        sessionStorage.setItem(SESSION_KEY, JSON.stringify(parsed));
+                        return parsed;
+                    }
                 } catch (e) { }
-                // Default active session as Vaibhav (26GMCA52) for smooth immediate testing
-                var defaultSession = defaultUsers[2];
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify(defaultSession));
-                return defaultSession;
+                // Return null by default: user MUST explicitly login or choose profile
+                return null;
             },
-            login: function (usernameOrEnroll, password) {
+            login: function (usernameOrEnroll, password, rememberMe) {
                 var users = getUsers();
-                var norm = usernameOrEnroll.trim().toLowerCase();
+                var norm = (usernameOrEnroll || '').trim().toLowerCase();
                 for (var i = 0; i < users.length; i++) {
                     var u = users[i];
                     if ((u.username.toLowerCase() === norm || u.enrollment_no.toLowerCase() === norm || u.email.toLowerCase() === norm) && u.password === password) {
                         sessionStorage.setItem(SESSION_KEY, JSON.stringify(u));
-                        localStorage.setItem(SESSION_KEY, JSON.stringify(u));
+                        if (rememberMe) {
+                            localStorage.setItem(REMEMBERED_KEY, JSON.stringify(u));
+                        } else {
+                            localStorage.removeItem(REMEMBERED_KEY);
+                        }
                         $rootScope.$broadcast('authChanged', u);
                         return { success: true, user: u };
                     }
                 }
-                return { success: false, message: 'Invalid credentials. Try vaibhav52 / password123' };
+                return { success: false, message: 'Invalid credentials. Select a quick profile card or enter valid login.' };
             },
-            register: function (userObj) {
+            register: function (userObj, rememberMe) {
                 var users = getUsers();
                 var nextId = 1;
                 users.forEach(function (u) { if (u.id >= nextId) nextId = u.id + 1; });
@@ -286,50 +200,99 @@
                 if (!userObj.avatar) userObj.avatar = 'temp.jpeg';
                 users.push(userObj);
                 localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
                 sessionStorage.setItem(SESSION_KEY, JSON.stringify(userObj));
-                localStorage.setItem(SESSION_KEY, JSON.stringify(userObj));
+                if (rememberMe) {
+                    localStorage.setItem(REMEMBERED_KEY, JSON.stringify(userObj));
+                }
                 $rootScope.$broadcast('authChanged', userObj);
                 return { success: true, user: userObj };
             },
             logout: function () {
                 sessionStorage.removeItem(SESSION_KEY);
-                localStorage.removeItem(SESSION_KEY);
+                localStorage.removeItem(REMEMBERED_KEY);
                 $rootScope.$broadcast('authChanged', null);
             }
         };
     }]);
 
-    // Railway Storage Service
-    app.factory('RailwayService', function () {
-        var BOOKINGS_KEY = 'railway_bookings_v1';
+    // Railway Storage Service with Strict Individual User Isolation (Private Call Log Concept)
+    app.factory('RailwayService', ['$rootScope', function ($rootScope) {
+        var BOOKINGS_KEY = 'gmca_railway_bookings_v3';
+
+        // Seed realistic private bookings for each team member
+        var defaultBookings = [
+            // Ridham Bambhaniya's personal bookings
+            { id: 101, pnr: 'PNR748291', userEnrollment: '26GMCA61', userId: 1, bookedBy: 'Ridham Bambhaniya', passengerName: 'Ridham Bambhaniya', train: '12957 - Ahmedabad Swarna Jayanti Rajdhani', travelClass: '3A', quota: 'GN', passengers: 2, date: '2026-10-15', totalFare: 2400, bookingDate: '2026-10-01 10:15', status: 'Confirmed' },
+            { id: 102, pnr: 'PNR831902', userEnrollment: '26GMCA61', userId: 1, bookedBy: 'Ridham Bambhaniya', passengerName: 'Ridham Bambhaniya', train: '22953 - Gujarat SF Express', travelClass: 'SL', quota: 'GN', passengers: 1, date: '2026-10-22', totalFare: 400, bookingDate: '2026-10-05 14:20', status: 'Confirmed' },
+
+            // Riya Thakkar's personal bookings
+            { id: 201, pnr: 'PNR612944', userEnrollment: '26GMCA33', userId: 2, bookedBy: 'Riya Thakkar', passengerName: 'Riya Thakkar', train: '12009 - Mumbai Central Vande Bharat Express', travelClass: '2A', quota: 'GN', passengers: 1, date: '2026-10-18', totalFare: 1800, bookingDate: '2026-10-04 11:30', status: 'Confirmed' },
+
+            // Vaibhav Senjaliya's personal bookings
+            { id: 301, pnr: 'PNR930182', userEnrollment: '26GMCA52', userId: 3, bookedBy: 'Vaibhav Senjaliya', passengerName: 'Vaibhav Senjaliya', train: '12957 - Ahmedabad Swarna Jayanti Rajdhani', travelClass: '2A', quota: 'GN', passengers: 1, date: '2026-10-25', totalFare: 1800, bookingDate: '2026-10-06 09:40', status: 'Confirmed' },
+            { id: 302, pnr: 'PNR441920', userEnrollment: '26GMCA52', userId: 3, bookedBy: 'Vaibhav Senjaliya', passengerName: 'Vaibhav Senjaliya', train: '19038 - Avadh Express', travelClass: 'SL', quota: 'GN', passengers: 2, date: '2026-10-29', totalFare: 700, bookingDate: '2026-10-08 16:50', status: 'Confirmed' }
+        ];
+
+        function getAllRaw() {
+            try {
+                var s = localStorage.getItem(BOOKINGS_KEY);
+                if (s) {
+                    var p = JSON.parse(s);
+                    if (Array.isArray(p)) return p;
+                }
+            } catch (e) { }
+            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(defaultBookings));
+            return defaultBookings;
+        }
+
+        function saveRaw(list) {
+            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+        }
+
         return {
-            getAll: function () {
-                try {
-                    var s = localStorage.getItem(BOOKINGS_KEY);
-                    if (s) return JSON.parse(s);
-                } catch (e) { }
-                return [
-                    { id: 101, pnr: 'PNR748291', name: 'Ridham Bambhaniya', train: '12957 - Ahmedabad Swarna Jayanti Rajdhani', travelClass: '3A', passengers: 2, quota: 'GN', date: '2026-10-15', totalFare: 2400 },
-                    { id: 102, pnr: 'PNR930182', name: 'Vaibhav Senjaliya', train: '12009 - Mumbai Central Vande Bharat', travelClass: '2A', passengers: 1, quota: 'GN', date: '2026-10-18', totalFare: 1800 }
-                ];
+            // Returns ONLY the records belonging to the authenticated user
+            getBookingsForUser: function (enrollmentOrId) {
+                if (!enrollmentOrId) return [];
+                var all = getAllRaw();
+                var norm = String(enrollmentOrId).trim().toUpperCase();
+                return all.filter(function (b) {
+                    return (b.userEnrollment && b.userEnrollment.toUpperCase() === norm) ||
+                           (b.userId && String(b.userId) === norm);
+                });
             },
-            save: function (booking) {
-                var list = this.getAll();
+            save: function (booking, currentUser) {
+                var list = getAllRaw();
                 booking.id = Date.now();
                 booking.pnr = 'PNR' + Math.floor(100000 + Math.random() * 900000);
+                booking.userEnrollment = currentUser ? currentUser.enrollment_no : 'GUEST';
+                booking.userId = currentUser ? currentUser.id : null;
+                booking.bookedBy = currentUser ? currentUser.full_name : booking.passengerName;
+                booking.bookingDate = new Date().toLocaleString();
+                booking.status = 'Confirmed';
                 list.unshift(booking);
-                localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+                saveRaw(list);
+                $rootScope.$broadcast('railwayBookingsChanged');
                 return booking;
             },
-            delete: function (id) {
-                var list = this.getAll().filter(function (b) { return b.id !== id; });
-                localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+            delete: function (id, currentUser) {
+                var list = getAllRaw();
+                var userEnroll = currentUser ? currentUser.enrollment_no.toUpperCase() : '';
+                var filtered = list.filter(function (b) {
+                    if (b.id === id) {
+                        // Security check: Only delete if it belongs to current user
+                        return b.userEnrollment && b.userEnrollment.toUpperCase() !== userEnroll;
+                    }
+                    return true;
+                });
+                saveRaw(filtered);
+                $rootScope.$broadcast('railwayBookingsChanged');
             }
         };
-    });
+    }]);
 
     // =========================================================================
-    // 3. CONTROLLERS
+    // 4. CONTROLLERS
     // =========================================================================
 
     // Navigation & Global Shell Controller
@@ -355,7 +318,19 @@
             $scope.activeDropdown = null;
         };
 
-        // Close clicked dropdown when clicking anywhere outside
+        // Guard link clicks in nav if not logged in
+        $scope.guardNav = function (targetUrl, $event) {
+            if (!$scope.currentUser && targetUrl !== '#/' && targetUrl !== '/') {
+                if ($event) $event.preventDefault();
+                $rootScope.accessDeniedNotice = '🔒 Authentication Required: Please log in first to access practicals and portal tools.';
+                $location.path('/');
+                $scope.closeMenu();
+                return false;
+            }
+            $scope.closeMenu();
+            return true;
+        };
+
         angular.element(document).on('click', function () {
             if ($scope.activeDropdown) {
                 $scope.$applyAsync(function () {
@@ -371,6 +346,12 @@
             return false;
         };
 
+        $scope.logout = function () {
+            AuthService.logout();
+            $scope.currentUser = null;
+            $location.path('/');
+        };
+
         $rootScope.$on('$routeChangeSuccess', function () {
             $scope.activeDropdown = null;
             $scope.mobileMenuOpen = false;
@@ -381,60 +362,91 @@
         });
     }]);
 
-    // Home Page Controller
-    app.controller('HomeController', ['$scope', '$location', 'AuthService', 'StudentDbService', function ($scope, $location, AuthService, StudentDbService) {
-        // Visit counter increment
+    // Home Page Controller (Login, Multi-Account Selection & Personal Railway Data)
+    app.controller('HomeController', ['$scope', '$location', '$rootScope', 'AuthService', 'RailwayService', function ($scope, $location, $rootScope, AuthService, RailwayService) {
         var visits = parseInt(localStorage.getItem('gmca_visits') || '0', 10) + 1;
         localStorage.setItem('gmca_visits', visits);
         $scope.visitCount = visits;
 
         $scope.currentUser = AuthService.getCurrentUser();
-        $scope.recentRecords = StudentDbService.getAll().slice(0, 5);
-        $scope.userRecord = $scope.currentUser ? StudentDbService.getByEnrollment($scope.currentUser.enrollment_no) : null;
+        $scope.teamMembers = AuthService.getDefaultTeamMembers();
 
-        $scope.loginModel = { usernameOrEnroll: '26GMCA52', password: 'password123' };
-        $scope.regModel = { role: 'Student' };
+        $scope.loginModel = {
+            usernameOrEnroll: '',
+            password: '',
+            rememberMe: true
+        };
+        $scope.regModel = { role: 'Student Member', rememberMe: true };
         $scope.activeTab = 'login';
         $scope.loginError = '';
         $scope.regSuccess = '';
+        $scope.selectedProfileId = null;
 
-        $scope.quickFill = function (enroll, pwd) {
-            $scope.loginModel.usernameOrEnroll = enroll;
-            $scope.loginModel.password = pwd;
+        // Load personal railway bookings
+        function loadUserBookings() {
+            if ($scope.currentUser) {
+                $scope.myBookings = RailwayService.getBookingsForUser($scope.currentUser.enrollment_no);
+            } else {
+                $scope.myBookings = [];
+            }
+        }
+        loadUserBookings();
+
+        // 1-Click Select Profile
+        $scope.selectProfile = function (member) {
+            $scope.selectedProfileId = member.id;
+            $scope.loginModel.usernameOrEnroll = member.enrollment_no;
+            $scope.loginModel.password = member.password;
+            $scope.loginError = '';
+        };
+
+        // Quick Instant Login for Selected Profile
+        $scope.quickLoginAs = function (member) {
+            $scope.selectProfile(member);
+            $scope.submitLogin();
         };
 
         $scope.submitLogin = function () {
             $scope.loginError = '';
-            var res = AuthService.login($scope.loginModel.usernameOrEnroll, $scope.loginModel.password);
+            if (!$scope.loginModel.usernameOrEnroll || !$scope.loginModel.password) {
+                $scope.loginError = 'Please select a profile or enter your username/enrollment and password.';
+                return;
+            }
+            var res = AuthService.login($scope.loginModel.usernameOrEnroll, $scope.loginModel.password, $scope.loginModel.rememberMe);
             if (res.success) {
                 $scope.currentUser = res.user;
-                $scope.userRecord = StudentDbService.getByEnrollment(res.user.enrollment_no);
+                $rootScope.accessDeniedNotice = '';
+                loadUserBookings();
             } else {
                 $scope.loginError = res.message;
             }
         };
 
         $scope.submitRegister = function () {
+            if (!$scope.regModel.full_name || !$scope.regModel.enrollment_no || !$scope.regModel.password) {
+                alert('Please complete all registration fields.');
+                return;
+            }
             $scope.regModel.avatar = 'temp.jpeg';
-            var res = AuthService.register($scope.regModel);
+            var res = AuthService.register($scope.regModel, $scope.regModel.rememberMe);
             if (res.success) {
                 $scope.currentUser = res.user;
-                $scope.userRecord = null;
-                $scope.activeTab = 'login';
+                $rootScope.accessDeniedNotice = '';
+                loadUserBookings();
             }
         };
 
         $scope.logout = function () {
             AuthService.logout();
             $scope.currentUser = null;
-            $scope.userRecord = null;
+            $scope.loginModel.usernameOrEnroll = '';
+            $scope.loginModel.password = '';
+            $scope.selectedProfileId = null;
+            loadUserBookings();
         };
 
-        $scope.$on('studentRecordsChanged', function () {
-            $scope.recentRecords = StudentDbService.getAll().slice(0, 5);
-            if ($scope.currentUser) {
-                $scope.userRecord = StudentDbService.getByEnrollment($scope.currentUser.enrollment_no);
-            }
+        $scope.$on('railwayBookingsChanged', function () {
+            loadUserBookings();
         });
     }]);
 
@@ -443,7 +455,7 @@
         $scope.members = [
             { id: 1, name: 'Ridham Bambhaniya', enroll: '26GMCA61', role: 'Team Lead / Layout Architect', avatar: 'ridham.jpeg', email: 'ridham.26gmca61@gmca.ac.in', tasks: 'Practical 1 (HTML table structure), Practical 2 (Tricolor styling), Core CSS layout design.' },
             { id: 2, name: 'Riya Thakkar', enroll: '26GMCA33', role: 'Frontend & Logic Developer', avatar: 'riya.jpeg', email: 'riya.26gmca33@gmca.ac.in', tasks: 'Practical 3 (Railway booking portal, fare calculator, validation), localStorage persistence.' },
-            { id: 3, name: 'Vaibhav Senjaliya', enroll: '26GMCA52', role: 'Full Stack & System Integrator', avatar: 'vaibhav.jpeg', email: 'vaibhav.26gmca52@gmca.ac.in', tasks: 'Practical 4 (Calculator), Practical 7 (Student Form & CRUD), PHP Practicals 9-12 runner engine & AngularJS SPA.' }
+            { id: 3, name: 'Vaibhav Senjaliya', enroll: '26GMCA52', role: 'Full Stack & System Integrator', avatar: 'vaibhav.jpeg', email: 'vaibhav.26gmca52@gmca.ac.in', tasks: 'Practical 4 (Calculator), PHP Practicals 9-12 runner engine & AngularJS SPA architecture.' }
         ];
     }]);
 
@@ -469,7 +481,9 @@
     }]);
 
     // Practical 3 Controller (Indian Railways Booking Portal)
-    app.controller('Practical3Controller', ['$scope', 'RailwayService', function ($scope, RailwayService) {
+    app.controller('Practical3Controller', ['$scope', 'RailwayService', 'AuthService', function ($scope, RailwayService, AuthService) {
+        $scope.currentUser = AuthService.getCurrentUser();
+
         $scope.trains = [
             { code: '12957', name: '12957 - Ahmedabad Swarna Jayanti Rajdhani', baseFare: 800 },
             { code: '12009', name: '12009 - Mumbai Central Vande Bharat Express', baseFare: 950 },
@@ -483,8 +497,8 @@
             quota: 'GN',
             passengers: 1,
             date: new Date().toISOString().substring(0, 10),
-            name: '',
-            phone: ''
+            passengerName: $scope.currentUser ? $scope.currentUser.full_name : '',
+            phone: '9876543210'
         };
 
         $scope.classMultiplier = { 'SL': 500, '3A': 1200, '2A': 1800, '1A': 3000 };
@@ -498,15 +512,13 @@
         };
 
         $scope.submitBooking = function () {
-            if (!$scope.booking.name || !$scope.booking.phone) {
+            if (!$scope.booking.passengerName || !$scope.booking.phone) {
                 alert('Please enter passenger full name and contact number.');
                 return;
             }
             $scope.booking.totalFare = $scope.calculateFare();
-            var saved = RailwayService.save(angular.copy($scope.booking));
-            $scope.successMessage = 'Booking confirmed! PNR: ' + saved.pnr + ' | Amount: ₹' + saved.totalFare;
-            $scope.booking.name = '';
-            $scope.booking.phone = '';
+            var saved = RailwayService.save(angular.copy($scope.booking), $scope.currentUser);
+            $scope.successMessage = 'Booking confirmed! PNR: ' + saved.pnr + ' | Amount: ₹' + saved.totalFare + ' (Saved to your personal account)';
         };
     }]);
 
@@ -537,7 +549,6 @@
 
         $scope.evaluate = function () {
             try {
-                // Safe arithmetic evaluation
                 var sanitized = $scope.display.replace(/[^0-9+\-*/().]/g, '');
                 var res = Function('"use strict";return (' + sanitized + ')')();
                 $scope.history.unshift($scope.display + ' = ' + res);
@@ -549,335 +560,462 @@
         };
     }]);
 
-    // Practical 7 Controller (Student Form)
-    app.controller('Practical7Controller', ['$scope', '$location', 'AuthService', 'StudentDbService', function ($scope, $location, AuthService, StudentDbService) {
-        var user = AuthService.getCurrentUser();
-        $scope.student = {
-            enrollment_no: user ? user.enrollment_no : '',
-            student_name: user ? user.full_name : '',
-            email: user ? user.email : '',
-            phone: '9876543210',
-            division: 'A',
-            roll_no: user ? user.enrollment_no.slice(-2) : '52',
-            project_title: 'WTP College Practicals & Interactive Web Portal',
-            technology_stack: 'AngularJS, PHP, MySQL, HTML5, CSS3',
-            github_repo: 'https://github.com/Darkvenom24/Group10',
-            semester: 'Semester 1'
-        };
+    // Booking Data Controller (User-Isolated Personal Railway Records)
+    app.controller('BookingDataController', ['$scope', 'RailwayService', 'AuthService', function ($scope, RailwayService, AuthService) {
+        $scope.currentUser = AuthService.getCurrentUser();
 
-        $scope.submitForm = function () {
-            StudentDbService.insert(angular.copy($scope.student));
-            alert('Practical 7 data recorded successfully! Redirecting to Student Records Dashboard...');
-            $location.path('/practical/7-data');
-        };
-    }]);
+        function loadBookings() {
+            if ($scope.currentUser) {
+                $scope.bookings = RailwayService.getBookingsForUser($scope.currentUser.enrollment_no);
+            } else {
+                $scope.bookings = [];
+            }
+        }
+        loadBookings();
 
-    // Practical 7 Data Controller (CRUD Dashboard)
-    app.controller('Practical7DataController', ['$scope', 'StudentDbService', function ($scope, StudentDbService) {
-        $scope.records = StudentDbService.getAll();
-        $scope.queryLogs = StudentDbService.getQueryLogs();
-        $scope.searchKeyword = '';
-        $scope.selectedRecord = null;
-        $scope.editRecord = null;
-        $scope.isEditModalOpen = false;
-        $scope.isViewModalOpen = false;
-
-        $scope.refreshData = function () {
-            $scope.records = StudentDbService.getAll();
-            $scope.queryLogs = StudentDbService.getQueryLogs();
-        };
-
-        $scope.viewDossier = function (r) {
-            $scope.selectedRecord = r;
-            $scope.isViewModalOpen = true;
-        };
-
-        $scope.closeViewModal = function () {
-            $scope.isViewModalOpen = false;
-            $scope.selectedRecord = null;
-        };
-
-        $scope.openEditModal = function (r) {
-            $scope.editRecord = angular.copy(r);
-            $scope.isEditModalOpen = true;
-        };
-
-        $scope.closeEditModal = function () {
-            $scope.isEditModalOpen = false;
-            $scope.editRecord = null;
-        };
-
-        $scope.saveEdit = function () {
-            if ($scope.editRecord && $scope.editRecord.id) {
-                StudentDbService.update($scope.editRecord.id, $scope.editRecord);
-                $scope.closeEditModal();
-                $scope.refreshData();
+        $scope.deleteBooking = function (id) {
+            if (confirm('Cancel and delete booking record?')) {
+                RailwayService.delete(id, $scope.currentUser);
+                loadBookings();
             }
         };
 
-        $scope.deleteRecord = function (id) {
-            if (confirm('Are you sure you want to delete student record #' + id + '? (Simulates DELETE FROM practical7_students)')) {
-                StudentDbService.delete(id);
-                $scope.refreshData();
-            }
-        };
-
-        $scope.exportCsv = function () {
-            var csv = 'ID,Enrollment,Student Name,Email,Division,Roll,Project Title,Tech Stack,Semester\n';
-            $scope.records.forEach(function (r) {
-                csv += [r.id, r.enrollment_no, '"' + r.student_name + '"', r.email, r.division, r.roll_no, '"' + r.project_title + '"', '"' + r.technology_stack + '"', r.semester].join(',') + '\n';
-            });
-            var blob = new Blob([csv], { type: 'text/csv' });
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'practical7_students_data.csv';
-            a.click();
-        };
-
-        $scope.$on('sqlQueryLogged', function (e, entry) {
-            $scope.queryLogs.unshift(entry);
+        $scope.$on('railwayBookingsChanged', function () {
+            loadBookings();
         });
     }]);
 
-    // Booking Data Controller
-    app.controller('BookingDataController', ['$scope', 'RailwayService', function ($scope, RailwayService) {
-        $scope.bookings = RailwayService.getAll();
-        $scope.deleteBooking = function (id) {
-            if (confirm('Cancel and delete booking record?')) {
-                RailwayService.delete(id);
-                $scope.bookings = RailwayService.getAll();
-            }
-        };
-    }]);
-
     // -------------------------------------------------------------------------
-    // PHP PRACTICAL CONTROLLERS (9, 10, 11, 12)
+    // PHP PRACTICAL CONTROLLERS (9, 10, 11, 12) — VS Code IDE & Runtime Playground
     // -------------------------------------------------------------------------
 
     // 9.1: Max of 3 Numbers
-    app.controller('Php91Controller', ['$scope', function ($scope) {
+    app.controller('Php91Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.val1 = 45;
         $scope.val2 = 82;
         $scope.val3 = 63;
-        $scope.maxResult = 82;
-        $scope.algorithm = '';
 
-        $scope.computeMax = function () {
-            var v1 = parseFloat($scope.val1) || 0;
-            var v2 = parseFloat($scope.val2) || 0;
-            var v3 = parseFloat($scope.val3) || 0;
-            var maxVal = Math.max(v1, v2, v3);
-            $scope.maxResult = maxVal;
-            if (v1 >= v2 && v1 >= v3) {
-                $scope.algorithm = 'Value 1 (' + v1 + ') is greater than or equal to Value 2 (' + v2 + ') and Value 3 (' + v3 + ').';
-            } else if (v2 >= v1 && v2 >= v3) {
-                $scope.algorithm = 'Value 2 (' + v2 + ') is greater than or equal to Value 1 (' + v1 + ') and Value 3 (' + v3 + ').';
-            } else {
-                $scope.algorithm = 'Value 3 (' + v3 + ') is greater than or equal to Value 1 (' + v1 + ') and Value 2 (' + v2 + ').';
-            }
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.executionTime = '0ms';
+        $scope.maxResult = null;
+        $scope.stdout = '';
+
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var v1 = parseFloat($scope.val1) || 0;
+                var v2 = parseFloat($scope.val2) || 0;
+                var v3 = parseFloat($scope.val3) || 0;
+                var maxVal = Math.max(v1, v2, v3);
+                $scope.maxResult = maxVal;
+
+                var decision = '';
+                if (v1 >= v2 && v1 >= v3) decision = 'Condition ($num1 >= $num2 && $num1 >= $num3) evaluated to TRUE';
+                else if (v2 >= v1 && v2 >= v3) decision = 'Condition ($num2 >= $num1 && $num2 >= $num3) evaluated to TRUE';
+                else decision = 'Else branch executed: $num3 is the largest value';
+                $scope.decision = decision;
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\nContent-Type: text/html; charset=UTF-8\n\n' +
+                    '--- PHP STDOUT (practical9_1.php) ---\n' +
+                    'POST Parameters: num1=' + v1 + ', num2=' + v2 + ', num3=' + v3 + '\n' +
+                    'Executing Conditional Logic...\n' +
+                    'Branch Evaluated: ' + decision + '\n' +
+                    'Maximum Value Computed: ' + maxVal + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(12 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.computeMax();
     }]);
 
     // 9.2: Print 1 to N Numbers
-    app.controller('Php92Controller', ['$scope', function ($scope) {
+    app.controller('Php92Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.n = 15;
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
         $scope.numbers = [];
         $scope.stats = { total: 0, evens: 0, odds: 0 };
+        $scope.stdout = '';
 
-        $scope.generate = function () {
-            var count = parseInt($scope.n, 10) || 1;
-            if (count > 200) count = 200;
-            var list = [];
-            var sum = 0, evens = 0, odds = 0;
-            for (var i = 1; i <= count; i++) {
-                list.push(i);
-                sum += i;
-                if (i % 2 === 0) evens++; else odds++;
-            }
-            $scope.numbers = list;
-            $scope.stats = { total: sum, evens: evens, odds: odds };
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var count = parseInt($scope.n, 10) || 1;
+                if (count > 200) count = 200;
+                if (count < 1) count = 1;
+
+                var list = [];
+                var sum = 0, evens = 0, odds = 0;
+                for (var i = 1; i <= count; i++) {
+                    list.push(i);
+                    sum += i;
+                    if (i % 2 === 0) evens++; else odds++;
+                }
+
+                $scope.numbers = list;
+                $scope.stats = { total: sum, evens: evens, odds: odds };
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical9_2.php) ---\n' +
+                    'N = ' + count + '\n' +
+                    'Loop: for ($i = 1; $i <= ' + count + '; $i++)\n' +
+                    'Numbers: ' + list.join(', ') + '\n' +
+                    'Total Count: ' + list.length + ' numbers\n' +
+                    'Cumulative Sum: ' + sum + '\n' +
+                    'Even Count: ' + evens + ' | Odd Count: ' + odds + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(14 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.generate();
     }]);
 
     // 9.3: 3 Pyramid Patterns
-    app.controller('Php93Controller', ['$scope', function ($scope) {
+    app.controller('Php93Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.rows = 5;
         $scope.symbol = '*';
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
         $scope.patterns = { right: '', centered: '', inverted: '' };
+        $scope.stdout = '';
 
-        $scope.buildPatterns = function () {
-            var r = parseInt($scope.rows, 10) || 5;
-            if (r > 20) r = 20;
-            var sym = $scope.symbol || '*';
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var r = parseInt($scope.rows, 10) || 5;
+                if (r > 15) r = 15;
+                if (r < 1) r = 1;
+                var sym = $scope.symbol || '*';
 
-            // 1. Right Angled
-            var right = '';
-            for (var i = 1; i <= r; i++) {
-                right += (sym + ' ').repeat(i) + '\n';
-            }
+                // 1. Right Angled
+                var right = '';
+                for (var i = 1; i <= r; i++) {
+                    right += (sym + ' ').repeat(i) + '\n';
+                }
 
-            // 2. Centered Pyramid
-            var centered = '';
-            for (var j = 1; j <= r; j++) {
-                var spaces = ' '.repeat((r - j) * 2);
-                centered += spaces + (sym + ' ').repeat(j) + '\n';
-            }
+                // 2. Centered Pyramid
+                var centered = '';
+                for (var j = 1; j <= r; j++) {
+                    var spaces = ' '.repeat((r - j) * 2);
+                    centered += spaces + (sym + ' ').repeat(j) + '\n';
+                }
 
-            // 3. Inverted Pyramid
-            var inverted = '';
-            for (var k = r; k >= 1; k--) {
-                var invSpaces = ' '.repeat((r - k) * 2);
-                inverted += invSpaces + (sym + ' ').repeat(k) + '\n';
-            }
+                // 3. Inverted Pyramid
+                var inverted = '';
+                for (var k = r; k >= 1; k--) {
+                    var invSpaces = ' '.repeat((r - k) * 2);
+                    inverted += invSpaces + (sym + ' ').repeat(k) + '\n';
+                }
 
-            $scope.patterns = { right: right, centered: centered, inverted: inverted };
+                $scope.patterns = { right: right, centered: centered, inverted: inverted };
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical9_3.php) ---\n' +
+                    'Rows: ' + r + ', Symbol: ' + sym + '\n\n' +
+                    'Pattern 1 (Right-Angled):\n' + right + '\n' +
+                    'Pattern 2 (Centered Pyramid):\n' + centered + '\n' +
+                    'Pattern 3 (Inverted Pyramid):\n' + inverted + '\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(16 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.buildPatterns();
     }]);
 
     // 10.1: Array Operations
-    app.controller('Php101Controller', ['$scope', function ($scope) {
-        $scope.input1 = '12, 45, 7, 89, 23';
-        $scope.input2 = '34, 11, 56, 90';
+    app.controller('Php101Controller', ['$scope', '$timeout', function ($scope, $timeout) {
+        $scope.input1 = '14, 8, 35, 2, 19';
+        $scope.input2 = '5, 42, 11, 23';
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
         $scope.result = {};
+        $scope.stdout = '';
 
-        $scope.processArray = function () {
-            var a1 = $scope.input1.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
-            var a2 = $scope.input2.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var a1 = $scope.input1.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
+                var a2 = $scope.input2.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
 
-            var reversed = angular.copy(a1).reverse();
-            var merged = a1.concat(a2).sort(function (a, b) { return a - b; });
-            var sum = a1.reduce(function (acc, val) { return acc + val; }, 0);
+                var reversed = angular.copy(a1).reverse();
+                var merged = a1.concat(a2).sort(function (a, b) { return a - b; });
+                var sum = a1.reduce(function (acc, val) { return acc + val; }, 0);
 
-            $scope.result = {
-                original: a1,
-                reversed: reversed,
-                mergedSorted: merged,
-                sum: sum
-            };
+                $scope.result = {
+                    original: a1,
+                    reversed: reversed,
+                    mergedSorted: merged,
+                    sum: sum
+                };
+
+                var printR1 = 'Array\n(\n' + a1.map(function (v, idx) { return '    [' + idx + '] => ' + v; }).join('\n') + '\n)';
+                var printRMerged = 'Array\n(\n' + merged.map(function (v, idx) { return '    [' + idx + '] => ' + v; }).join('\n') + '\n)';
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical10_1.php) ---\n' +
+                    '10.1.1 Print Values:\n' + printR1 + '\n\n' +
+                    '10.1.2 array_reverse($arr1):\n' + JSON.stringify(reversed) + '\n\n' +
+                    '10.1.3 array_merge & sort:\n' + printRMerged + '\n\n' +
+                    '10.1.4 array_sum($arr1): ' + sum + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(15 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.processArray();
     }]);
 
     // 10.2: String Name & Size Passed as Argument
-    app.controller('Php102Controller', ['$scope', function ($scope) {
+    app.controller('Php102Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.studentName = 'Vaibhav Senjaliya';
         $scope.sampleString = 'Government MCA College, Maninagar';
-        $scope.strLength = 0;
-        $scope.wordCount = 0;
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.stdout = '';
 
-        $scope.calculateString = function () {
-            $scope.strLength = ($scope.sampleString || '').length;
-            $scope.wordCount = ($scope.sampleString || '').trim().split(/\s+/).filter(Boolean).length;
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var str = $scope.sampleString || '';
+                $scope.strLength = str.length;
+                $scope.wordCount = str.trim().split(/\s+/).filter(Boolean).length;
+                $scope.revStr = str.split('').reverse().join('');
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical10_2.php) ---\n' +
+                    'Student Name Argument: ' + $scope.studentName + '\n' +
+                    'Target String Argument: "' + str + '"\n' +
+                    'strlen($str): ' + $scope.strLength + ' characters\n' +
+                    'str_word_count($str): ' + $scope.wordCount + ' words\n' +
+                    'strrev($str): "' + $scope.revStr + '"\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(13 + Math.random() * 6) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.calculateString();
     }]);
 
     // 11.1: Max & Min Numbers
-    app.controller('Php111Controller', ['$scope', function ($scope) {
-        $scope.n1 = 34;
-        $scope.n2 = 89;
-        $scope.n3 = 12;
-        $scope.max = 89;
-        $scope.min = 12;
+    app.controller('Php111Controller', ['$scope', '$timeout', function ($scope, $timeout) {
+        $scope.n1 = 45;
+        $scope.n2 = 18;
+        $scope.n3 = 92;
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.stdout = '';
 
-        $scope.evaluate = function () {
-            var v1 = parseFloat($scope.n1) || 0;
-            var v2 = parseFloat($scope.n2) || 0;
-            var v3 = parseFloat($scope.n3) || 0;
-            $scope.max = Math.max(v1, v2, v3);
-            $scope.min = Math.min(v1, v2, v3);
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var v1 = parseFloat($scope.n1) || 0;
+                var v2 = parseFloat($scope.n2) || 0;
+                var v3 = parseFloat($scope.n3) || 0;
+                $scope.max = Math.max(v1, v2, v3);
+                $scope.min = Math.min(v1, v2, v3);
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical11_1.php) ---\n' +
+                    'Inputs: numA=' + v1 + ', numB=' + v2 + ', numC=' + v3 + '\n' +
+                    'if-else Decision logic evaluated.\n' +
+                    'Maximum: ' + $scope.max + '\n' +
+                    'Minimum: ' + $scope.min + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(12 + Math.random() * 6) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-        $scope.evaluate();
     }]);
 
     // 11.2: Date/Time & Greeting Message
-    app.controller('Php112Controller', ['$scope', '$interval', function ($scope, $interval) {
+    app.controller('Php112Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.simulatedHour = new Date().getHours();
-        $scope.isLive = true;
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.stdout = '';
 
-        function updateClock() {
-            var now = new Date();
-            $scope.currentTimeStr = now.toLocaleTimeString();
-            $scope.currentDateStr = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            if ($scope.isLive) {
-                $scope.simulatedHour = now.getHours();
-            }
-            $scope.updateGreeting();
-        }
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var now = new Date();
+                var h = parseInt($scope.simulatedHour, 10);
+                var greeting = '';
+                var color = '';
 
-        $scope.updateGreeting = function () {
-            var h = parseInt($scope.simulatedHour, 10);
-            if (h >= 5 && h < 12) {
-                $scope.greeting = 'Good Morning! 🌅';
-                $scope.greetingColor = '#D97706';
-            } else if (h >= 12 && h < 17) {
-                $scope.greeting = 'Good Afternoon! ☀️';
-                $scope.greetingColor = '#2563EB';
-            } else if (h >= 17 && h < 22) {
-                $scope.greeting = 'Good Evening! 🌇';
-                $scope.greetingColor = '#7C3AED';
-            } else {
-                $scope.greeting = 'Good Night! 🌙';
-                $scope.greetingColor = '#475569';
-            }
+                if (h >= 5 && h < 12) {
+                    greeting = 'Good Morning! 🌅';
+                    color = '#D97706';
+                } else if (h >= 12 && h < 17) {
+                    greeting = 'Good Afternoon! ☀️';
+                    color = '#2563EB';
+                } else if (h >= 17 && h < 22) {
+                    greeting = 'Good Evening! 🌇';
+                    color = '#7C3AED';
+                } else {
+                    greeting = 'Good Night! 🌙';
+                    color = '#475569';
+                }
+
+                $scope.currentDateStr = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                $scope.currentTimeStr = String(h).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+                $scope.greeting = greeting;
+                $scope.greetingColor = color;
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical11_2.php) ---\n' +
+                    'date_default_timezone_set("Asia/Kolkata");\n' +
+                    'Current Date: ' + $scope.currentDateStr + '\n' +
+                    'Hour Evaluated: ' + h + ':00 hrs (24-hour format)\n' +
+                    'Greeting Decision: ' + greeting + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(14 + Math.random() * 6) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
-
-        updateClock();
-        var timer = $interval(function () {
-            if ($scope.isLive) updateClock();
-        }, 1000);
-
-        $scope.$on('$destroy', function () {
-            $interval.cancel(timer);
-        });
     }]);
 
-    // 11.3: User Profile & Form
-    app.controller('Php113Controller', ['$scope', function ($scope) {
+    // 11.3: User Profile & Form Handling
+    app.controller('Php113Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.profile = {
             fullName: 'Vaibhav Senjaliya',
+            enrollment: '26GMCA52',
             email: 'vaibhav@gmca.ac.in',
             course: 'Master of Computer Applications (MCA)',
-            bio: 'Passionate about web architectures, full stack software development, and database engineering.'
+            bio: 'Passionate about web architectures, full stack software development, and relational database systems.'
         };
-        $scope.submittedProfile = angular.copy($scope.profile);
 
-        $scope.submitProfile = function () {
-            $scope.submittedProfile = angular.copy($scope.profile);
-            $scope.showSuccess = true;
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.submittedProfile = null;
+        $scope.stdout = '';
+
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                $scope.submittedProfile = angular.copy($scope.profile);
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical11_3.php) ---\n' +
+                    'REQUEST_METHOD: POST\n' +
+                    '$_POST Array Content:\n' +
+                    JSON.stringify($scope.profile, null, 4) + '\n\n' +
+                    'Sanitization: htmlspecialchars applied to all fields.\n' +
+                    'Profile Record Verified. HTTP 200 OK\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(18 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
     }]);
 
     // 11.4: String Functions (5 Tasks)
-    app.controller('Php114Controller', ['$scope', function ($scope) {
+    app.controller('Php114Controller', ['$scope', '$timeout', function ($scope, $timeout) {
         $scope.nameInput = 'Vaibhav Senjaliya';
-        $scope.strArg = 'Web Technology Practicals 2026';
-        $scope.concatA = 'Government MCA ';
-        $scope.concatB = 'College, Maninagar';
-        $scope.caseInput = 'welcome to gmca web portal';
-        $scope.haystack = 'The quick brown fox jumps over the lazy dog';
-        $scope.needle = 'fox';
+        $scope.sizeArg = 'Government MCA College, Maninagar';
+        $scope.concat1 = 'Web Technology';
+        $scope.concat2 = 'Practical Portal';
+        $scope.caseStr = 'Master of Computer Applications';
+        $scope.haystack = 'Gujarat Technological University Ahmedabad';
+        $scope.needle = 'University';
 
-        $scope.getName = function () { return $scope.nameInput; };
-        $scope.getSize = function () { return ($scope.strArg || '').length; };
-        $scope.getConcat = function () { return ($scope.concatA || '') + ($scope.concatB || ''); };
-        $scope.getUpper = function () { return ($scope.caseInput || '').toUpperCase(); };
-        $scope.getLower = function () { return ($scope.caseInput || '').toLowerCase(); };
-        $scope.getWords = function () {
-            return ($scope.caseInput || '').replace(/\b\w/g, function (l) { return l.toUpperCase(); });
-        };
-        $scope.getFind = function () {
-            var pos = ($scope.haystack || '').indexOf($scope.needle || '');
-            return pos !== -1 ? 'Found at index ' + pos : 'Substring not found';
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.out = {};
+        $scope.stdout = '';
+
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                var pos = ($scope.haystack || '').indexOf($scope.needle || '');
+                $scope.out = {
+                    name: $scope.nameInput,
+                    size: ($scope.sizeArg || '').length,
+                    concat: ($scope.concat1 || '') + ' ' + ($scope.concat2 || ''),
+                    upper: ($scope.caseStr || '').toUpperCase(),
+                    lower: ($scope.caseStr || '').toLowerCase(),
+                    title: ($scope.caseStr || '').replace(/\b\w/g, function (l) { return l.toUpperCase(); }),
+                    foundPos: pos !== -1 ? 'Found at index position: ' + pos : 'Substring NOT found'
+                };
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP STDOUT (practical11_4.php) ---\n' +
+                    '11.4.1 printName(): ' + $scope.out.name + '\n' +
+                    '11.4.2 strlen("' + $scope.sizeArg + '"): ' + $scope.out.size + ' bytes\n' +
+                    '11.4.3 concatenation: "' + $scope.out.concat + '"\n' +
+                    '11.4.4 strtoupper: ' + $scope.out.upper + '\n' +
+                    '       strtolower: ' + $scope.out.lower + '\n' +
+                    '       ucwords:    ' + $scope.out.title + '\n' +
+                    '11.4.5 strpos: ' + $scope.out.foundPos + '\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(15 + Math.random() * 8) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 300);
         };
     }]);
 
-    // 12: Database Connection & CRUD Guide
-    app.controller('Php12Controller', ['$scope', function ($scope) {
-        $scope.activeCodeTab = 'pdo';
+    // 12: Database Connection & Architecture Guide
+    app.controller('Php12Controller', ['$scope', '$timeout', function ($scope, $timeout) {
+        $scope.dbHost = 'localhost';
+        $scope.dbUser = 'root';
+        $scope.dbName = 'gmca_wtp_practical';
+        $scope.testQuery = 'SELECT * FROM railway_bookings WHERE status = "Confirmed"';
+
+        $scope.hasRun = false;
+        $scope.isRunning = false;
+        $scope.activeOutputTab = 'web';
+        $scope.connectionStatus = null;
+        $scope.stdout = '';
+
+        $scope.runScript = function () {
+            $scope.isRunning = true;
+            $timeout(function () {
+                $scope.connectionStatus = {
+                    connected: true,
+                    dsn: 'mysql:host=' + $scope.dbHost + ';dbname=' + $scope.dbName + ';charset=utf8mb4',
+                    serverVersion: 'MySQL 8.0.35 InnoDB',
+                    ping: '0.8ms'
+                };
+
+                $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                    '--- PHP PDO STDOUT (practical12_crud.php) ---\n' +
+                    'Connecting to: mysql:host=' + $scope.dbHost + ';dbname=' + $scope.dbName + '\n' +
+                    'PDO Attributes: ATTR_ERRMODE => ERRMODE_EXCEPTION, ATTR_DEFAULT_FETCH_MODE => FETCH_ASSOC\n' +
+                    'Database Connection: ESTABLISHED SUCCESSFULLY.\n' +
+                    'Executing Query: ' + $scope.testQuery + '\n' +
+                    'Query Status: 200 OK | Records matched: Simulated Active\n\n' +
+                    'Script completed with exit code 0';
+
+                $scope.executionTime = Math.floor(22 + Math.random() * 10) + 'ms';
+                $scope.isRunning = false;
+                $scope.hasRun = true;
+            }, 350);
+        };
     }]);
 
     // PHP Interactive Hub

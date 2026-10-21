@@ -1,10 +1,10 @@
 <div class="spa-view-enter">
     <div class="spa-card">
         <div class="spa-breadcrumb">
-            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>11.3 User Profile Web Page</span>
+            <a href="#/">Home</a> <span>/</span> <a href="#/php/hub">PHP Practicals</a> <span>/</span> <span>11.3 User Profile Form</span>
         </div>
         <div class="spa-header-bar">
-            <h2><span>👤</span> 11.3: User Profile Web Page & PHP Form Processor</h2>
+            <h2><span>👤</span> Practical 11.3: User Profile & PHP Form Submission ($_POST)</h2>
             <div style="display: flex; gap: 8px;">
                 <a href="php/practical11_3.php" target="_blank" class="btn-php-action btn-secondary" style="font-size: 11.5px;">Download Raw PHP ⬇</a>
                 <span class="php-badge badge-php">Practical 11.3</span>
@@ -12,52 +12,181 @@
         </div>
 
         <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
-            <b>Problem Statement:</b> Create a web page for user profile and execute a PHP file on submission of the form and display the information using PHP.
+            <b>Problem Statement:</b> Create a user profile web page in PHP that receives form data via <code>$_POST</code>, applies sanitization, and displays the processed user dossier.
         </p>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
-            <!-- Profile Form -->
-            <form ng-submit="submitProfile()" style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 20px; border-radius: 8px;">
-                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
-                    User Profile Input Form
-                </h3>
-                <div class="php-form-group">
-                    <label>Full Legal Name:</label>
-                    <input type="text" ng-model="profile.fullName" class="php-form-control" required>
+        <!-- Split-Screen Playground: VS Code IDE (Left) + Runtime Output (Right) -->
+        <div class="php-playground-grid">
+            <!-- Left Side: VS Code Code Editor -->
+            <div class="vscode-editor">
+                <div class="vscode-header">
+                    <div class="vscode-tab">
+                        <span class="tab-icon">PHP</span>
+                        <span>practical11_3.php</span>
+                    </div>
+                    <div class="vscode-actions">
+                        <span class="vscode-badge">PHP 8.2</span>
+                    </div>
                 </div>
-                <div class="php-form-group">
-                    <label>Official Email Address:</label>
-                    <input type="email" ng-model="profile.email" class="php-form-control" required>
-                </div>
-                <div class="php-form-group">
-                    <label>Academic Program / Course:</label>
-                    <input type="text" ng-model="profile.course" class="php-form-control" required>
-                </div>
-                <div class="php-form-group">
-                    <label>Professional Bio / Statement:</label>
-                    <textarea ng-model="profile.bio" rows="3" class="php-form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn-php-action" style="width: 100%;">
-                    📤 Submit Profile (Execute PHP $_POST)
-                </button>
-            </form>
+                <div class="vscode-body">
+                    <div class="vscode-gutter">
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+                    </div>
+                    <pre class="vscode-code"><code><span class="tok-tag">&lt;?php</span>
+<span class="tok-cm">/**
+ * Practical 11.3: User Profile Web Page ($_POST Handling)
+ * Group 10 — Government MCA College, Maninagar
+ */</span>
 
-            <!-- Rendered Output Card -->
-            <div style="background: #FFFFFF; border: 1.5px solid var(--navy); border-radius: 8px; padding: 20px;">
-                <h3 style="margin-top: 0; color: var(--navy); font-size: 15px; border-bottom: 2px solid var(--green); padding-bottom: 6px; display: flex; justify-content: space-between;">
-                    <span>Generated Profile Card (PHP Display)</span>
-                    <span class="php-badge badge-green" ng-if="showSuccess">POST Received</span>
-                </h3>
+<span class="tok-var">$isSubmitted</span> = <span class="tok-kw">false</span>;
+<span class="tok-var">$userData</span> = [];
 
-                <div style="text-align: center; margin-bottom: 16px;">
-                    <img src="vaibhav.jpeg" onerror="this.src='temp.jpeg'" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--saffron);">
-                    <h3 style="margin: 8px 0 2px 0; color: var(--navy); font-size: 17px;">{{submittedProfile.fullName}}</h3>
-                    <div style="font-size: 13px; color: #64748B;">{{submittedProfile.course}}</div>
+<span class="tok-kw">if</span> (<span class="tok-var">$_SERVER</span>[<span class="tok-str">"REQUEST_METHOD"</span>] == <span class="tok-str">"POST"</span>) {
+    <span class="tok-var">$isSubmitted</span> = <span class="tok-kw">true</span>;
+    <span class="tok-var">$userData</span> = [
+        <span class="tok-str">'fullName'</span>   =&gt; <span class="tok-fn">htmlspecialchars</span>(<span class="tok-fn">trim</span>(<span class="tok-var">$_POST</span>[<span class="tok-str">'fullName'</span>] ?? <span class="tok-str">''</span>)),
+        <span class="tok-str">'enrollment'</span> =&gt; <span class="tok-fn">htmlspecialchars</span>(<span class="tok-fn">trim</span>(<span class="tok-var">$_POST</span>[<span class="tok-str">'enrollment'</span>] ?? <span class="tok-str">''</span>)),
+        <span class="tok-str">'email'</span>      =&gt; <span class="tok-fn">htmlspecialchars</span>(<span class="tok-fn">trim</span>(<span class="tok-var">$_POST</span>[<span class="tok-str">'email'</span>] ?? <span class="tok-str">''</span>)),
+        <span class="tok-str">'course'</span>     =&gt; <span class="tok-fn">htmlspecialchars</span>(<span class="tok-fn">trim</span>(<span class="tok-var">$_POST</span>[<span class="tok-str">'course'</span>] ?? <span class="tok-str">''</span>)),
+        <span class="tok-str">'bio'</span>        =&gt; <span class="tok-fn">htmlspecialchars</span>(<span class="tok-fn">trim</span>(<span class="tok-var">$_POST</span>[<span class="tok-str">'bio'</span>] ?? <span class="tok-str">''</span>))
+    ];
+}
+
+<span class="tok-kw">if</span> (<span class="tok-var">$isSubmitted</span>) {
+    <span class="tok-kw">echo</span> <span class="tok-str">"&lt;h3&gt;Profile Dossier for "</span> . <span class="tok-var">$userData</span>[<span class="tok-str">'fullName'</span>] . <span class="tok-str">"&lt;/h3&gt;"</span>;
+    <span class="tok-kw">echo</span> <span class="tok-str">"Enrollment: "</span> . <span class="tok-var">$userData</span>[<span class="tok-str">'enrollment'</span>] . <span class="tok-str">"&lt;br&gt;"</span>;
+    <span class="tok-kw">echo</span> <span class="tok-str">"Email: "</span> . <span class="tok-var">$userData</span>[<span class="tok-str">'email'</span>] . <span class="tok-str">"&lt;br&gt;"</span>;
+    <span class="tok-kw">echo</span> <span class="tok-str">"Course: "</span> . <span class="tok-var">$userData</span>[<span class="tok-str">'course'</span>] . <span class="tok-str">"&lt;br&gt;"</span>;
+    <span class="tok-kw">echo</span> <span class="tok-str">"Biography: "</span> . <span class="tok-var">$userData</span>[<span class="tok-str">'bio'</span>];
+}
+<span class="tok-tag">?&gt;</span></code></pre>
                 </div>
+            </div>
 
-                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px; font-size: 13px;">
-                    <div style="margin-bottom: 6px;"><b>Email:</b> {{submittedProfile.email}}</div>
-                    <div><b>Bio:</b> {{submittedProfile.bio}}</div>
+            <!-- Right Side: Runtime Panel & Live Output -->
+            <div class="runtime-panel">
+                <div class="runtime-header">
+                    <h3><span>⚡</span> PHP Runtime Execution & Output</h3>
+                    <span style="font-size: 11px; opacity: 0.9;">Run on Demand</span>
+                </div>
+                <div class="runtime-body">
+                    <!-- Section 1: Parameters Manipulation -->
+                    <div class="runtime-input-section">
+                        <div class="runtime-section-title">
+                            <span>⚙️</span> Manipulate Script Inputs ($_POST Form):
+                        </div>
+                        <div class="input-group-row">
+                            <div class="php-form-group">
+                                <label>Full Name:</label>
+                                <input type="text" ng-model="profile.fullName" class="php-form-control">
+                            </div>
+                            <div class="php-form-group">
+                                <label>Enrollment No:</label>
+                                <input type="text" ng-model="profile.enrollment" class="php-form-control">
+                            </div>
+                        </div>
+                        <div class="php-form-group" style="margin-bottom: 8px;">
+                            <label>Email Address:</label>
+                            <input type="email" ng-model="profile.email" class="php-form-control">
+                        </div>
+                        <div class="php-form-group" style="margin-bottom: 8px;">
+                            <label>Course / Program:</label>
+                            <input type="text" ng-model="profile.course" class="php-form-control">
+                        </div>
+                        <div class="php-form-group">
+                            <label>Biography Summary:</label>
+                            <textarea ng-model="profile.bio" class="php-form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Run Button -->
+                    <button type="button" class="btn-run-php" ng-class="{'running': isRunning}" ng-click="runScript()">
+                        <span ng-if="!isRunning">▶ Run PHP Script ($_POST Submit)</span>
+                        <span ng-if="isRunning">⚡ Compiling & Executing PHP...</span>
+                    </button>
+
+                    <!-- Section 3: Status Bar -->
+                    <div class="runtime-status-bar">
+                        <span class="status-pill ready" ng-if="!hasRun && !isRunning">● Ready to Execute</span>
+                        <span class="status-pill running" ng-if="isRunning">⚡ Executing PHP 8.2...</span>
+                        <span class="status-pill success" ng-if="hasRun && !isRunning">✔ HTTP 200 OK (Exit 0)</span>
+                        <span>Time: {{executionTime}}</span>
+                    </div>
+
+                    <!-- Section 4: Output Window -->
+                    <div class="runtime-output-wrapper">
+                        <div class="runtime-output-tabs">
+                            <button type="button" class="runtime-output-tab" ng-class="{'active': activeOutputTab==='web'}" ng-click="activeOutputTab='web'">
+                                🌐 Rendered Output
+                            </button>
+                            <button type="button" class="runtime-output-tab" ng-class="{'active': activeOutputTab==='cli'}" ng-click="activeOutputTab='cli'">
+                                💻 Server STDOUT ($_POST Array)
+                            </button>
+                        </div>
+
+                        <!-- Before Run State -->
+                        <div ng-if="!hasRun" class="runtime-output-content" style="text-align: center; padding: 32px 14px; color: #64748B;">
+                            <div style="font-size: 32px; margin-bottom: 6px;">▶</div>
+                            <div style="font-weight: 700; color: var(--navy); margin-bottom: 4px;">Click "Run PHP Script" to Execute</div>
+                            <div style="font-size: 12.5px;">Output will execute and render here dynamically according to the PHP logic.</div>
+                        </div>
+
+                        <!-- After Run State -->
+                        <div ng-if="hasRun" class="runtime-output-content">
+                            <!-- Web Rendered Output -->
+                            <div ng-if="activeOutputTab==='web'">
+                                <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 14px; border-top: 3px solid var(--saffron);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <h3 style="margin: 0; color: var(--navy); font-size: 16px;">{{submittedProfile.fullName}}</h3>
+                                        <span class="php-badge badge-navy">{{submittedProfile.enrollment}}</span>
+                                    </div>
+                                    <div style="font-size: 12.5px; color: #475569; margin-bottom: 6px;">
+                                        <b>Email:</b> {{submittedProfile.email}} | <b>Course:</b> {{submittedProfile.course}}
+                                    </div>
+                                    <div style="font-size: 12.5px; color: #334155; line-height: 1.5; background: #FFFFFF; padding: 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                                        <b>Bio:</b> {{submittedProfile.bio}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CLI STDOUT Output -->
+                            <div ng-if="activeOutputTab==='cli'">
+                                <pre class="runtime-stdout">{{stdout}}</pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

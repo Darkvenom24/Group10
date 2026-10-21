@@ -6,13 +6,21 @@
         <div class="spa-header-bar">
             <h2><span>🚆</span> Practical 3: Indian Railways Booking Portal</h2>
             <div style="display: flex; gap: 8px;">
-                <a href="#/booking-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">View Booked Tickets (Data) →</a>
+                <a href="#/booking-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">View My Booked Tickets →</a>
                 <span class="php-badge badge-php">Interactive Web App</span>
             </div>
         </div>
 
+        <!-- Account Badge -->
+        <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 13px; color: #166534;">
+                Booking under account: <b>{{currentUser.full_name}}</b> (Enrollment: <b>{{currentUser.enrollment_no}}</b>)
+            </div>
+            <span class="php-badge badge-green" style="font-size: 11px;">Saved to Your Personal History</span>
+        </div>
+
         <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
-            <b>Objective:</b> Build a responsive ticket reservation system featuring client-side form validation, dynamic DOM fare estimation, and persistent data storage.
+            <b>Objective:</b> Build a responsive ticket reservation system featuring client-side form validation, dynamic DOM fare estimation, and persistent individual user data storage.
         </p>
 
         <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 20px;">
@@ -63,7 +71,7 @@
                 <div class="input-group-row">
                     <div class="php-form-group">
                         <label>Primary Passenger Name:</label>
-                        <input type="text" ng-model="booking.name" class="php-form-control" placeholder="e.g. Ridham Bambhaniya" required>
+                        <input type="text" ng-model="booking.passengerName" class="php-form-control" placeholder="Passenger Name" required>
                     </div>
                     <div class="php-form-group">
                         <label>10-Digit Mobile Number:</label>
@@ -76,7 +84,7 @@
                 </button>
 
                 <div ng-if="successMessage" style="margin-top: 14px; background: #DCFCE7; border: 1px solid #86EFAC; color: #166534; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 13.5px;">
-                    {{successMessage}}
+                    ✅ {{successMessage}}
                 </div>
             </form>
 

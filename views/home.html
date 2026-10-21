@@ -1,14 +1,24 @@
 <div class="spa-view-enter">
+    <!-- Top Access Denied Banner if user was redirected -->
+    <div class="access-restricted-banner" ng-if="$root.accessDeniedNotice">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🔒</span>
+            <div>
+                <b>{{$root.accessDeniedNotice}}</b>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Welcome Banner & Visit Counter -->
     <div style="background: linear-gradient(135deg, #000080, #00004d); color: #FFFFFF; border-radius: 10px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0, 0, 128, 0.15); border-left: 6px solid var(--saffron);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
-                <span class="php-badge badge-php" style="margin-bottom: 8px;">MCA Semester 1 — Web Technology</span>
+                <span class="php-badge badge-php" style="margin-bottom: 8px;">MCA Semester 1 — Web Technology Practicals</span>
                 <h1 style="margin: 6px 0; font-size: 26px; color: #FFFFFF; font-weight: 800;">
                     Group 10 — Academic Web Portal & Practicals Hub
                 </h1>
                 <p style="margin: 0; color: #E2E8F0; font-size: 14.5px;">
-                    Government MCA College, Maninagar (K.K. Shastri Campus, Ahmedabad) • Single Page Application
+                    Government MCA College, Maninagar (K.K. Shastri Educational Campus, Ahmedabad)
                 </p>
             </div>
             <div style="background: rgba(255, 255, 255, 0.12); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 10px;">
@@ -21,82 +31,100 @@
         </div>
     </div>
 
-    <!-- Quick Practicals Navigation Pills -->
+    <!-- Quick Practicals Navigation Pills (Student Form removed, Railway is primary) -->
     <div class="practical-pills">
-        <span style="font-size: 12px; font-weight: 700; color: var(--navy); align-self: center; margin-right: 4px;">Jump to:</span>
-        <a href="#/practical/1" class="practical-pill">P1: HTML</a>
-        <a href="#/practical/2" class="practical-pill">P2: CSS</a>
-        <a href="#/practical/3" class="practical-pill">P3: Railway</a>
-        <a href="#/practical/4" class="practical-pill">P4: Calculator</a>
-        <a href="#/practical/7" class="practical-pill">P7: Student Form</a>
-        <a href="#/practical/7-data" class="practical-pill">P7: Records (CRUD)</a>
-        <a href="#/php/hub" class="practical-pill" style="border-color: var(--saffron); color: var(--navy); font-weight: bold;">⚡ PHP Hub (9-12)</a>
+        <span style="font-size: 12px; font-weight: 700; color: var(--navy); align-self: center; margin-right: 4px;">Quick Jump:</span>
+        <a href="#/practical/1" class="practical-pill" ng-click="guardNav('#/practical/1', $event)">P1: HTML Table</a>
+        <a href="#/practical/2" class="practical-pill" ng-click="guardNav('#/practical/2', $event)">P2: CSS Styling</a>
+        <a href="#/practical/3" class="practical-pill" ng-click="guardNav('#/practical/3', $event)">🚆 P3: Railway Portal</a>
+        <a href="#/practical/4" class="practical-pill" ng-click="guardNav('#/practical/4', $event)">🧮 P4: JS Calculator</a>
+        <a href="#/booking-data" class="practical-pill" ng-click="guardNav('#/booking-data', $event)">🎫 My Railway Data</a>
+        <a href="#/php/hub" class="practical-pill" style="border-color: var(--saffron); color: var(--navy); font-weight: bold;" ng-click="guardNav('#/php/hub', $event)">⚡ PHP Hub (9-12)</a>
     </div>
 
     <!-- Main Two-Column Layout -->
     <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
-        <!-- Left Column: Institute Info, Auth & Student Records -->
+        <!-- Left Column: Institute Info, Auth & Isolated Railway Records -->
         <div>
             <!-- About Institute Card -->
             <div class="spa-card">
                 <div class="spa-header-bar">
-                    <h2><span>🏛</span> About Our Institute</h2>
-                    <span class="php-badge badge-navy">GMCA Maninagar</span>
+                    <h2><span>🏛</span> Government MCA College, Maninagar</h2>
+                    <span class="php-badge badge-navy">GMCA Ahmedabad</span>
                 </div>
                 <p style="line-height: 1.7; color: #334155; font-size: 14.5px; margin-top: 0;">
                     At <b>Government MCA College, Maninagar</b>, we provide high-quality education in Computer Applications.
                     Under Principal <b>Dr. Chetan B. Bhatt</b> and dedicated faculty, students master both theory and hands-on web engineering.
                 </p>
                 <div style="background: #F8FAFC; border-left: 4px solid var(--green); padding: 12px 16px; border-radius: 4px; font-size: 13.5px; color: #1E293B;">
-                    <b>Mission:</b> Equip students with robust software development skills, professional ethics, and research mindset for the evolving IT industry.
+                    <b>Academic Curriculum:</b> HTML5 semantic structuring, CSS3 responsive tricolor styling, JavaScript interactivity, AngularJS Single Page Architecture, and PHP 8 server-side runtime execution.
                 </div>
             </div>
 
-            <!-- Practical 12: Authentication Section (Clean, Professional) -->
-            <div class="spa-card">
+            <!-- Authentication Card (Strict Login Requirement & Clean Profile Switcher) -->
+            <div class="spa-card" id="login-section">
                 <div class="spa-header-bar">
-                    <h2><span>🔐</span> Practical 12: Authentication & Session</h2>
-                    <span class="php-badge badge-php">MySQL Auth</span>
+                    <h2><span>🔐</span> User Authentication & Identity Verification</h2>
+                    <span class="php-badge" ng-class="{'badge-green': currentUser, 'badge-php': !currentUser}">
+                        {{currentUser ? 'Active: ' + currentUser.enrollment_no : 'Login Required'}}
+                    </span>
                 </div>
 
                 <!-- Logged In View -->
                 <div ng-if="currentUser" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 18px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                         <div style="display: flex; align-items: center; gap: 14px;">
-                            <img ng-src="{{currentUser.avatar || 'temp.jpeg'}}" onerror="this.src='temp.jpeg'" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--green);">
+                            <img ng-src="{{currentUser.avatar || 'temp.jpeg'}}" onerror="this.src='temp.jpeg'" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--green); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
                             <div>
-                                <div style="font-size: 16px; font-weight: 700; color: #166534;">{{currentUser.full_name}}</div>
-                                <div style="font-size: 13px; color: #15803D;">Enrollment: <b>{{currentUser.enrollment_no}}</b> | Role: {{currentUser.role}}</div>
+                                <div style="font-size: 17px; font-weight: 700; color: #166534;">{{currentUser.full_name}}</div>
+                                <div style="font-size: 13px; color: #15803D; margin-top: 2px;">
+                                    Enrollment: <b>{{currentUser.enrollment_no}}</b> | Role: <b>{{currentUser.role}}</b>
+                                </div>
+                                <div style="font-size: 11.5px; color: #166534; opacity: 0.85; margin-top: 2px;">
+                                    Email: {{currentUser.email}}
+                                </div>
                             </div>
                         </div>
-                        <button type="button" ng-click="logout()" class="btn-php-action btn-secondary" style="font-size: 12.5px; padding: 6px 14px;">
-                            Logout
-                        </button>
-                    </div>
-
-                    <!-- Post-Login Practical 7 Instruction -->
-                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #86EFAC;">
-                        <div ng-if="!userRecord">
-                            <p style="margin: 0 0 10px 0; font-size: 13.5px; color: #14532D; font-weight: 600;">
-                                👉 <b>Action Required (Practical 12):</b> Please submit your academic & project data in <b>Practical no. 7</b>:
-                            </p>
-                            <a href="#/practical/7" class="btn-php-action" style="background: var(--green); text-decoration: none; font-size: 13px;">
-                                📝 Fill Practical no. 7 Form Now →
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <a href="#/practical/3" class="btn-php-action" style="background: var(--green); font-size: 12px; text-decoration: none;">
+                                + Book Railway Ticket
                             </a>
-                        </div>
-                        <div ng-if="userRecord" style="background: #FFFFFF; border: 1px solid #86EFAC; border-radius: 6px; padding: 12px; margin-top: 8px;">
-                            <span class="php-badge badge-green" style="font-size: 11px;">Practical 7 Submitted</span>
-                            <div style="font-size: 14px; font-weight: 700; color: var(--navy); margin-top: 4px;">{{userRecord.project_title}}</div>
-                            <div style="font-size: 12.5px; color: #475569; margin-top: 2px;">Tech: {{userRecord.technology_stack}} | Roll: {{userRecord.roll_no}}</div>
+                            <button type="button" ng-click="logout()" class="btn-php-action btn-secondary" style="font-size: 12px; padding: 6px 14px;">
+                                Switch User / Logout
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Logged Out View -->
+                <!-- Logged Out View with 1-Click Profile Selector -->
                 <div ng-if="!currentUser">
+                    <p style="font-size: 13.5px; color: #475569; margin-top: 0; line-height: 1.6;">
+                        <b>Instructions:</b> Access is restricted to authenticated users. Choose your profile below for instant 1-click login, or enter your credentials.
+                    </p>
+
+                    <!-- Profile Selector Cards (Ridham, Riya, Vaibhav) -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; margin-bottom: 8px;">
+                            Quick 1-Click Profile Selection:
+                        </div>
+                        <div class="user-cards-grid">
+                            <div ng-repeat="m in teamMembers" class="user-select-card" ng-class="{'selected': selectedProfileId === m.id}" ng-click="selectProfile(m)">
+                                <img ng-src="{{m.avatar}}" onerror="this.src='temp.jpeg'" alt="{{m.full_name}}">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 13px; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{m.full_name}}</div>
+                                    <div style="font-size: 11px; color: #64748B;">{{m.enrollment_no}} • {{m.role}}</div>
+                                    <button type="button" ng-click="quickLoginAs(m); $event.stopPropagation();" class="auth-chip-btn" style="margin-top: 4px; padding: 2px 8px; font-size: 10.5px;">
+                                        ⚡ Login as {{m.full_name.split(' ')[0]}}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auth Header Tabs -->
                     <div class="auth-header-tabs">
-                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Login</button>
-                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='register'}" ng-click="activeTab='register'">Register</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Manual Login</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='register'}" ng-click="activeTab='register'">Register New Student</button>
                     </div>
 
                     <!-- Login Form -->
@@ -104,22 +132,25 @@
                         <form ng-submit="submitLogin()">
                             <div class="input-group-row">
                                 <div class="php-form-group">
-                                    <label>Username, Email, or Enrollment:</label>
-                                    <input type="text" ng-model="loginModel.usernameOrEnroll" class="php-form-control" placeholder="e.g. 26GMCA52 or vaibhav52" required>
+                                    <label>Username or Enrollment No:</label>
+                                    <input type="text" ng-model="loginModel.usernameOrEnroll" class="php-form-control" placeholder="e.g. 26GMCA61, 26GMCA33, or 26GMCA52" required>
                                 </div>
                                 <div class="php-form-group">
                                     <label>Password:</label>
-                                    <input type="password" ng-model="loginModel.password" class="php-form-control" placeholder="password123" required>
+                                    <input type="password" ng-model="loginModel.password" class="php-form-control" placeholder="Enter password (default: password123)" required>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
-                                <button type="submit" class="btn-php-action">🔑 Login to System</button>
-                                <span style="font-size: 12px; color: #64748B;">Quick demo:</span>
-                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA52', 'password123')">Vaibhav</button>
-                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA61', 'password123')">Ridham</button>
-                                <button type="button" class="auth-chip-btn" ng-click="quickFill('26GMCA33', 'password123')">Riya</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+                                <label style="font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="checkbox" ng-model="loginModel.rememberMe"> Remember my login on this device
+                                </label>
+                                <button type="submit" class="btn-php-action" style="padding: 9px 22px;">
+                                    🔑 Verify & Login
+                                </button>
                             </div>
-                            <div ng-if="loginError" style="color: #DC2626; font-size: 13px; margin-top: 8px;">{{loginError}}</div>
+                            <div ng-if="loginError" style="color: #DC2626; font-size: 13px; margin-top: 10px; font-weight: 600;">
+                                ⚠️ {{loginError}}
+                            </div>
                         </form>
                     </div>
 
@@ -129,11 +160,11 @@
                             <div class="input-group-row">
                                 <div class="php-form-group">
                                     <label>Full Name:</label>
-                                    <input type="text" ng-model="regModel.full_name" class="php-form-control" placeholder="Student Name" required>
+                                    <input type="text" ng-model="regModel.full_name" class="php-form-control" placeholder="Your Name" required>
                                 </div>
                                 <div class="php-form-group">
                                     <label>Enrollment No:</label>
-                                    <input type="text" ng-model="regModel.enrollment_no" class="php-form-control" placeholder="26GMCA99" required>
+                                    <input type="text" ng-model="regModel.enrollment_no" class="php-form-control" placeholder="e.g. 26GMCA99" required>
                                 </div>
                             </div>
                             <div class="input-group-row">
@@ -143,46 +174,84 @@
                                 </div>
                                 <div class="php-form-group">
                                     <label>Password:</label>
-                                    <input type="password" ng-model="regModel.password" class="php-form-control" placeholder="Choose password" required>
+                                    <input type="password" ng-model="regModel.password" class="php-form-control" placeholder="Choose a password" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn-php-action" style="background: var(--green); margin-top: 8px;">📝 Register & Auto-Login</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+                                <label style="font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="checkbox" ng-model="regModel.rememberMe"> Remember my login on this device
+                                </label>
+                                <button type="submit" class="btn-php-action" style="background: var(--green); padding: 9px 22px;">
+                                    📝 Register & Access Portal
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Practical 12 Requirement: Display Details of Practical 7 Data on Index Page -->
+            <!-- Railway Reservation Records (Strict Individual User Isolation) -->
             <div class="spa-card">
                 <div class="spa-header-bar">
-                    <h2><span>📋</span> Practical 7 Submissions (Database Records)</h2>
-                    <a href="#/practical/7-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">
-                        Full CRUD Dashboard →
+                    <h2><span>🎫</span> My Railway Reservations (Personal Database)</h2>
+                    <a href="#/booking-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">
+                        Full Records Dashboard →
                     </a>
                 </div>
-                <div style="overflow-x: auto;">
+
+                <!-- If user is logged in AND has bookings -->
+                <div ng-if="currentUser && myBookings.length > 0" style="overflow-x: auto;">
+                    <div style="font-size: 12.5px; color: #64748B; margin-bottom: 10px;">
+                        Showing tickets booked under account: <b>{{currentUser.enrollment_no}} ({{currentUser.full_name}})</b>
+                    </div>
                     <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse: collapse; font-size: 13px; text-align: left;">
                         <thead>
                             <tr bgcolor="#000080" style="color: #FFFFFF;">
-                                <th>Enrollment</th>
-                                <th>Name</th>
-                                <th>Project Title</th>
-                                <th>Tech Stack</th>
-                                <th>Action</th>
+                                <th>PNR</th>
+                                <th>Passenger Name</th>
+                                <th>Train Details</th>
+                                <th>Class</th>
+                                <th>Date</th>
+                                <th>Total Fare</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="r in recentRecords" style="border-bottom: 1px solid #E2E8F0;">
-                                <td><b>{{r.enrollment_no}}</b></td>
-                                <td>{{r.student_name}}</td>
-                                <td>{{r.project_title}}</td>
-                                <td><span class="php-badge badge-php" style="font-size: 11px;">{{r.technology_stack}}</span></td>
-                                <td>
-                                    <a href="#/practical/7-data" style="color: var(--navy); font-weight: 600; text-decoration: none;">View</a>
-                                </td>
+                            <tr ng-repeat="b in myBookings" style="border-bottom: 1px solid #E2E8F0;">
+                                <td><b style="color: var(--navy);">{{b.pnr}}</b></td>
+                                <td>{{b.passengerName}}</td>
+                                <td>{{b.train}}</td>
+                                <td><span class="php-badge badge-php">{{b.travelClass}} ({{b.passengers}}p)</span></td>
+                                <td>{{b.date}}</td>
+                                <td><b style="color: var(--saffron);">₹{{b.totalFare}}</b></td>
+                                <td><span class="php-badge badge-green">{{b.status || 'Confirmed'}}</span></td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Empty State (User logged in but has no bookings yet) -->
+                <div ng-if="currentUser && myBookings.length === 0" class="empty-data-state">
+                    <div class="empty-data-icon">📭</div>
+                    <div class="empty-data-title">You haven't filled any form yet</div>
+                    <div class="empty-data-desc">
+                        No railway reservation records are registered under account <b>{{currentUser.enrollment_no}}</b> yet.
+                    </div>
+                    <div class="empty-privacy-note">
+                        <b>🔒 Private User Data Notice:</b> Just like your mobile phone's private call logs and SMS history, all railway booking records are strictly isolated to individual student accounts. You can only view your own forms and tickets; no one else can see your submissions.
+                    </div>
+                    <a href="#/practical/3" class="btn-php-action" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>🚆</span> Book Your First Railway Ticket (Practical 3) →
+                    </a>
+                </div>
+
+                <!-- Logged Out State Prompt -->
+                <div ng-if="!currentUser" class="empty-data-state" style="padding: 24px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Login to View Your Personal Railway Bookings</div>
+                    <div style="font-size: 13px; color: #64748B; margin-bottom: 12px;">
+                        Select your profile above (Ridham, Riya, or Vaibhav) to view your isolated booking history.
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,25 +261,25 @@
             <!-- Team Overview Card -->
             <div class="spa-card" style="padding: 18px;">
                 <h3 style="margin: 0 0 12px 0; color: var(--navy); font-size: 16px; border-bottom: 2px solid var(--saffron); padding-bottom: 6px;">
-                    👥 Group 10 Team Leads
+                    👥 Group 10 Team Members
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <a href="#/member/1" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
-                        <img src="ridham.jpeg" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <img src="ridham.jpeg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--navy);">
                         <div>
                             <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Ridham Bambhaniya</div>
-                            <div style="font-size: 11px; color: #64748B;">26GMCA61 • Lead</div>
+                            <div style="font-size: 11px; color: #64748B;">26GMCA61 • Team Lead</div>
                         </div>
                     </a>
                     <a href="#/member/2" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
-                        <img src="riya.jpeg" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <img src="riya.jpeg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--navy);">
                         <div>
                             <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Riya Thakkar</div>
                             <div style="font-size: 11px; color: #64748B;">26GMCA33 • Member</div>
                         </div>
                     </a>
                     <a href="#/member/3" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px; border-radius: 6px; background: #F8FAFC; border: 1px solid #E2E8F0;">
-                        <img src="vaibhav.jpeg" onerror="this.src='temp.jpeg'" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                        <img src="vaibhav.jpeg" onerror="this.src='temp.jpeg'" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--navy);">
                         <div>
                             <div style="font-size: 13px; font-weight: 700; color: var(--navy);">Vaibhav Senjaliya</div>
                             <div style="font-size: 11px; color: #64748B;">26GMCA52 • Member</div>
@@ -227,7 +296,7 @@
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <a href="#/practical/3" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #EFF6FF; border: 1px solid #BFDBFE;">
                         <div style="font-size: 13px; font-weight: 700; color: #1E40AF;">🚆 Railway Booking Portal</div>
-                        <div style="font-size: 11.5px; color: #3B82F6;">Dynamic fare calculation & validation</div>
+                        <div style="font-size: 11.5px; color: #3B82F6;">Dynamic fare calculation & private records</div>
                     </a>
                     <a href="#/practical/4" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #FEF3C7; border: 1px solid #FDE68A;">
                         <div style="font-size: 13px; font-weight: 700; color: #92400E;">🧮 Interactive Calculator</div>
@@ -235,7 +304,7 @@
                     </a>
                     <a href="#/php/hub" style="text-decoration: none; padding: 10px; border-radius: 6px; background: #FFF7ED; border: 1px solid #FFEDD5;">
                         <div style="font-size: 13px; font-weight: 700; color: #C2410C;">⚡ PHP Practicals (9-12)</div>
-                        <div style="font-size: 11.5px; color: #EA580C;">Live interactive execution hub</div>
+                        <div style="font-size: 11.5px; color: #EA580C;">VS Code split-IDE with live runtime runner</div>
                     </a>
                 </div>
             </div>
