@@ -1794,35 +1794,43 @@ select.input-valid {
 }
 
 .vscode-body {
-    display: flex;
+    display: block;
     min-height: 420px;
     max-height: 620px;
     overflow: auto;
     background: #1E1E1E;
 }
 
-.vscode-gutter {
-    background: #1E1E1E;
-    color: #5A5A5A;
-    padding: 14px 10px 14px 12px;
-    text-align: right;
-    font-size: 12.5px;
-    line-height: 1.6;
-    user-select: none;
-    border-right: 1px solid #2D2D2D;
-    min-width: 32px;
-}
-
 .vscode-code {
-    padding: 14px 16px;
+    padding: 16px 20px;
     margin: 0;
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 13.5px;
+    line-height: 1.65;
     color: #D4D4D4;
     overflow-x: auto;
-    flex: 1;
     white-space: pre;
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+    background: #1E1E1E;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.code-copy-btn {
+    background: #2D2D2D;
+    color: #CCCCCC;
+    border: 1px solid #444444;
+    padding: 3px 9px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
     font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.code-copy-btn:hover {
+    background: #007ACC;
+    color: #FFFFFF;
+    border-color: #007ACC;
 }
 
 /* VS Code Syntax Highlighting Tokens */
