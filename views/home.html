@@ -36,7 +36,7 @@
         <!-- Gallery Top Bar with Title, Counter & Controls -->
         <div class="gallery-top-bar">
             <div class="gallery-title-wrap">
-                <h2><span>📸</span> Group 10 Academic & Project Photo Gallery</h2>
+                <h2>Group 10 Academic & Project Photo Gallery</h2>
                 <span class="php-badge badge-php" style="font-size: 11px;">AngularJS Slideshow</span>
                 <span class="php-badge" ng-class="{'badge-green': isAutoPlaying, 'badge-navy': !isAutoPlaying}" style="font-size: 11px;">
                     {{isAutoPlaying ? '● Auto-Playing (4s)' : '❚❚ Paused'}}
@@ -116,7 +116,7 @@
         <div class="gallery-lightbox-modal" ng-if="isGalleryFullscreen" ng-click="toggleFullscreen()">
             <div style="display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; padding-bottom: 12px;">
                 <div style="font-size: 18px; font-weight: 700;">
-                    📸 Photo {{currentSlideIndex + 1}} of {{galleryImages.length}}
+                    Photo {{currentSlideIndex + 1}} of {{galleryImages.length}}
                 </div>
                 <button type="button" ng-click="toggleFullscreen()" class="btn-php-action btn-secondary" style="font-size: 12px;">
                     ✕ Close Fullscreen
@@ -132,8 +132,8 @@
         </div>
     </div>
 
-    <!-- Main Two-Column Layout -->
-    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
+    <!-- Main Two-Column Layout (Responsive Stack on Tablet/Mobile) -->
+    <div class="portal-two-col-layout">
         <!-- Left Column: Institute Info, Auth & Isolated Railway Records -->
         <div>
             <!-- About Institute Card -->
@@ -270,7 +270,7 @@
                 </div>
 
                 <!-- If user is logged in AND has bookings -->
-                <div ng-if="currentUser && myBookings.length > 0" style="overflow-x: auto;">
+                <div ng-if="currentUser && myBookings.length > 0" class="table-responsive" style="padding: 12px; margin-top: 10px;">
                     <div style="font-size: 12.5px; color: #64748B; margin-bottom: 10px;">
                         Showing tickets booked under account: <b>{{currentUser.enrollment_no}} ({{currentUser.full_name}})</b>
                     </div>
