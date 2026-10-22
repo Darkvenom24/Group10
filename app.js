@@ -520,43 +520,6 @@
             }
         };
 
-        // On-screen touch/mouse numeric keypad
-        $scope.keypadPress = function (val) {
-            if (val === 'clear') {
-                $scope.retryPin();
-                return;
-            }
-            if (val === 'backspace') {
-                for (var i = 3; i >= 0; i--) {
-                    if ($scope.pinModal.digits[i] !== '') {
-                        $scope.pinModal.digits[i] = '';
-                        var el = document.getElementById('pin-box-' + i);
-                        if (el) el.focus();
-                        break;
-                    }
-                }
-                $scope.updateEnteredPin();
-                return;
-            }
-
-            // Append digit to first empty box
-            for (var j = 0; j < 4; j++) {
-                if ($scope.pinModal.digits[j] === '') {
-                    $scope.pinModal.digits[j] = String(val);
-                    if (j < 3) {
-                        var nextBox = document.getElementById('pin-box-' + (j + 1));
-                        if (nextBox) nextBox.focus();
-                    }
-                    break;
-                }
-            }
-            $scope.updateEnteredPin();
-
-            if ($scope.pinModal.digits.every(function (d) { return d !== ''; })) {
-                $scope.submitPin();
-            }
-        };
-
         // Verify PIN and complete authentication
         $scope.submitPin = function () {
             var pin = $scope.pinModal.digits.join('');

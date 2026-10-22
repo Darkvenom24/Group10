@@ -2690,6 +2690,23 @@ select.input-valid,
     background: #EEF2FF;
 }
 
+/* Defensive suppression: Ensure keypad elements never render under any cached DOM */
+.pin-keypad,
+.pin-key-btn,
+button.pin-key-btn {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    position: absolute !important;
+    overflow: hidden !important;
+}
+
 .pin-error-box {
     background: #FEF2F2;
     border: 1px solid #FCA5A5;
