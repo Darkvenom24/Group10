@@ -2690,44 +2690,6 @@ select.input-valid,
     background: #EEF2FF;
 }
 
-.pin-keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    max-width: 280px;
-    margin: 0 auto 16px auto;
-}
-
-.pin-key-btn {
-    background: #F1F5F9;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 12px 0;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--navy);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
-}
-
-.pin-key-btn:hover {
-    background: #E2E8F0;
-    border-color: #CBD5E1;
-    transform: translateY(-1px);
-}
-
-.pin-key-btn:active {
-    background: #CBD5E1;
-    transform: translateY(1px);
-}
-
-.pin-key-btn.action-key {
-    font-size: 13px;
-    color: #475569;
-    font-weight: 600;
-}
-
 .pin-error-box {
     background: #FEF2F2;
     border: 1px solid #FCA5A5;
@@ -3361,11 +3323,6 @@ select.input-valid,
         margin: 12px 0;
     }
 
-    .pin-key-btn {
-        padding: 10px 0;
-        font-size: 17px;
-    }
-
     /* Calculator */
     .calculator-card {
         padding: 14px;
@@ -3410,16 +3367,6 @@ select.input-valid,
 
     .pin-digits-row {
         gap: 6px;
-    }
-
-    .pin-keypad {
-        max-width: 240px;
-        gap: 6px;
-    }
-
-    .pin-key-btn {
-        padding: 9px 0;
-        font-size: 16px;
     }
 
     .spa-card {
