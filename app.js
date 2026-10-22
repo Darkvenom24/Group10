@@ -692,46 +692,14 @@
         $scope.selectedProfileId = null;
 
         // =========================================================================
-        // FULL-SIZE PHOTO GALLERY SLIDESHOW ENGINE (AngularJS $interval, Touch & Keyboard)
-        // Extensible for image1 to imageN photographs
+        // FULL-SIZE PHOTO GALLERY SLIDESHOW ENGINE (AngularJS $interval)
+        // Designed for any event photographs (image1 to imageN) without requiring member context
+        // Easily add: { id: 4, src: 'image1.jpeg' }, { id: 5, src: 'image2.jpeg' }...
         // =========================================================================
         $scope.galleryImages = [
-            {
-                id: 1,
-                src: 'ridham.jpeg',
-                fallbackSrc: 'temp.jpeg',
-                alt: 'Ridham Bambhaniya',
-                title: 'Ridham Bambhaniya',
-                enroll: '26GMCA61',
-                role: 'Team Lead / Layout Architect',
-                badge: 'Team Lead',
-                caption: 'Practical 1 (HTML Table Layout) & Practical 2 (Tricolor CSS) — Core Architecture and Interface Standardization.',
-                profileUrl: '#/member/1'
-            },
-            {
-                id: 2,
-                src: 'riya.jpeg',
-                fallbackSrc: 'temp.jpeg',
-                alt: 'Riya Thakkar',
-                title: 'Riya Thakkar',
-                enroll: '26GMCA33',
-                role: 'Student Member / Form Specialist',
-                badge: 'Developer',
-                caption: 'Practical 3 (Indian Railways Booking Portal) — Dynamic Fare Engine, Form Validations & Isolated Data Records.',
-                profileUrl: '#/member/2'
-            },
-            {
-                id: 3,
-                src: 'vaibhav.jpeg',
-                fallbackSrc: 'temp.jpeg',
-                alt: 'Vaibhav Senjaliya',
-                title: 'Vaibhav Senjaliya',
-                enroll: '26GMCA52',
-                role: 'Student Member / Full Stack Engineer',
-                badge: 'Developer',
-                caption: 'Practical 4 (Interactive Calculator) & PHP Practicals 9-12 Runner Engine — AngularJS SPA Architecture & Relational Isolation.',
-                profileUrl: '#/member/3'
-            }
+            { id: 1, src: 'ridham.jpeg', fallbackSrc: 'temp.jpeg', alt: 'Photo 1' },
+            { id: 2, src: 'riya.jpeg', fallbackSrc: 'temp.jpeg', alt: 'Photo 2' },
+            { id: 3, src: 'vaibhav.jpeg', fallbackSrc: 'temp.jpeg', alt: 'Photo 3' }
         ];
 
         // Slideshow state
