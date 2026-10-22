@@ -31,15 +31,135 @@
         </div>
     </div>
 
-    <!-- Quick Practicals Navigation Pills (Student Form removed, Railway is primary) -->
-    <div class="practical-pills">
-        <span style="font-size: 12px; font-weight: 700; color: var(--navy); align-self: center; margin-right: 4px;">Quick Jump:</span>
-        <a href="#/practical/1" class="practical-pill" ng-click="guardNav('#/practical/1', $event)">P1: HTML Table</a>
-        <a href="#/practical/2" class="practical-pill" ng-click="guardNav('#/practical/2', $event)">P2: CSS Styling</a>
-        <a href="#/practical/3" class="practical-pill" ng-click="guardNav('#/practical/3', $event)">🚆 P3: Railway Portal</a>
-        <a href="#/practical/4" class="practical-pill" ng-click="guardNav('#/practical/4', $event)">🧮 P4: JS Calculator</a>
-        <a href="#/booking-data" class="practical-pill" ng-click="guardNav('#/booking-data', $event)">🎫 My Railway Data</a>
-        <a href="#/php/hub" class="practical-pill" style="border-color: var(--saffron); color: var(--navy); font-weight: bold;" ng-click="guardNav('#/php/hub', $event)">⚡ PHP Hub (9-12)</a>
+    <!-- Full-Size AngularJS Photo Gallery Slideshow (Replaces Quick Jump) -->
+    <div class="photo-gallery-card" ng-mouseleave="resumeOnLeave()" ng-mouseenter="pauseOnHover()">
+        <!-- Gallery Top Bar with Title, Counter & Controls -->
+        <div class="gallery-top-bar">
+            <div class="gallery-title-wrap">
+                <h2><span>📸</span> Group 10 Academic & Project Photo Gallery</h2>
+                <span class="php-badge badge-php" style="font-size: 11px;">AngularJS Slideshow</span>
+                <span class="php-badge" ng-class="{'badge-green': isAutoPlaying, 'badge-navy': !isAutoPlaying}" style="font-size: 11px;">
+                    {{isAutoPlaying ? '● Auto-Playing (4s)' : '❚❚ Paused'}}
+                </span>
+            </div>
+            <div class="gallery-ctrl-group">
+                <button type="button" class="gallery-ctrl-btn" ng-click="prevSlide()" title="Previous Photograph (or Left Arrow)">
+                    ◀ Prev
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="toggleAutoPlay()" title="Toggle Slideshow Play / Pause">
+                    <span ng-if="isAutoPlaying">⏸ Pause</span>
+                    <span ng-if="!isAutoPlaying">▶ Play</span>
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="nextSlide()" title="Next Photograph (or Right Arrow)">
+                    Next ▶
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="toggleFullscreen()" title="Fullscreen Lightbox Mode">
+                    ⛶ Fullscreen
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Viewport Frame with Cinematic Blurred Depth Backdrop -->
+        <div class="gallery-viewport">
+            <!-- Animated Top Progress Bar -->
+            <div class="gallery-timer-bar" ng-style="{width: slideProgress + '%'}"></div>
+
+            <!-- Cinematic Blur Layer of Current Image -->
+            <div class="gallery-bg-blur" ng-style="{'background-image': 'url(' + galleryImages[currentSlideIndex].src + ')'}"></div>
+
+            <!-- Floating Slide Counter -->
+            <div class="gallery-counter-badge">
+                Photo {{currentSlideIndex + 1}} of {{galleryImages.length}}
+            </div>
+
+            <!-- Floating Navigation Arrows -->
+            <button type="button" class="gallery-arrow-btn gallery-arrow-prev" ng-click="prevSlide()" title="Previous (Left Arrow)">
+                &#10094;
+            </button>
+            <button type="button" class="gallery-arrow-btn gallery-arrow-next" ng-click="nextSlide()" title="Next (Right Arrow)">
+                &#10095;
+            </button>
+
+            <!-- Foreground Centered Photographic Slide -->
+            <div class="gallery-main-img-wrap">
+                <img ng-src="{{galleryImages[currentSlideIndex].src}}"
+                     onerror="this.src='temp.jpeg'"
+                     alt="{{galleryImages[currentSlideIndex].alt}}"
+                     class="gallery-main-img"
+                     title="{{galleryImages[currentSlideIndex].title}}">
+            </div>
+
+            <!-- Slide Caption Overlay with Glassmorphic Gradient -->
+            <div class="gallery-caption-overlay">
+                <div class="gallery-caption-text">
+                    <h3>
+                        {{galleryImages[currentSlideIndex].title}}
+                        <span class="php-badge badge-saffron" style="font-size: 11.5px; vertical-align: middle;">
+                            {{galleryImages[currentSlideIndex].badge}}
+                        </span>
+                        <span class="php-badge badge-navy" style="font-size: 11.5px; vertical-align: middle;">
+                            {{galleryImages[currentSlideIndex].enroll}}
+                        </span>
+                    </h3>
+                    <p><b>Role & Responsibilities:</b> {{galleryImages[currentSlideIndex].role}}</p>
+                    <p style="opacity: 0.9; margin-top: 2px;">{{galleryImages[currentSlideIndex].caption}}</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a ng-href="{{galleryImages[currentSlideIndex].profileUrl}}" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; text-decoration: none; white-space: nowrap;">
+                        View Full Profile →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Footer with Navigation Dots & Interactive Thumbnail Strip -->
+        <div class="gallery-footer-bar">
+            <!-- Dot Bullets Navigation -->
+            <div class="gallery-dots">
+                <button type="button"
+                        ng-repeat="img in galleryImages"
+                        class="gallery-dot"
+                        ng-class="{active: currentSlideIndex === $index}"
+                        ng-click="goToSlide($index)"
+                        title="Jump to Photo {{$index + 1}}: {{img.title}}">
+                </button>
+            </div>
+
+            <!-- Thumbnail Strip for 1-Click Jumping -->
+            <div class="gallery-thumbs-row">
+                <div ng-repeat="img in galleryImages"
+                     class="gallery-thumb-item"
+                     ng-class="{active: currentSlideIndex === $index}"
+                     ng-click="goToSlide($index)"
+                     title="{{img.title}}">
+                    <img ng-src="{{img.src}}" onerror="this.src='temp.jpeg'" alt="{{img.title}}" class="gallery-thumb-img">
+                    <div style="font-size: 11.5px; line-height: 1.2;">
+                        <div style="font-weight: 700; color: var(--navy);">{{img.title.split(' ')[0]}}</div>
+                        <div style="font-size: 10px; color: #64748B;">{{img.enroll}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Lightbox Modal View -->
+        <div class="gallery-lightbox-modal" ng-if="isGalleryFullscreen" ng-click="toggleFullscreen()">
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; padding-bottom: 12px;">
+                <div style="font-size: 18px; font-weight: 700;">
+                    📸 {{galleryImages[currentSlideIndex].title}} ({{currentSlideIndex + 1}} / {{galleryImages.length}})
+                </div>
+                <button type="button" ng-click="toggleFullscreen()" class="btn-php-action btn-secondary" style="font-size: 12px;">
+                    ✕ Close Fullscreen
+                </button>
+            </div>
+            <div class="gallery-viewport" ng-click="$event.stopPropagation()">
+                <div class="gallery-bg-blur" ng-style="{'background-image': 'url(' + galleryImages[currentSlideIndex].src + ')'}"></div>
+                <button type="button" class="gallery-arrow-btn gallery-arrow-prev" ng-click="prevSlide()">&#10094;</button>
+                <button type="button" class="gallery-arrow-btn gallery-arrow-next" ng-click="nextSlide()">&#10095;</button>
+                <div class="gallery-main-img-wrap">
+                    <img ng-src="{{galleryImages[currentSlideIndex].src}}" onerror="this.src='temp.jpeg'" alt="{{galleryImages[currentSlideIndex].alt}}" class="gallery-main-img">
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Two-Column Layout -->

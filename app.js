@@ -136,10 +136,18 @@
         var SESSION_KEY = 'gmca_current_session_v2';
         var REMEMBERED_KEY = 'gmca_remembered_session_v2';
 
+        // Secure 4-Digit PIN Mapping for Team Leads
+        // Vaibhav: 9543 | Ridham: 0101 | Riya: 9898
+        var MEMBER_PINS = {
+            '26GMCA61': '0101', // Ridham Bambhaniya
+            '26GMCA33': '9898', // Riya Thakkar
+            '26GMCA52': '9543'  // Vaibhav Senjaliya
+        };
+
         var defaultUsers = [
-            { id: 1, username: 'ridham61', full_name: 'Ridham Bambhaniya', email: 'ridham.26gmca61@gmca.ac.in', enrollment_no: '26GMCA61', password: 'password123', role: 'Team Lead', avatar: 'ridham.jpeg' },
-            { id: 2, username: 'riya33', full_name: 'Riya Thakkar', email: 'riya.26gmca33@gmca.ac.in', enrollment_no: '26GMCA33', password: 'password123', role: 'Student Member', avatar: 'riya.jpeg' },
-            { id: 3, username: 'vaibhav52', full_name: 'Vaibhav Senjaliya', email: 'vaibhav.26gmca52@gmca.ac.in', enrollment_no: '26GMCA52', password: 'password123', role: 'Student Member', avatar: 'vaibhav.jpeg' }
+            { id: 1, username: 'ridham61', full_name: 'Ridham Bambhaniya', email: 'ridham.26gmca61@gmca.ac.in', enrollment_no: '26GMCA61', password: 'password123', pin: '0101', role: 'Team Lead', avatar: 'ridham.jpeg' },
+            { id: 2, username: 'riya33', full_name: 'Riya Thakkar', email: 'riya.26gmca33@gmca.ac.in', enrollment_no: '26GMCA33', password: 'password123', pin: '9898', role: 'Student Member', avatar: 'riya.jpeg' },
+            { id: 3, username: 'vaibhav52', full_name: 'Vaibhav Senjaliya', email: 'vaibhav.26gmca52@gmca.ac.in', enrollment_no: '26GMCA52', password: 'password123', pin: '9543', role: 'Student Member', avatar: 'vaibhav.jpeg' }
         ];
 
         function getUsers() {
@@ -147,7 +155,15 @@
                 var s = localStorage.getItem(USERS_KEY);
                 if (s) {
                     var p = JSON.parse(s);
-                    if (Array.isArray(p) && p.length > 0) return p;
+                    if (Array.isArray(p) && p.length > 0) {
+                        // Ensure PINs are synchronized
+                        p.forEach(function (u) {
+                            if (MEMBER_PINS[u.enrollment_no]) {
+                                u.pin = MEMBER_PINS[u.enrollment_no];
+                            }
+                        });
+                        return p;
+                    }
                 }
             } catch (e) { }
             localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
@@ -157,6 +173,9 @@
         return {
             getDefaultTeamMembers: function () {
                 return defaultUsers;
+            },
+            getMemberPin: function (enrollmentNo) {
+                return MEMBER_PINS[enrollmentNo] || null;
             },
             getCurrentUser: function () {
                 try {
@@ -191,6 +210,30 @@
                     }
                 }
                 return { success: false, message: 'Invalid credentials. Select a quick profile card or enter valid login.' };
+            },
+            // 4-Digit Security PIN Verification & Instant Login
+            verifyAndLoginPin: function (enrollmentOrId, enteredPin) {
+                var users = getUsers();
+                var norm = String(enrollmentOrId || '').trim().toUpperCase();
+                var matchedUser = null;
+                for (var i = 0; i < users.length; i++) {
+                    var u = users[i];
+                    if (u.enrollment_no.toUpperCase() === norm || String(u.id) === norm || u.username.toUpperCase() === norm) {
+                        matchedUser = u;
+                        break;
+                    }
+                }
+                if (!matchedUser) {
+                    return { success: false, message: 'Profile not found. Please log in with your credentials or register.' };
+                }
+                var expectedPin = MEMBER_PINS[matchedUser.enrollment_no.toUpperCase()] || matchedUser.pin;
+                if (String(enteredPin).trim() === String(expectedPin).trim()) {
+                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(matchedUser));
+                    localStorage.setItem(REMEMBERED_KEY, JSON.stringify(matchedUser));
+                    $rootScope.$broadcast('authChanged', matchedUser);
+                    return { success: true, user: matchedUser };
+                }
+                return { success: false, message: 'Incorrect 4-digit PIN! Please try again.' };
             },
             register: function (userObj, rememberMe) {
                 var users = getUsers();
@@ -295,6 +338,272 @@
     // 4. CONTROLLERS
     // =========================================================================
 
+    // Header & Avatar Identity Verification Controller (4-Digit PIN Security & ng-disabled)
+    app.controller('HeaderController', ['$scope', '$rootScope', '$location', '$timeout', 'AuthService', function ($scope, $rootScope, $location, $timeout, AuthService) {
+        $scope.currentUser = AuthService.getCurrentUser();
+
+        // 3 Core Team Members shown in header capsule
+        $scope.headerMembers = [
+            {
+                id: 1,
+                name: 'Ridham Bambhaniya',
+                shortName: 'Ridham',
+                enroll: '26GMCA61',
+                role: 'Team Lead',
+                pin: '0101',
+                avatar: 'ridham.jpeg',
+                fallbackAvatar: 'temp.jpeg',
+                profileUrl: '#/member/1'
+            },
+            {
+                id: 2,
+                name: 'Riya Thakkar',
+                shortName: 'Riya',
+                enroll: '26GMCA33',
+                role: 'Student Member',
+                pin: '9898',
+                avatar: 'riya.jpeg',
+                fallbackAvatar: 'temp.jpeg',
+                profileUrl: '#/member/2'
+            },
+            {
+                id: 3,
+                name: 'Vaibhav Senjaliya',
+                shortName: 'Vaibhav',
+                enroll: '26GMCA52',
+                role: 'Student Member',
+                pin: '9543',
+                avatar: 'vaibhav.jpeg',
+                fallbackAvatar: 'temp.jpeg',
+                profileUrl: '#/member/3'
+            }
+        ];
+
+        // Active user popover state
+        $scope.activeUserMenuOpen = false;
+
+        // PIN Verification Modal State
+        $scope.pinModal = {
+            isOpen: false,
+            targetMember: null,
+            digits: ['', '', '', ''],
+            enteredPin: '',
+            errorMsg: '',
+            successMsg: '',
+            isSubmitting: false,
+            shake: false,
+            showDigits: true
+        };
+
+        // Global auth state listener
+        $rootScope.$on('authChanged', function (event, user) {
+            $scope.currentUser = user;
+            $scope.activeUserMenuOpen = false;
+        });
+
+        // AngularJS ng-disabled evaluator:
+        // When logged in as Person X, remainings are disabled and unclickable until logout
+        $scope.isAvatarDisabled = function (m) {
+            if (!$scope.currentUser) return false;
+            return $scope.currentUser.enrollment_no !== m.enroll;
+        };
+
+        $scope.getAvatarTooltip = function (m) {
+            if (!$scope.currentUser) {
+                return 'Click to log in as ' + m.name + ' (Protected: 4-digit PIN required)';
+            }
+            if ($scope.currentUser.enrollment_no === m.enroll) {
+                return 'Active Session: ' + m.name + ' (' + m.enroll + ') — Click for profile or logout';
+            }
+            return 'Locked: ' + m.name + ' (Disabled via ng-disabled while ' + $scope.currentUser.full_name + ' is logged in. Logout to switch.)';
+        };
+
+        $scope.handleAvatarClick = function (m) {
+            // Guard disabled state
+            if ($scope.isAvatarDisabled(m)) {
+                return;
+            }
+
+            // If already logged in as this person, toggle options or navigate to profile
+            if ($scope.currentUser && $scope.currentUser.enrollment_no === m.enroll) {
+                $scope.activeUserMenuOpen = !$scope.activeUserMenuOpen;
+                return;
+            }
+
+            // Not logged in: open 4-digit PIN verification modal
+            $scope.openPinModal(m);
+        };
+
+        $scope.openPinModal = function (member) {
+            $scope.pinModal.targetMember = member;
+            $scope.pinModal.digits = ['', '', '', ''];
+            $scope.pinModal.enteredPin = '';
+            $scope.pinModal.errorMsg = '';
+            $scope.pinModal.successMsg = '';
+            $scope.pinModal.isSubmitting = false;
+            $scope.pinModal.shake = false;
+            $scope.pinModal.isOpen = true;
+
+            $timeout(function () {
+                var el = document.getElementById('pin-box-0');
+                if (el) el.focus();
+            }, 100);
+        };
+
+        $scope.closePinModal = function () {
+            $scope.pinModal.isOpen = false;
+            $scope.pinModal.errorMsg = '';
+            $scope.pinModal.successMsg = '';
+        };
+
+        $scope.retryPin = function () {
+            $scope.pinModal.digits = ['', '', '', ''];
+            $scope.pinModal.enteredPin = '';
+            $scope.pinModal.errorMsg = '';
+            $scope.pinModal.successMsg = '';
+            $timeout(function () {
+                var el = document.getElementById('pin-box-0');
+                if (el) el.focus();
+            }, 50);
+        };
+
+        $scope.updateEnteredPin = function () {
+            $scope.pinModal.enteredPin = $scope.pinModal.digits.join('');
+            $scope.pinModal.errorMsg = '';
+        };
+
+        // Physical keyboard typing on individual digit boxes
+        $scope.onDigitInput = function (index, event) {
+            var val = $scope.pinModal.digits[index];
+            if (val && val.length > 1) {
+                $scope.pinModal.digits[index] = val.slice(-1);
+            }
+            $scope.updateEnteredPin();
+
+            // Auto-advance to next box
+            if ($scope.pinModal.digits[index] && index < 3) {
+                var nextEl = document.getElementById('pin-box-' + (index + 1));
+                if (nextEl) nextEl.focus();
+            }
+
+            // Auto submit if all 4 digits entered
+            if ($scope.pinModal.digits.every(function (d) { return d !== ''; })) {
+                $scope.submitPin();
+            }
+        };
+
+        $scope.onDigitKeydown = function (index, event) {
+            if (event.key === 'Backspace' && !$scope.pinModal.digits[index] && index > 0) {
+                var prevEl = document.getElementById('pin-box-' + (index - 1));
+                if (prevEl) {
+                    prevEl.focus();
+                    $scope.pinModal.digits[index - 1] = '';
+                    $scope.updateEnteredPin();
+                }
+            } else if (event.key === 'Enter') {
+                $scope.submitPin();
+            }
+        };
+
+        $scope.onPinPaste = function (event) {
+            var clipData = (event.clipboardData || window.clipboardData).getData('text');
+            if (clipData) {
+                var clean = clipData.replace(/\D/g, '');
+                if (clean.length >= 4) {
+                    event.preventDefault();
+                    for (var i = 0; i < 4; i++) {
+                        $scope.pinModal.digits[i] = clean.charAt(i);
+                    }
+                    $scope.updateEnteredPin();
+                    $scope.submitPin();
+                }
+            }
+        };
+
+        // On-screen touch/mouse numeric keypad
+        $scope.keypadPress = function (val) {
+            if (val === 'clear') {
+                $scope.retryPin();
+                return;
+            }
+            if (val === 'backspace') {
+                for (var i = 3; i >= 0; i--) {
+                    if ($scope.pinModal.digits[i] !== '') {
+                        $scope.pinModal.digits[i] = '';
+                        var el = document.getElementById('pin-box-' + i);
+                        if (el) el.focus();
+                        break;
+                    }
+                }
+                $scope.updateEnteredPin();
+                return;
+            }
+
+            // Append digit to first empty box
+            for (var j = 0; j < 4; j++) {
+                if ($scope.pinModal.digits[j] === '') {
+                    $scope.pinModal.digits[j] = String(val);
+                    if (j < 3) {
+                        var nextBox = document.getElementById('pin-box-' + (j + 1));
+                        if (nextBox) nextBox.focus();
+                    }
+                    break;
+                }
+            }
+            $scope.updateEnteredPin();
+
+            if ($scope.pinModal.digits.every(function (d) { return d !== ''; })) {
+                $scope.submitPin();
+            }
+        };
+
+        // Verify PIN and complete authentication
+        $scope.submitPin = function () {
+            var pin = $scope.pinModal.digits.join('');
+            if (pin.length !== 4) {
+                $scope.pinModal.errorMsg = 'Please enter all 4 digits of the security PIN.';
+                return;
+            }
+
+            $scope.pinModal.isSubmitting = true;
+            var target = $scope.pinModal.targetMember;
+            var res = AuthService.verifyAndLoginPin(target.enroll, pin);
+
+            if (res.success) {
+                $scope.pinModal.successMsg = '✅ PIN Verified! Logging in as ' + target.name + '...';
+                $scope.pinModal.errorMsg = '';
+                $timeout(function () {
+                    $scope.closePinModal();
+                    $scope.pinModal.isSubmitting = false;
+                }, 400);
+            } else {
+                $scope.pinModal.isSubmitting = false;
+                $scope.pinModal.errorMsg = res.message;
+                $scope.pinModal.shake = true;
+                $timeout(function () {
+                    $scope.pinModal.shake = false;
+                }, 450);
+            }
+        };
+
+        // Public security fallback: register or standard login
+        $scope.goToStandardLogin = function () {
+            $scope.closePinModal();
+            $location.path('/');
+            $timeout(function () {
+                var el = document.getElementById('login-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 200);
+        };
+
+        $scope.logout = function () {
+            AuthService.logout();
+            $scope.currentUser = null;
+            $scope.activeUserMenuOpen = false;
+            $location.path('/');
+        };
+    }]);
+
     // Navigation & Global Shell Controller
     app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthService', function ($scope, $location, $rootScope, AuthService) {
         $scope.mobileMenuOpen = false;
@@ -362,8 +671,8 @@
         });
     }]);
 
-    // Home Page Controller (Login, Multi-Account Selection & Personal Railway Data)
-    app.controller('HomeController', ['$scope', '$location', '$rootScope', 'AuthService', 'RailwayService', function ($scope, $location, $rootScope, AuthService, RailwayService) {
+    // Home Page Controller (AngularJS Photo Gallery Slideshow, Login & Railway Database)
+    app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interval', '$timeout', 'AuthService', 'RailwayService', function ($scope, $location, $rootScope, $interval, $timeout, AuthService, RailwayService) {
         var visits = parseInt(localStorage.getItem('gmca_visits') || '0', 10) + 1;
         localStorage.setItem('gmca_visits', visits);
         $scope.visitCount = visits;
@@ -382,7 +691,152 @@
         $scope.regSuccess = '';
         $scope.selectedProfileId = null;
 
-        // Load personal railway bookings
+        // =========================================================================
+        // FULL-SIZE PHOTO GALLERY SLIDESHOW ENGINE (AngularJS $interval, Touch & Keyboard)
+        // Extensible for image1 to imageN photographs
+        // =========================================================================
+        $scope.galleryImages = [
+            {
+                id: 1,
+                src: 'ridham.jpeg',
+                fallbackSrc: 'temp.jpeg',
+                alt: 'Ridham Bambhaniya',
+                title: 'Ridham Bambhaniya',
+                enroll: '26GMCA61',
+                role: 'Team Lead / Layout Architect',
+                badge: 'Team Lead',
+                caption: 'Practical 1 (HTML Table Layout) & Practical 2 (Tricolor CSS) — Core Architecture and Interface Standardization.',
+                profileUrl: '#/member/1'
+            },
+            {
+                id: 2,
+                src: 'riya.jpeg',
+                fallbackSrc: 'temp.jpeg',
+                alt: 'Riya Thakkar',
+                title: 'Riya Thakkar',
+                enroll: '26GMCA33',
+                role: 'Student Member / Form Specialist',
+                badge: 'Developer',
+                caption: 'Practical 3 (Indian Railways Booking Portal) — Dynamic Fare Engine, Form Validations & Isolated Data Records.',
+                profileUrl: '#/member/2'
+            },
+            {
+                id: 3,
+                src: 'vaibhav.jpeg',
+                fallbackSrc: 'temp.jpeg',
+                alt: 'Vaibhav Senjaliya',
+                title: 'Vaibhav Senjaliya',
+                enroll: '26GMCA52',
+                role: 'Student Member / Full Stack Engineer',
+                badge: 'Developer',
+                caption: 'Practical 4 (Interactive Calculator) & PHP Practicals 9-12 Runner Engine — AngularJS SPA Architecture & Relational Isolation.',
+                profileUrl: '#/member/3'
+            }
+        ];
+
+        // Slideshow state
+        $scope.currentSlideIndex = 0;
+        $scope.isAutoPlaying = true;
+        $scope.slideIntervalMs = 4000;
+        $scope.slideProgress = 0;
+        $scope.isGalleryFullscreen = false;
+
+        var slideTimer = null;
+        var progressTimer = null;
+        var progressStep = 100 / ($scope.slideIntervalMs / 100);
+
+        function startProgress() {
+            $scope.slideProgress = 0;
+            if (progressTimer) $interval.cancel(progressTimer);
+            if (!$scope.isAutoPlaying) return;
+            progressTimer = $interval(function () {
+                $scope.slideProgress += progressStep;
+                if ($scope.slideProgress >= 100) {
+                    $scope.slideProgress = 100;
+                }
+            }, 100);
+        }
+
+        function startAutoSlide() {
+            if (slideTimer) $interval.cancel(slideTimer);
+            if (!$scope.isAutoPlaying) return;
+            startProgress();
+            slideTimer = $interval(function () {
+                $scope.nextSlide();
+            }, $scope.slideIntervalMs);
+        }
+
+        function stopAutoSlide() {
+            if (slideTimer) {
+                $interval.cancel(slideTimer);
+                slideTimer = null;
+            }
+            if (progressTimer) {
+                $interval.cancel(progressTimer);
+                progressTimer = null;
+            }
+            $scope.slideProgress = 0;
+        }
+
+        $scope.nextSlide = function () {
+            $scope.currentSlideIndex = ($scope.currentSlideIndex + 1) % $scope.galleryImages.length;
+            if ($scope.isAutoPlaying) {
+                startAutoSlide();
+            }
+        };
+
+        $scope.prevSlide = function () {
+            $scope.currentSlideIndex = ($scope.currentSlideIndex - 1 + $scope.galleryImages.length) % $scope.galleryImages.length;
+            if ($scope.isAutoPlaying) {
+                startAutoSlide();
+            }
+        };
+
+        $scope.goToSlide = function (idx) {
+            if (idx >= 0 && idx < $scope.galleryImages.length) {
+                $scope.currentSlideIndex = idx;
+                if ($scope.isAutoPlaying) {
+                    startAutoSlide();
+                }
+            }
+        };
+
+        $scope.toggleAutoPlay = function () {
+            $scope.isAutoPlaying = !$scope.isAutoPlaying;
+            if ($scope.isAutoPlaying) {
+                startAutoSlide();
+            } else {
+                stopAutoSlide();
+            }
+        };
+
+        $scope.pauseOnHover = function () {
+            if ($scope.isAutoPlaying) {
+                stopAutoSlide();
+            }
+        };
+
+        $scope.resumeOnLeave = function () {
+            if ($scope.isAutoPlaying) {
+                startAutoSlide();
+            }
+        };
+
+        $scope.toggleFullscreen = function () {
+            $scope.isGalleryFullscreen = !$scope.isGalleryFullscreen;
+        };
+
+        // Initialize slideshow
+        startAutoSlide();
+
+        // Clean up intervals on view destroy to prevent memory leaks
+        $scope.$on('$destroy', function () {
+            stopAutoSlide();
+        });
+
+        // =========================================================================
+        // USER AUTHENTICATION & RAILWAY ISOLATED RECORDS
+        // =========================================================================
         function loadUserBookings() {
             if ($scope.currentUser) {
                 $scope.myBookings = RailwayService.getBookingsForUser($scope.currentUser.enrollment_no);
@@ -391,6 +845,12 @@
             }
         }
         loadUserBookings();
+
+        // Listen for global auth changes (including PIN verification logins)
+        $rootScope.$on('authChanged', function (event, user) {
+            $scope.currentUser = user;
+            loadUserBookings();
+        });
 
         // 1-Click Select Profile
         $scope.selectProfile = function (member) {

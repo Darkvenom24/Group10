@@ -9,19 +9,38 @@
 <body bgcolor="#f8f9fa" style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
 
     <!-- Persistent Indian Flag Saffron Header with Team Avatars -->
-    <header style="background-color: var(--saffron); padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+    <header ng-controller="HeaderController" style="background-color: var(--saffron); padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: relative;">
         <div class="header-wrap" style="display: flex; align-items: center; justify-content: center; position: relative; min-height: 80px;">
             <!-- Top-Left Profile Pictures of 3 Members in small circular shape -->
+            <!-- Top-Left Profile Pictures of 3 Members with PIN Verification & ng-disabled -->
             <div class="header-members-left" title="Group 10 Team Members" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.22); padding: 6px 12px; border-radius: 35px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                <a href="#/member/1" title="Ridham Bambhaniya (Lead)">
-                    <img src="ridham.jpeg" alt="Ridham" class="header-avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FFFFFF;">
-                </a>
-                <a href="#/member/2" title="Riya Thakkar">
-                    <img src="riya.jpeg" alt="Riya" class="header-avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FFFFFF;">
-                </a>
-                <a href="#/member/3" title="Vaibhav Senjaliya">
-                    <img src="vaibhav.jpeg" onerror="this.onerror=null;this.src='temp.jpeg';" alt="Vaibhav" class="header-avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FFFFFF;">
-                </a>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button"
+                            ng-repeat="m in headerMembers"
+                            class="header-avatar-btn"
+                            ng-class="{'is-logged-user': currentUser && currentUser.enrollment_no === m.enroll, 'is-locked-user': currentUser && currentUser.enrollment_no !== m.enroll}"
+                            ng-disabled="currentUser && currentUser.enrollment_no !== m.enroll"
+                            ng-click="handleAvatarClick(m)"
+                            title="{{getAvatarTooltip(m)}}">
+                        <img ng-src="{{m.avatar}}" onerror="this.src='temp.jpeg'" alt="{{m.name}}" class="header-avatar">
+                        <span class="avatar-status-badge avatar-badge-active" ng-if="currentUser && currentUser.enrollment_no === m.enroll" title="Active Logged-In User">✓</span>
+                        <span class="avatar-status-badge avatar-badge-lock" ng-if="currentUser && currentUser.enrollment_no !== m.enroll" title="Locked via ng-disabled">🔒</span>
+                    </button>
+                </div>
+                <!-- Logged In Status Pill & Logout Button -->
+                <div ng-if="currentUser" class="header-logged-chip" style="display: flex; align-items: center; gap: 6px; padding-left: 8px; border-left: 1.5px solid rgba(255,255,255,0.4);">
+                    <div style="text-align: left; line-height: 1.2;">
+                        <div style="font-size: 11px; font-weight: 800; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.25);">
+                            {{currentUser.full_name.split(' ')[0]}}
+                        </div>
+                        <div style="font-size: 9.5px; color: #FFF7ED; opacity: 0.9;">
+                            {{currentUser.enrollment_no}}
+                        </div>
+                    </div>
+                    <button type="button" ng-click="logout()" class="header-logout-btn" title="Logout and re-enable all avatars">
+                        Logout
+                    </button>
+                </div>
             </div>
 
             <!-- Center Title -->
@@ -29,6 +48,130 @@
                 <div style="font-size: 26px; font-weight: 800; letter-spacing: 0.5px;">Welcome to Group-10 Webpage</div>
                 <div style="font-size: 14px; opacity: 0.95; margin-top: 2px;">Government MCA College, Maninagar — Web Technology Practicals & Projects</div>
                 <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">Academic Year 2025–2026 | Master of Computer Applications (MCA) — Semester 1</div>
+            </div>
+        </div>
+            <!-- 4-Digit Security PIN Verification Modal -->
+        <div class="pin-modal-backdrop" ng-if="pinModal.isOpen" ng-click="closePinModal()">
+            <div class="pin-modal-card" ng-click="$event.stopPropagation()" ng-class="{'pin-shake': pinModal.shake}">
+                <!-- Modal Header -->
+                <div class="pin-modal-header">
+                    <button type="button" class="pin-modal-close-btn" ng-click="closePinModal()" title="Close">&times;</button>
+                    <div class="pin-member-avatar-wrap">
+                        <img ng-src="{{pinModal.targetMember.avatar}}" onerror="this.src='temp.jpeg'" alt="{{pinModal.targetMember.name}}" class="pin-member-avatar">
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; letter-spacing: 0.3px;">{{pinModal.targetMember.name}}</div>
+                    <div style="font-size: 12.5px; color: #FEF08A; margin-top: 2px; font-weight: 600;">
+                        {{pinModal.targetMember.enroll}} &bull; {{pinModal.targetMember.role}}
+                    </div>
+                    <div style="font-size: 11.5px; color: #E2E8F0; opacity: 0.9; margin-top: 4px;">
+                        Enter 4-digit security PIN to unlock account & database records
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="pin-modal-body">
+                    <!-- Error / Success Alert -->
+                    <div ng-if="pinModal.errorMsg" class="pin-error-box">
+                        <span>⚠️ {{pinModal.errorMsg}}</span>
+                        <button type="button" ng-click="retryPin()" class="btn-php-action" style="font-size: 11px; padding: 3px 8px; background: #DC2626;">🔄 Retry</button>
+                    </div>
+                    <div ng-if="pinModal.successMsg" class="pin-success-box">
+                        {{pinModal.successMsg}}
+                    </div>
+
+                    <!-- 4 Digit Input Boxes -->
+                    <div class="pin-digits-row" ng-paste="onPinPaste($event)">
+                        <input type="{{pinModal.showDigits ? 'text' : 'password'}}"
+                               id="pin-box-0"
+                               class="pin-digit-box"
+                               ng-class="{filled: pinModal.digits[0] !== ''}"
+                               maxlength="1"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               ng-model="pinModal.digits[0]"
+                               ng-input="onDigitInput(0, $event)"
+                               ng-keyup="onDigitInput(0, $event)"
+                               ng-keydown="onDigitKeydown(0, $event)"
+                               autocomplete="off"
+                               required>
+                        <input type="{{pinModal.showDigits ? 'text' : 'password'}}"
+                               id="pin-box-1"
+                               class="pin-digit-box"
+                               ng-class="{filled: pinModal.digits[1] !== ''}"
+                               maxlength="1"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               ng-model="pinModal.digits[1]"
+                               ng-input="onDigitInput(1, $event)"
+                               ng-keyup="onDigitInput(1, $event)"
+                               ng-keydown="onDigitKeydown(1, $event)"
+                               autocomplete="off"
+                               required>
+                        <input type="{{pinModal.showDigits ? 'text' : 'password'}}"
+                               id="pin-box-2"
+                               class="pin-digit-box"
+                               ng-class="{filled: pinModal.digits[2] !== ''}"
+                               maxlength="1"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               ng-model="pinModal.digits[2]"
+                               ng-input="onDigitInput(2, $event)"
+                               ng-keyup="onDigitInput(2, $event)"
+                               ng-keydown="onDigitKeydown(2, $event)"
+                               autocomplete="off"
+                               required>
+                        <input type="{{pinModal.showDigits ? 'text' : 'password'}}"
+                               id="pin-box-3"
+                               class="pin-digit-box"
+                               ng-class="{filled: pinModal.digits[3] !== ''}"
+                               maxlength="1"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               ng-model="pinModal.digits[3]"
+                               ng-input="onDigitInput(3, $event)"
+                               ng-keyup="onDigitInput(3, $event)"
+                               ng-keydown="onDigitKeydown(3, $event)"
+                               autocomplete="off"
+                               required>
+                    </div>
+
+                    <!-- On-Screen Numeric Keypad -->
+                    <div class="pin-keypad">
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('1')">1</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('2')">2</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('3')">3</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('4')">4</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('5')">5</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('6')">6</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('7')">7</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('8')">8</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('9')">9</button>
+                        <button type="button" class="pin-key-btn action-key" ng-click="keypadPress('clear')" title="Clear all digits">Clear</button>
+                        <button type="button" class="pin-key-btn" ng-click="keypadPress('0')">0</button>
+                        <button type="button" class="pin-key-btn action-key" ng-click="keypadPress('backspace')" title="Backspace">⌫</button>
+                    </div>
+
+                    <!-- Modal Action Buttons -->
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <button type="button" class="btn-php-action" ng-click="submitPin()" ng-disabled="pinModal.isSubmitting" style="flex: 1; padding: 10px; font-size: 13.5px;">
+                            <span ng-if="!pinModal.isSubmitting">🔐 Verify PIN & Login</span>
+                            <span ng-if="pinModal.isSubmitting">Verifying...</span>
+                        </button>
+                        <button type="button" class="btn-php-action btn-secondary" ng-click="retryPin()" style="padding: 10px 14px; font-size: 13px;">
+                            🔄 Retry
+                        </button>
+                    </div>
+
+                    <!-- Public Safety & Registration Fallback -->
+                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #E2E8F0; text-align: center;">
+                        <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">
+                            🔒 <b>Public Access Protection:</b> Not {{pinModal.targetMember.name}} or don't know the PIN?
+                        </div>
+                        <button type="button" ng-click="goToStandardLogin()" style="background: transparent; border: 1px solid var(--navy); color: var(--navy); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            📝 Login with your Account / Register New Student →
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -359,15 +502,135 @@
         </div>
     </div>
 
-    <!-- Quick Practicals Navigation Pills (Student Form removed, Railway is primary) -->
-    <div class="practical-pills">
-        <span style="font-size: 12px; font-weight: 700; color: var(--navy); align-self: center; margin-right: 4px;">Quick Jump:</span>
-        <a href="#/practical/1" class="practical-pill" ng-click="guardNav('#/practical/1', $event)">P1: HTML Table</a>
-        <a href="#/practical/2" class="practical-pill" ng-click="guardNav('#/practical/2', $event)">P2: CSS Styling</a>
-        <a href="#/practical/3" class="practical-pill" ng-click="guardNav('#/practical/3', $event)">🚆 P3: Railway Portal</a>
-        <a href="#/practical/4" class="practical-pill" ng-click="guardNav('#/practical/4', $event)">🧮 P4: JS Calculator</a>
-        <a href="#/booking-data" class="practical-pill" ng-click="guardNav('#/booking-data', $event)">🎫 My Railway Data</a>
-        <a href="#/php/hub" class="practical-pill" style="border-color: var(--saffron); color: var(--navy); font-weight: bold;" ng-click="guardNav('#/php/hub', $event)">⚡ PHP Hub (9-12)</a>
+    <!-- Full-Size AngularJS Photo Gallery Slideshow (Replaces Quick Jump) -->
+    <div class="photo-gallery-card" ng-mouseleave="resumeOnLeave()" ng-mouseenter="pauseOnHover()">
+        <!-- Gallery Top Bar with Title, Counter & Controls -->
+        <div class="gallery-top-bar">
+            <div class="gallery-title-wrap">
+                <h2><span>📸</span> Group 10 Academic & Project Photo Gallery</h2>
+                <span class="php-badge badge-php" style="font-size: 11px;">AngularJS Slideshow</span>
+                <span class="php-badge" ng-class="{'badge-green': isAutoPlaying, 'badge-navy': !isAutoPlaying}" style="font-size: 11px;">
+                    {{isAutoPlaying ? '● Auto-Playing (4s)' : '❚❚ Paused'}}
+                </span>
+            </div>
+            <div class="gallery-ctrl-group">
+                <button type="button" class="gallery-ctrl-btn" ng-click="prevSlide()" title="Previous Photograph (or Left Arrow)">
+                    ◀ Prev
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="toggleAutoPlay()" title="Toggle Slideshow Play / Pause">
+                    <span ng-if="isAutoPlaying">⏸ Pause</span>
+                    <span ng-if="!isAutoPlaying">▶ Play</span>
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="nextSlide()" title="Next Photograph (or Right Arrow)">
+                    Next ▶
+                </button>
+                <button type="button" class="gallery-ctrl-btn" ng-click="toggleFullscreen()" title="Fullscreen Lightbox Mode">
+                    ⛶ Fullscreen
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Viewport Frame with Cinematic Blurred Depth Backdrop -->
+        <div class="gallery-viewport">
+            <!-- Animated Top Progress Bar -->
+            <div class="gallery-timer-bar" ng-style="{width: slideProgress + '%'}"></div>
+
+            <!-- Cinematic Blur Layer of Current Image -->
+            <div class="gallery-bg-blur" ng-style="{'background-image': 'url(' + galleryImages[currentSlideIndex].src + ')'}"></div>
+
+            <!-- Floating Slide Counter -->
+            <div class="gallery-counter-badge">
+                Photo {{currentSlideIndex + 1}} of {{galleryImages.length}}
+            </div>
+
+            <!-- Floating Navigation Arrows -->
+            <button type="button" class="gallery-arrow-btn gallery-arrow-prev" ng-click="prevSlide()" title="Previous (Left Arrow)">
+                &#10094;
+            </button>
+            <button type="button" class="gallery-arrow-btn gallery-arrow-next" ng-click="nextSlide()" title="Next (Right Arrow)">
+                &#10095;
+            </button>
+
+            <!-- Foreground Centered Photographic Slide -->
+            <div class="gallery-main-img-wrap">
+                <img ng-src="{{galleryImages[currentSlideIndex].src}}"
+                     onerror="this.src='temp.jpeg'"
+                     alt="{{galleryImages[currentSlideIndex].alt}}"
+                     class="gallery-main-img"
+                     title="{{galleryImages[currentSlideIndex].title}}">
+            </div>
+
+            <!-- Slide Caption Overlay with Glassmorphic Gradient -->
+            <div class="gallery-caption-overlay">
+                <div class="gallery-caption-text">
+                    <h3>
+                        {{galleryImages[currentSlideIndex].title}}
+                        <span class="php-badge badge-saffron" style="font-size: 11.5px; vertical-align: middle;">
+                            {{galleryImages[currentSlideIndex].badge}}
+                        </span>
+                        <span class="php-badge badge-navy" style="font-size: 11.5px; vertical-align: middle;">
+                            {{galleryImages[currentSlideIndex].enroll}}
+                        </span>
+                    </h3>
+                    <p><b>Role & Responsibilities:</b> {{galleryImages[currentSlideIndex].role}}</p>
+                    <p style="opacity: 0.9; margin-top: 2px;">{{galleryImages[currentSlideIndex].caption}}</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a ng-href="{{galleryImages[currentSlideIndex].profileUrl}}" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; text-decoration: none; white-space: nowrap;">
+                        View Full Profile →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Footer with Navigation Dots & Interactive Thumbnail Strip -->
+        <div class="gallery-footer-bar">
+            <!-- Dot Bullets Navigation -->
+            <div class="gallery-dots">
+                <button type="button"
+                        ng-repeat="img in galleryImages"
+                        class="gallery-dot"
+                        ng-class="{active: currentSlideIndex === $index}"
+                        ng-click="goToSlide($index)"
+                        title="Jump to Photo {{$index + 1}}: {{img.title}}">
+                </button>
+            </div>
+
+            <!-- Thumbnail Strip for 1-Click Jumping -->
+            <div class="gallery-thumbs-row">
+                <div ng-repeat="img in galleryImages"
+                     class="gallery-thumb-item"
+                     ng-class="{active: currentSlideIndex === $index}"
+                     ng-click="goToSlide($index)"
+                     title="{{img.title}}">
+                    <img ng-src="{{img.src}}" onerror="this.src='temp.jpeg'" alt="{{img.title}}" class="gallery-thumb-img">
+                    <div style="font-size: 11.5px; line-height: 1.2;">
+                        <div style="font-weight: 700; color: var(--navy);">{{img.title.split(' ')[0]}}</div>
+                        <div style="font-size: 10px; color: #64748B;">{{img.enroll}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Lightbox Modal View -->
+        <div class="gallery-lightbox-modal" ng-if="isGalleryFullscreen" ng-click="toggleFullscreen()">
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; padding-bottom: 12px;">
+                <div style="font-size: 18px; font-weight: 700;">
+                    📸 {{galleryImages[currentSlideIndex].title}} ({{currentSlideIndex + 1}} / {{galleryImages.length}})
+                </div>
+                <button type="button" ng-click="toggleFullscreen()" class="btn-php-action btn-secondary" style="font-size: 12px;">
+                    ✕ Close Fullscreen
+                </button>
+            </div>
+            <div class="gallery-viewport" ng-click="$event.stopPropagation()">
+                <div class="gallery-bg-blur" ng-style="{'background-image': 'url(' + galleryImages[currentSlideIndex].src + ')'}"></div>
+                <button type="button" class="gallery-arrow-btn gallery-arrow-prev" ng-click="prevSlide()">&#10094;</button>
+                <button type="button" class="gallery-arrow-btn gallery-arrow-next" ng-click="nextSlide()">&#10095;</button>
+                <div class="gallery-main-img-wrap">
+                    <img ng-src="{{galleryImages[currentSlideIndex].src}}" onerror="this.src='temp.jpeg'" alt="{{galleryImages[currentSlideIndex].alt}}" class="gallery-main-img">
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Two-Column Layout -->
