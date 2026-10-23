@@ -1,13 +1,22 @@
 <div class="spa-view-enter">
     <div class="spa-card">
         <div class="spa-breadcrumb">
-            <a href="#/">Home</a> <span>/</span> <span>Practical 3</span>
+            <a href="#/">Home</a> <span>/</span> <a href="#/practical/3" ng-click="resetToCreateMode()">Practical 3</a>
+            <span ng-if="isViewMode"> <span>/</span> <span style="color: var(--navy); font-weight: bold;">View Reservation (PNR: {{editingBooking.pnr}})</span></span>
+            <span ng-if="isEditMode"> <span>/</span> <span style="color: #D97706; font-weight: bold;">Edit Reservation (PNR: {{editingBooking.pnr}})</span></span>
         </div>
         <div class="spa-header-bar">
-            <h2><span>🚆</span> Practical 3: Indian Railways Booking Portal</h2>
+            <h2>
+                <span>🚆</span>
+                <span ng-if="!isViewMode && !isEditMode">Practical 3: Indian Railways Booking Portal</span>
+                <span ng-if="isViewMode">Practical 3: Indian Railways Booking Portal — View Reservation</span>
+                <span ng-if="isEditMode">Practical 3: Indian Railways Booking Portal — Edit Reservation</span>
+            </h2>
             <div style="display: flex; gap: 8px;">
                 <a href="#/booking-data" class="btn-php-action btn-secondary" style="font-size: 12px; text-decoration: none;">View My Booked Tickets →</a>
-                <span class="php-badge badge-php">Interactive Web App</span>
+                <span ng-if="isViewMode" class="php-badge badge-green">Read-Only Portal Form</span>
+                <span ng-if="isEditMode" class="php-badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">Edit Mode</span>
+                <span ng-if="!isViewMode && !isEditMode" class="php-badge badge-php">Interactive Web App</span>
             </div>
         </div>
 
@@ -17,6 +26,47 @@
                 Booking under account: <b>{{currentUser.full_name}}</b> (Enrollment: <b>{{currentUser.enrollment_no}}</b>)
             </div>
             <span class="php-badge badge-green" style="font-size: 11px;">Saved to Your Personal History</span>
+        </div>
+
+        <!-- View Mode Non-Editable Banner -->
+        <div ng-if="isViewMode" style="background: #EFF6FF; border: 1.5px solid #60A5FA; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 700; color: #1E40AF; font-size: 14px;">
+                    👁️ Non-Editable Railway Portal Form (Read-Only Mode)
+                </div>
+                <div style="font-size: 12.5px; color: #2563EB; margin-top: 2px;">
+                    Displaying reservation details for <b>PNR: {{editingBooking.pnr || booking.pnr}}</b>. All fields are locked for editing.
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" ng-click="switchToEditMode()" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; background: #D97706; color: #fff;">✏️ Switch to Edit Mode</button>
+                <button type="button" ng-click="returnToBookings()" class="btn-php-action btn-secondary" style="font-size: 12px; padding: 6px 14px;">← Back to Saved Records</button>
+                <button type="button" ng-click="resetToCreateMode()" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; background: var(--navy); color: #fff;">+ Book New Ticket</button>
+            </div>
+        </div>
+
+        <!-- Edit Mode Banner -->
+        <div ng-if="isEditMode" style="background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 700; color: #92400E; font-size: 14px;">
+                    ✏️ Editable Railway Portal Form (Update Mode)
+                </div>
+                <div style="font-size: 12.5px; color: #B45309; margin-top: 2px;">
+                    Modifying reservation record <b>PNR: {{editingBooking.pnr}}</b>. All fields are pre-filled and editable. Make updates and click 'Save Changes'.
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" ng-click="switchToViewMode()" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; background: var(--navy); color: #fff;">👁️ View Only Mode</button>
+                <button type="button" ng-click="returnToBookings()" class="btn-php-action btn-secondary" style="font-size: 12px; padding: 6px 14px;">Cancel & Return</button>
+            </div>
+        </div>
+
+        <!-- Update Success Notification -->
+        <div ng-if="updateSuccessNotice" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 13.5px; color: #166534; font-weight: 700;">
+                {{updateSuccessNotice}}
+            </div>
+            <a href="#/booking-data" class="btn-php-action" style="font-size: 12px; padding: 6px 14px; text-decoration: none;">View Saved Reservations Table →</a>
         </div>
 
         <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0;">
@@ -60,8 +110,10 @@
             <!-- Booking Form -->
             <form ng-submit="submitBooking()" novalidate style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 22px; border-radius: 8px;">
                 <h3 style="margin-top: 0; color: var(--navy); font-size: 16.5px; border-bottom: 2px solid var(--saffron); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>Ticket Reservation Form</span>
-                    <span style="font-size: 11px; font-weight: normal; color: #64748B;">* All fields mandatory</span>
+                    <span ng-if="!isViewMode && !isEditMode">Ticket Reservation Form</span>
+                    <span ng-if="isViewMode">Ticket Reservation Form (Non-Editable — PNR: {{editingBooking.pnr}})</span>
+                    <span ng-if="isEditMode">Edit Reservation Form (PNR: {{editingBooking.pnr}})</span>
+                    <span style="font-size: 11px; font-weight: normal; color: #64748B;">{{isViewMode ? '🔒 All fields locked' : '* All fields mandatory'}}</span>
                 </h3>
 
                 <!-- Step 1: Passenger Name (Mandatory First, No Numbers) -->
@@ -72,10 +124,12 @@
                     </label>
                     <input type="text"
                            id="passengerName"
+                           ng-disabled="isViewMode"
                            ng-model="booking.passengerName"
                            ng-change="validateName(false)"
                            ng-blur="touched.passengerName = true; validateName(false)"
                            ng-class="{'input-error': touched.passengerName && errors.passengerName, 'input-valid': touched.passengerName && !errors.passengerName, 'shake': shakeFields.passengerName}"
+                           ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                            class="php-form-control"
                            placeholder="Enter full name (alphabets only, e.g. Vaibhav Senjaliya)"
                            autocomplete="off">
@@ -91,12 +145,14 @@
                     <input type="tel"
                            id="phone"
                            maxlength="10"
+                           ng-disabled="isViewMode"
                            ng-model="booking.phone"
-                           ng-focus="handleSequentialFieldAccess('phone', $event)"
-                           ng-click="handleSequentialFieldAccess('phone', $event)"
+                           ng-focus="!isViewMode && handleSequentialFieldAccess('phone', $event)"
+                           ng-click="!isViewMode && handleSequentialFieldAccess('phone', $event)"
                            ng-change="validatePhone(false)"
                            ng-blur="touched.phone = true; validatePhone(false)"
                            ng-class="{'input-error': touched.phone && errors.phone, 'input-valid': touched.phone && !errors.phone, 'shake': shakeFields.phone}"
+                           ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                            class="php-form-control"
                            placeholder="10-digit Indian mobile (starts with 6, 7, 8, 9)"
                            autocomplete="off">
@@ -110,12 +166,14 @@
                         <span class="order-badge-hint">Step 3</span>
                     </label>
                     <select id="trainSelect"
+                            ng-disabled="isViewMode"
                             ng-model="booking.train"
-                            ng-focus="handleSequentialFieldAccess('train', $event)"
-                            ng-click="handleSequentialFieldAccess('train', $event)"
+                            ng-focus="!isViewMode && handleSequentialFieldAccess('train', $event)"
+                            ng-click="!isViewMode && handleSequentialFieldAccess('train', $event)"
                             ng-change="validateTrain(false)"
                             ng-blur="touched.train = true; validateTrain(false)"
                             ng-class="{'input-error': touched.train && errors.train, 'input-valid': touched.train && !errors.train, 'shake': shakeFields.train}"
+                            ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                             class="php-form-control">
                         <option value="">-- Select Train Route --</option>
                         <option ng-repeat="t in trains" value="{{t.name}}">{{t.name}}</option>
@@ -128,11 +186,13 @@
                     <div class="php-form-group">
                         <label for="travelClass">Select Travel Class: <span class="required-star">*</span></label>
                         <select id="travelClass"
+                                ng-disabled="isViewMode"
                                 ng-model="booking.travelClass"
-                                ng-focus="handleSequentialFieldAccess('travelClass', $event)"
-                                ng-click="handleSequentialFieldAccess('travelClass', $event)"
+                                ng-focus="!isViewMode && handleSequentialFieldAccess('travelClass', $event)"
+                                ng-click="!isViewMode && handleSequentialFieldAccess('travelClass', $event)"
                                 ng-change="validateClass()"
                                 ng-class="{'input-error': touched.travelClass && errors.travelClass, 'input-valid': touched.travelClass && !errors.travelClass}"
+                                ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                                 class="php-form-control">
                             <option value="SL">Sleeper (SL) - ₹500 base</option>
                             <option value="3A">AC 3 Tier (3A) - ₹1200 base</option>
@@ -145,11 +205,13 @@
                     <div class="php-form-group">
                         <label for="quota">Quota Type: <span class="required-star">*</span></label>
                         <select id="quota"
+                                ng-disabled="isViewMode"
                                 ng-model="booking.quota"
-                                ng-focus="handleSequentialFieldAccess('quota', $event)"
-                                ng-click="handleSequentialFieldAccess('quota', $event)"
+                                ng-focus="!isViewMode && handleSequentialFieldAccess('quota', $event)"
+                                ng-click="!isViewMode && handleSequentialFieldAccess('quota', $event)"
                                 ng-change="validateQuota()"
                                 ng-class="{'input-error': touched.quota && errors.quota, 'input-valid': touched.quota && !errors.quota}"
+                                ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                                 class="php-form-control">
                             <option value="GN">General (GN)</option>
                             <option value="TQ">Tatkal (TQ +30%)</option>
@@ -170,12 +232,14 @@
                         <input type="date"
                                id="travelDate"
                                min="{{minDate}}"
+                               ng-disabled="isViewMode"
                                ng-model="booking.date"
-                               ng-focus="handleSequentialFieldAccess('date', $event)"
-                               ng-click="handleSequentialFieldAccess('date', $event)"
+                               ng-focus="!isViewMode && handleSequentialFieldAccess('date', $event)"
+                               ng-click="!isViewMode && handleSequentialFieldAccess('date', $event)"
                                ng-change="validateDate()"
                                ng-blur="touched.date = true; validateDate()"
                                ng-class="{'input-error': touched.date && errors.date, 'input-valid': touched.date && !errors.date, 'shake': shakeFields.date}"
+                               ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                                class="php-form-control">
                         <span class="error-msg" id="dateError">{{errors.date}}</span>
                     </div>
@@ -188,18 +252,41 @@
                                id="passengerQty"
                                min="1"
                                max="6"
+                               ng-disabled="isViewMode"
                                ng-model="booking.passengers"
-                               ng-focus="handleSequentialFieldAccess('passengers', $event)"
-                               ng-click="handleSequentialFieldAccess('passengers', $event)"
+                               ng-focus="!isViewMode && handleSequentialFieldAccess('passengers', $event)"
+                               ng-click="!isViewMode && handleSequentialFieldAccess('passengers', $event)"
                                ng-change="validateQty()"
                                ng-blur="touched.passengers = true; validateQty()"
                                ng-class="{'input-error': touched.passengers && errors.passengers, 'input-valid': touched.passengers && !errors.passengers, 'shake': shakeFields.passengers}"
+                               ng-style="{'background': isViewMode ? '#F1F5F9' : '', 'cursor': isViewMode ? 'not-allowed' : ''}"
                                class="php-form-control">
                         <span class="error-msg" id="qtyError">{{errors.passengers}}</span>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">
+                <!-- View Mode Action Buttons -->
+                <div ng-if="isViewMode" style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                    <button type="button" ng-click="switchToEditMode()" class="btn-submit" style="flex: 1; background: #D97706; margin-top: 0;">
+                        ✏️ Edit This Reservation
+                    </button>
+                    <button type="button" ng-click="returnToBookings()" class="btn-php-action btn-secondary" style="padding: 10px 18px; font-size: 13px;">
+                        ← Back to Saved Records
+                    </button>
+                </div>
+
+                <!-- Edit Mode Action Buttons -->
+                <div ng-if="isEditMode" style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                    <button type="submit" class="btn-submit" style="flex: 1; background: #D97706; margin-top: 0;">
+                        💾 Save Changes & Update Reservation
+                    </button>
+                    <button type="button" ng-click="returnToBookings()" class="btn-php-action btn-secondary" style="padding: 10px 18px; font-size: 13px;">
+                        Cancel
+                    </button>
+                </div>
+
+                <!-- Create Mode Action Button -->
+                <button ng-if="!isViewMode && !isEditMode" type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">
                     🎟 Confirm Ticket & Save to System
                 </button>
             </form>

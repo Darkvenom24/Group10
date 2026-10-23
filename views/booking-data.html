@@ -39,12 +39,81 @@
                         <td>{{b.passengers}}</td>
                         <td>{{b.date}}</td>
                         <td><b style="color: var(--saffron);">₹{{b.totalFare}}</b></td>
-                        <td>
-                            <button type="button" ng-click="deleteBooking(b.id)" class="btn-php-action" style="font-size: 11px; padding: 4px 10px; background: #DC2626;">Cancel</button>
+                        <td style="white-space: nowrap;">
+                            <div style="display: inline-flex; gap: 6px; align-items: center;">
+                                <button type="button" ng-click="viewBooking(b)" class="btn-php-action" style="font-size: 11px; padding: 4px 9px; background: var(--navy); color: #FFFFFF; display: inline-flex; align-items: center; gap: 4px;" title="Open in non-editable Railway Portal Form">
+                                    <span>👁️</span> View
+                                </button>
+                                <button type="button" ng-click="editBooking(b)" class="btn-php-action" style="font-size: 11px; padding: 4px 9px; background: #D97706; color: #FFFFFF; display: inline-flex; align-items: center; gap: 4px;" title="Open in editable Railway Portal Form with filled details">
+                                    <span>✏️</span> Edit
+                                </button>
+                                <button type="button" ng-click="deleteBooking(b.id)" class="btn-php-action" style="font-size: 11px; padding: 4px 9px; background: #DC2626; color: #FFFFFF;" title="Cancel Reservation">
+                                    Cancel
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Quick View Non-Editable Portal Modal (In-Page) -->
+        <div ng-if="showModal && selectedBookingForModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;">
+            <div style="background: #FFFFFF; border-radius: 10px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); border: 2px solid var(--navy);">
+                <div style="background: var(--navy); color: #FFFFFF; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+                    <div style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <span>🚆</span> Non-Editable Railway Portal Form — PNR: {{selectedBookingForModal.pnr}}
+                    </div>
+                    <button type="button" ng-click="closeQuickView()" style="background: none; border: none; color: #FFFFFF; font-size: 20px; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; color: #1E40AF;">
+                        🔒 <b>Read-Only Mode:</b> This ticket is displayed in non-editable railway portal format. Click "Edit in Portal" to modify details.
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13px;">
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Passenger Name:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.passengerName}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Mobile Number:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.phone}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group" style="grid-column: span 2;">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Train Route:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.train}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Travel Class:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.travelClass}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Quota:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.quota}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Date of Journey:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.date}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                        <div class="php-form-group">
+                            <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Passengers Count:</label>
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.passengers}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                        </div>
+                    </div>
+
+                    <div style="background: #FFF7ED; border: 1px solid #FFD8A8; border-radius: 6px; padding: 12px 16px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; color: #9A3412; font-size: 13px;">Total Ticket Fare:</span>
+                        <span style="font-size: 20px; font-weight: 800; color: var(--saffron);">₹{{selectedBookingForModal.totalFare}}</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                        <button type="button" ng-click="closeQuickView()" class="btn-php-action btn-secondary" style="font-size: 12.5px; padding: 8px 16px;">Close</button>
+                        <button type="button" ng-click="editBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: #D97706;">✏️ Edit in Portal</button>
+                        <button type="button" ng-click="viewBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: var(--navy);">Open Full Portal View →</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Empty State (User has not filled any form yet) -->

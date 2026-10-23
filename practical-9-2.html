@@ -377,7 +377,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         function executePhp9_2(e) {
             if (e) e.preventDefault();
-            const n = parseInt(document.getElementById('numN').value) || 1;
+            const rawVal = document.getElementById('numN').value;
+            const n = parseInt(rawVal);
+            const output = document.getElementById('outputBody');
+            const numGrid = document.getElementById('numGrid');
+
+            if (isNaN(n) || n <= 0) {
+                output.innerHTML = `<span style="color: #F87171; font-weight: bold;">[PHP 8.2 Fatal Error - Uncaught ValueError]</span>
+Stack trace:
+  #0 /var/www/html/practical9_2.php(14): SequenceGenerator->generate(${isNaN(n) ? 'NULL' : n})
+  #1 {main}
+  thrown in /var/www/html/practical9_2.php on line 14
+
+<span style="color: #EF4444; font-weight: bold;">Error: Value of N must be a positive integer greater than 0. Received: ${isNaN(n) ? 'Empty/Invalid' : n}.</span>
+Negative or zero values cannot form a loop sequence from 1 to N. Please enter a valid number (e.g. 5, 10, 25).`;
+                if (numGrid) {
+                    numGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 16px; background: #FEF2F2; color: #991B1B; border: 1.5px solid #F87171; border-radius: 6px; text-align: center; font-size: 13px; font-weight: 600;">
+                        ❌ Execution Failed: Value of N must be a positive integer (&gt; 0). Negative values are not permitted.
+                    </div>`;
+                }
+                document.getElementById('execTime').innerText = '0.0000s (Error 400)';
+                return;
+            }
 
             const numbers = [];
             let gridHtml = '';
@@ -388,7 +409,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             const sum = (n * (n + 1)) / 2;
-            const output = document.getElementById('outputBody');
             output.innerHTML = `[PHP 8.2 Execution - POST /practical9_2.php]
 Input: $n = ${n}
 
@@ -402,7 +422,7 @@ Total Iterations: ${n}
 Sum of 1 to ${n}: ${sum} (using n*(n+1)/2)
 Even count: ${Math.floor(n / 2)}, Odd count: ${Math.ceil(n / 2)}`;
 
-            document.getElementById('numGrid').innerHTML = gridHtml;
+            numGrid.innerHTML = gridHtml;
             document.getElementById('execTime').innerText = (Math.random() * 0.002 + 0.001).toFixed(4) + 's';
         }
 

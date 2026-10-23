@@ -87,7 +87,8 @@
                         <div class="input-group-row">
                             <div class="php-form-group">
                                 <label>Rows Count (1 to 15):</label>
-                                <input type="number" ng-model="rows" min="1" max="15" class="php-form-control">
+                                <input type="number" ng-model="rows" min="1" max="15" class="php-form-control" ng-class="{'input-error': rows !== undefined && rows !== null && rows !== '' && rows <= 0}">
+                                <span ng-if="rows !== undefined && rows !== null && rows !== '' && rows <= 0" style="color: #DC2626; font-size: 11px; font-weight: 600; display: block; margin-top: 3px;">⚠️ Invalid: Rows must be positive (&gt; 0). Negative rows cannot form pyramids.</span>
                             </div>
                             <div class="php-form-group">
                                 <label>Pattern Character:</label>
@@ -106,7 +107,8 @@
                     <div class="runtime-status-bar">
                         <span class="status-pill ready" ng-if="!hasRun && !isRunning">● Ready to Execute</span>
                         <span class="status-pill running" ng-if="isRunning">⚡ Executing PHP 8.2...</span>
-                        <span class="status-pill success" ng-if="hasRun && !isRunning">✔ HTTP 200 OK (Exit 0)</span>
+                        <span class="status-pill success" ng-if="hasRun && !isRunning && !runtimeError">✔ HTTP 200 OK (Exit 0)</span>
+                        <span class="status-pill" style="background: #FEE2E2; color: #991B1B; border: 1px solid #F87171;" ng-if="hasRun && !isRunning && runtimeError">❌ HTTP 400 (ValueError)</span>
                         <span>Time: {{executionTime}}</span>
                     </div>
 
@@ -132,7 +134,20 @@
                         <div ng-if="hasRun" class="runtime-output-content">
                             <!-- Web Rendered Output -->
                             <div ng-if="activeOutputTab==='web'">
-                                <div style="display: flex; flex-direction: column; gap: 14px; max-height: 280px; overflow-y: auto;">
+                                <!-- Runtime Error Banner -->
+                                <div ng-if="runtimeError" style="background: #FEF2F2; border: 1.5px solid #F87171; border-radius: 6px; padding: 14px 16px; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; color: #991B1B; font-weight: 700; font-size: 13.5px; margin-bottom: 6px;">
+                                        <span>❌</span> PHP Runtime / ValueError Exception
+                                    </div>
+                                    <div style="color: #B91C1C; font-size: 13px; line-height: 1.5;">
+                                        {{runtimeError}}
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #7F1D1D; background: #FEE2E2; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+                                        <b>PHP Rule:</b> <code>str_repeat()</code> parameter 2 ($times) and geometric pyramid rows must be &gt;= 1. Negative values are mathematically invalid.
+                                    </div>
+                                </div>
+
+                                <div ng-if="!runtimeError" style="display: flex; flex-direction: column; gap: 14px; max-height: 280px; overflow-y: auto;">
                                     <div>
                                         <div style="font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px;">1. Right-Angled Half Pyramid:</div>
                                         <pre style="background: #0F172A; color: #38BDF8; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; margin: 0; overflow-x: auto;">{{patterns.right}}</pre>

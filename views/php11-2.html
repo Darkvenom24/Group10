@@ -74,7 +74,8 @@
                         </div>
                         <div class="php-form-group" style="margin-bottom: 8px;">
                             <label>Simulate Server Hour (0 to 23 hrs):</label>
-                            <input type="number" ng-model="simulatedHour" min="0" max="23" class="php-form-control">
+                            <input type="number" ng-model="simulatedHour" min="0" max="23" class="php-form-control" ng-class="{'input-error': simulatedHour !== undefined && simulatedHour !== null && simulatedHour !== '' && (simulatedHour < 0 || simulatedHour > 23)}">
+                            <span ng-if="simulatedHour !== undefined && simulatedHour !== null && simulatedHour !== '' && (simulatedHour < 0 || simulatedHour > 23)" style="color: #DC2626; font-size: 11px; font-weight: 600; display: block; margin-top: 3px;">⚠️ Invalid: Hour cannot be negative or &gt; 23 (allowed: 00 to 23).</span>
                         </div>
                         <div style="font-size: 11.5px; color: #64748B;">
                             Quick test:
@@ -95,7 +96,8 @@
                     <div class="runtime-status-bar">
                         <span class="status-pill ready" ng-if="!hasRun && !isRunning">● Ready to Execute</span>
                         <span class="status-pill running" ng-if="isRunning">⚡ Executing PHP 8.2...</span>
-                        <span class="status-pill success" ng-if="hasRun && !isRunning">✔ HTTP 200 OK (Exit 0)</span>
+                        <span class="status-pill success" ng-if="hasRun && !isRunning && !runtimeError">✔ HTTP 200 OK (Exit 0)</span>
+                        <span class="status-pill" style="background: #FEE2E2; color: #991B1B; border: 1px solid #F87171;" ng-if="hasRun && !isRunning && runtimeError">❌ HTTP 400 (RangeError)</span>
                         <span>Time: {{executionTime}}</span>
                     </div>
 
@@ -121,14 +123,29 @@
                         <div ng-if="hasRun" class="runtime-output-content">
                             <!-- Web Rendered Output -->
                             <div ng-if="activeOutputTab==='web'">
-                                <div style="text-align: center; padding: 18px; border-radius: 6px; margin-bottom: 12px;" ng-style="{'background': '#F8FAFC', 'border': '2px solid ' + greetingColor}">
-                                    <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748B;">Dynamic Greeting</span>
-                                    <div style="font-size: 26px; font-weight: 800; margin: 4px 0;" ng-style="{'color': greetingColor}">{{greeting}}</div>
-                                    <span class="php-badge badge-navy" style="font-size: 11px;">Hour: {{simulatedHour}}:00 hrs</span>
+                                <!-- Runtime Error Banner -->
+                                <div ng-if="runtimeError" style="background: #FEF2F2; border: 1.5px solid #F87171; border-radius: 6px; padding: 14px 16px; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; color: #991B1B; font-weight: 700; font-size: 13.5px; margin-bottom: 6px;">
+                                        <span>❌</span> PHP Runtime / RangeError Exception
+                                    </div>
+                                    <div style="color: #B91C1C; font-size: 13px; line-height: 1.5;">
+                                        {{runtimeError}}
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #7F1D1D; background: #FEE2E2; padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+                                        <b>PHP Rule:</b> In 24-hour timekeeping, hours range from 00 to 23. Negative hours (-X) are invalid.
+                                    </div>
                                 </div>
-                                <div style="font-size: 12.5px; color: #334155; line-height: 1.6; background: #F8FAFC; padding: 10px; border-radius: 4px;">
-                                    <div><b>Server Date:</b> {{currentDateStr}}</div>
-                                    <div><b>Calculated Time:</b> {{currentTimeStr}} (Asia/Kolkata)</div>
+
+                                <div ng-if="!runtimeError">
+                                    <div style="text-align: center; padding: 18px; border-radius: 6px; margin-bottom: 12px;" ng-style="{'background': '#F8FAFC', 'border': '2px solid ' + greetingColor}">
+                                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748B;">Dynamic Greeting</span>
+                                        <div style="font-size: 26px; font-weight: 800; margin: 4px 0;" ng-style="{'color': greetingColor}">{{greeting}}</div>
+                                        <span class="php-badge badge-navy" style="font-size: 11px;">Hour: {{simulatedHour}}:00 hrs</span>
+                                    </div>
+                                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; background: #F8FAFC; padding: 10px; border-radius: 4px;">
+                                        <div><b>Server Date:</b> {{currentDateStr}}</div>
+                                        <div><b>Calculated Time:</b> {{currentTimeStr}} (Asia/Kolkata)</div>
+                                    </div>
                                 </div>
                             </div>
 

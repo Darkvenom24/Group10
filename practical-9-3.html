@@ -400,8 +400,21 @@ echo "&lt;/pre&gt;";
 
         function executePhp9_3(e) {
             if (e) e.preventDefault();
-            const rows = parseInt(document.getElementById('numRows').value) || 5;
+            const rawRows = document.getElementById('numRows').value;
+            const rows = parseInt(rawRows);
             const mode = document.getElementById('patChar').value;
+
+            if (isNaN(rows) || rows <= 0) {
+                const errMsg = `[PHP 8.2 Fatal Error - Uncaught ValueError]
+str_repeat(): Argument #2 ($times) must be greater than or equal to 0. Given: ${isNaN(rows) ? 'NULL' : rows}
+
+Error: Number of rows must be a positive integer (>= 1).
+Negative or zero values cannot form pyramid geometry.`;
+                document.getElementById('pat1Output').innerText = `❌ Error: Rows must be >= 1. Received: ${isNaN(rows) ? 'Empty' : rows}`;
+                document.getElementById('pat2Output').innerText = errMsg;
+                document.getElementById('pat3Output').innerText = `❌ Error: Rows must be >= 1. Received: ${isNaN(rows) ? 'Empty' : rows}`;
+                return;
+            }
 
             // Pattern 1: Right-Angled
             let p1 = '';
@@ -413,10 +426,11 @@ echo "&lt;/pre&gt;";
             }
             document.getElementById('pat1Output').innerText = p1;
 
-            // Pattern 2: Centered Equilateral
+            // Pattern 2: Centered Equilateral (Safely clamp leading spaces)
             let p2 = '';
             for (let i = 1; i <= rows; i++) {
-                p2 += ' '.repeat((rows - i) * 2);
+                const spaceCount = Math.max(0, (rows - i) * 2);
+                p2 += ' '.repeat(spaceCount);
                 for (let k = 1; k <= (2 * i - 1); k++) {
                     p2 += (mode === '123' ? (k % 10) + ' ' : mode + ' ');
                 }

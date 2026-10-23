@@ -543,12 +543,34 @@ function renderSubmittedData() {
                 <td>${item.date}</td>
                 <td>₹${item.fareNum}</td>
                 <td><span class="badge status-badge">${item.status}</span></td>
-                <td><button onclick="cancelBooking(${index})" class="btn-danger">Cancel</button></td>
+                <td>
+                    <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                        <button onclick="viewBookingRecord(${index})" style="background: #1E3A8A; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 600;">👁️ View</button>
+                        <button onclick="editBookingRecord(${index})" style="background: #D97706; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 600;">✏️ Edit</button>
+                        <button onclick="cancelBooking(${index})" class="btn-danger" style="padding: 5px 9px; font-size: 11.5px;">Cancel</button>
+                    </div>
+                </td>
             </tr>`;
     });
 
     tableHTML += `</tbody></table>`;
     container.innerHTML = tableHTML;
+}
+
+function viewBookingRecord(index) {
+    const records = JSON.parse(localStorage.getItem('railwayBookingDataList')) || [];
+    const item = records[index];
+    if (!item) return;
+    const prefix = window.location.pathname.includes('Practical 3') ? '../' : '';
+    window.location.href = `${prefix}index.html#/practical/3?mode=view&id=${item.id || item.pnr}`;
+}
+
+function editBookingRecord(index) {
+    const records = JSON.parse(localStorage.getItem('railwayBookingDataList')) || [];
+    const item = records[index];
+    if (!item) return;
+    const prefix = window.location.pathname.includes('Practical 3') ? '../' : '';
+    window.location.href = `${prefix}index.html#/practical/3?mode=edit&id=${item.id || item.pnr}`;
 }
 
 // Update Dashboard Metric Widgets

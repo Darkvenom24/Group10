@@ -387,6 +387,20 @@ echo "&lt;h2&gt;Greeting: $greeting&lt;/h2&gt;";
 
             document.getElementById('liveTime').innerText = `${String(hour12).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 
+            // Range check for 24-hour cycle
+            if (hour < 0 || hour > 23) {
+                const badge = document.getElementById('greetingBadge');
+                badge.className = 'greeting-badge greet-night';
+                badge.innerText = '❌ Invalid Hour Range';
+
+                document.getElementById('outputBody').innerHTML = `<span style="color: #F87171; font-weight: bold;">[PHP 8.2 Fatal Error - Uncaught RangeError]</span>
+In 24-hour format, server hours must be within 00 to 23.
+Received out-of-range value: <b>$hour = ${hour}</b>.
+
+<span style="color: #EF4444; font-weight: bold;">Error: Negative hours or hours > 23 are invalid and do not correspond to any solar time.</span>`;
+                return;
+            }
+
             // Greeting decision logic
             let greeting = '';
             let badgeClass = '';

@@ -330,6 +330,37 @@
                 });
                 saveRaw(filtered);
                 $rootScope.$broadcast('railwayBookingsChanged');
+            },
+            getBookingById: function (id) {
+                if (!id) return null;
+                var all = getAllRaw();
+                var search = String(id).trim().toUpperCase();
+                return all.find(function (b) {
+                    return String(b.id) === search || (b.pnr && b.pnr.toUpperCase() === search);
+                }) || null;
+            },
+            update: function (booking, currentUser) {
+                var list = getAllRaw();
+                var foundIndex = -1;
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) === String(booking.id) || (list[i].pnr && list[i].pnr === booking.pnr)) {
+                        foundIndex = i;
+                        break;
+                    }
+                }
+                if (foundIndex !== -1) {
+                    var original = list[foundIndex];
+                    var updated = angular.extend({}, original, booking);
+                    updated.updatedAt = new Date().toLocaleString();
+                    if (currentUser) {
+                        updated.lastModifiedBy = currentUser.full_name;
+                    }
+                    list[foundIndex] = updated;
+                    saveRaw(list);
+                    $rootScope.$broadcast('railwayBookingsChanged');
+                    return updated;
+                }
+                return null;
             }
         };
     }]);
@@ -872,7 +903,7 @@
     }]);
 
     // Practical 3 Controller (Indian Railways Booking Portal)
-    app.controller('Practical3Controller', ['$scope', '$timeout', 'RailwayService', 'AuthService', function ($scope, $timeout, RailwayService, AuthService) {
+    app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'RailwayService', 'AuthService', function ($scope, $timeout, $location, RailwayService, AuthService) {
         $scope.currentUser = AuthService.getCurrentUser();
 
         // Authentic Express Train Routes from Original Indian Railways Portal
@@ -888,7 +919,16 @@
         // Min Date constraint: cannot book in the past
         $scope.minDate = new Date().toISOString().split('T')[0];
 
-        // Blank form model so validations trigger dynamically
+        // Mode Detection: 'create', 'view' (non-editable portal form), or 'edit' (editable form with filled details)
+        var searchParams = $location.search() || {};
+        $scope.formMode = searchParams.mode || 'create';
+        var targetId = searchParams.id || searchParams.pnr;
+        $scope.isViewMode = ($scope.formMode === 'view');
+        $scope.isEditMode = ($scope.formMode === 'edit');
+        $scope.editingBooking = null;
+        $scope.updateSuccessNotice = '';
+
+        // Form model initialization
         $scope.booking = {
             passengerName: '',
             phone: '',
@@ -906,6 +946,23 @@
         $scope.sequentialWarning = '';
         $scope.submitErrorBanner = '';
         $scope.confirmedTicket = null;
+
+        // If targetId is provided, load the existing booking for View or Edit
+        if (targetId) {
+            var loadedBooking = RailwayService.getBookingById(targetId);
+            if (loadedBooking) {
+                $scope.editingBooking = loadedBooking;
+                $scope.booking = {
+                    passengerName: loadedBooking.passengerName || '',
+                    phone: loadedBooking.phone || '',
+                    train: loadedBooking.train || '',
+                    travelClass: loadedBooking.travelClass || 'SL',
+                    quota: loadedBooking.quota || 'GN',
+                    date: loadedBooking.date || '',
+                    passengers: loadedBooking.passengers || 1
+                };
+            }
+        }
 
         // Trigger CSS shake animation on field
         $scope.triggerShake = function (fieldName) {
@@ -1129,7 +1186,53 @@
             else if ($scope.booking.quota === 'PT') quotaMult = 1.5;
             var base = 300;
             var perPassenger = (base + mult) * quotaMult;
-            return Math.round(perPassenger * ($scope.booking.passengers || 1));
+            var passengerCount = parseInt($scope.booking.passengers, 10);
+            if (isNaN(passengerCount) || passengerCount < 1) passengerCount = 1;
+            return Math.round(perPassenger * passengerCount);
+        };
+
+        // Mode Switching & Navigation Helpers
+        $scope.switchToEditMode = function () {
+            $scope.formMode = 'edit';
+            $scope.isViewMode = false;
+            $scope.isEditMode = true;
+            if ($scope.editingBooking) {
+                $location.search({ mode: 'edit', id: $scope.editingBooking.id });
+            }
+        };
+
+        $scope.switchToViewMode = function () {
+            $scope.formMode = 'view';
+            $scope.isViewMode = true;
+            $scope.isEditMode = false;
+            if ($scope.editingBooking) {
+                $location.search({ mode: 'view', id: $scope.editingBooking.id });
+            }
+        };
+
+        $scope.returnToBookings = function () {
+            $location.path('/booking-data').search({});
+        };
+
+        $scope.resetToCreateMode = function () {
+            $scope.formMode = 'create';
+            $scope.isViewMode = false;
+            $scope.isEditMode = false;
+            $scope.editingBooking = null;
+            $scope.confirmedTicket = null;
+            $scope.updateSuccessNotice = '';
+            $scope.booking = {
+                passengerName: '',
+                phone: '',
+                train: '',
+                travelClass: 'SL',
+                quota: 'GN',
+                date: '',
+                passengers: 1
+            };
+            $scope.touched = {};
+            $scope.errors = {};
+            $location.search({});
         };
 
         // Submit Booking Handler: Strict Validation Guard & Block with Custom Messages
@@ -1137,6 +1240,7 @@
             $scope.sequentialWarning = '';
             $scope.submitErrorBanner = '';
             $scope.confirmedTicket = null;
+            $scope.updateSuccessNotice = '';
 
             // Touch all fields
             $scope.touched.passengerName = true;
@@ -1180,7 +1284,29 @@
                 return false;
             }
 
-            // Valid! Create booking record
+            // If in Edit Mode, update existing booking in database!
+            if ($scope.isEditMode && $scope.editingBooking) {
+                var totalFare = $scope.calculateFare();
+                var updatedRecord = angular.extend({}, $scope.editingBooking, {
+                    passengerName: $scope.booking.passengerName.trim(),
+                    phone: $scope.booking.phone.trim(),
+                    train: $scope.booking.train,
+                    travelClass: $scope.booking.travelClass,
+                    quota: $scope.booking.quota,
+                    passengers: Math.max(1, parseInt($scope.booking.passengers, 10)),
+                    date: $scope.booking.date,
+                    totalFare: totalFare,
+                    status: 'Confirmed'
+                });
+
+                var saved = RailwayService.update(updatedRecord, $scope.currentUser);
+                $scope.confirmedTicket = saved;
+                $scope.editingBooking = saved;
+                $scope.updateSuccessNotice = "✅ Reservation (PNR: " + saved.pnr + ") successfully updated and saved in database!";
+                return true;
+            }
+
+            // Valid! Create new booking record
             var totalFare = $scope.calculateFare();
             var pnrNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
@@ -1191,7 +1317,7 @@
                 train: $scope.booking.train,
                 travelClass: $scope.booking.travelClass,
                 quota: $scope.booking.quota,
-                passengers: parseInt($scope.booking.passengers, 10),
+                passengers: Math.max(1, parseInt($scope.booking.passengers, 10)),
                 date: $scope.booking.date,
                 totalFare: totalFare,
                 status: 'Confirmed'
@@ -1256,8 +1382,10 @@
     }]);
 
     // Booking Data Controller (User-Isolated Personal Railway Records)
-    app.controller('BookingDataController', ['$scope', 'RailwayService', 'AuthService', function ($scope, RailwayService, AuthService) {
+    app.controller('BookingDataController', ['$scope', '$location', 'RailwayService', 'AuthService', function ($scope, $location, RailwayService, AuthService) {
         $scope.currentUser = AuthService.getCurrentUser();
+        $scope.selectedBookingForModal = null;
+        $scope.showModal = false;
 
         function loadBookings() {
             if ($scope.currentUser) {
@@ -1267,6 +1395,27 @@
             }
         }
         loadBookings();
+
+        // 1. View Action: Navigates to Railway Portal Form in Non-Editable Mode
+        $scope.viewBooking = function (b) {
+            $location.path('/practical/3').search({ mode: 'view', id: b.id });
+        };
+
+        // 2. Edit Action: Navigates to Railway Portal Form in Editable Mode with pre-filled details
+        $scope.editBooking = function (b) {
+            $location.path('/practical/3').search({ mode: 'edit', id: b.id });
+        };
+
+        // In-page quick preview modal
+        $scope.openQuickView = function (b) {
+            $scope.selectedBookingForModal = b;
+            $scope.showModal = true;
+        };
+
+        $scope.closeQuickView = function () {
+            $scope.showModal = false;
+            $scope.selectedBookingForModal = null;
+        };
 
         $scope.deleteBooking = function (id) {
             if (confirm('Cancel and delete booking record?')) {
@@ -1296,26 +1445,44 @@
         $scope.executionTime = '0ms';
         $scope.maxResult = null;
         $scope.stdout = '';
+        $scope.runtimeError = '';
 
         $scope.runScript = function () {
             $scope.isRunning = true;
+            $scope.runtimeError = '';
             $timeout(function () {
-                var v1 = parseFloat($scope.val1) || 0;
-                var v2 = parseFloat($scope.val2) || 0;
-                var v3 = parseFloat($scope.val3) || 0;
+                var s1 = String($scope.val1).trim();
+                var s2 = String($scope.val2).trim();
+                var s3 = String($scope.val3).trim();
+
+                var v1 = parseFloat(s1);
+                var v2 = parseFloat(s2);
+                var v3 = parseFloat(s3);
+
+                if (s1 === '' || s2 === '' || s3 === '' || isNaN(v1) || isNaN(v2) || isNaN(v3)) {
+                    $scope.runtimeError = '⚠️ PHP Runtime Error (TypeError): All 3 inputs must be valid numeric values.';
+                    $scope.stdout = 'X-Powered-By: PHP/8.2.10\nContent-Type: text/html; charset=UTF-8\n\n' +
+                        'Fatal error: Uncaught TypeError: Non-numeric parameter encountered in practical9_1.php on line 11\n\n' +
+                        'Process finished with exit code 255 (FATAL_ERROR)';
+                    $scope.executionTime = '5ms';
+                    $scope.isRunning = false;
+                    $scope.hasRun = true;
+                    return;
+                }
+
                 var maxVal = Math.max(v1, v2, v3);
                 $scope.maxResult = maxVal;
 
                 var decision = '';
-                if (v1 >= v2 && v1 >= v3) decision = 'Condition ($num1 >= $num2 && $num1 >= $num3) evaluated to TRUE';
-                else if (v2 >= v1 && v2 >= v3) decision = 'Condition ($num2 >= $num1 && $num2 >= $num3) evaluated to TRUE';
-                else decision = 'Else branch executed: $num3 is the largest value';
+                if (v1 >= v2 && v1 >= v3) decision = 'Condition ($num1 >= $num2 && $num1 >= $num3) evaluated to TRUE ($num1 = ' + v1 + ' is max)';
+                else if (v2 >= v1 && v2 >= v3) decision = 'Condition ($num2 >= $num1 && $num2 >= $num3) evaluated to TRUE ($num2 = ' + v2 + ' is max)';
+                else decision = 'Else branch executed: $num3 (' + v3 + ') is the largest value';
                 $scope.decision = decision;
 
                 $scope.stdout = 'X-Powered-By: PHP/8.2.10\nContent-Type: text/html; charset=UTF-8\n\n' +
                     '--- PHP STDOUT (practical9_1.php) ---\n' +
                     'POST Parameters: num1=' + v1 + ', num2=' + v2 + ', num3=' + v3 + '\n' +
-                    'Executing Conditional Logic...\n' +
+                    'Executing Conditional Comparison Logic...\n' +
                     'Branch Evaluated: ' + decision + '\n' +
                     'Maximum Value Computed: ' + maxVal + '\n\n' +
                     'Script completed with exit code 0';
@@ -1336,13 +1503,34 @@
         $scope.numbers = [];
         $scope.stats = { total: 0, evens: 0, odds: 0 };
         $scope.stdout = '';
+        $scope.runtimeError = '';
 
         $scope.runScript = function () {
             $scope.isRunning = true;
+            $scope.runtimeError = '';
             $timeout(function () {
-                var count = parseInt($scope.n, 10) || 1;
+                var raw = ($scope.n === undefined || $scope.n === null || $scope.n === '') ? '' : String($scope.n).trim();
+                var count = parseInt(raw, 10);
+
+                // Logical & Runtime Validation: N cannot be negative or zero
+                if (raw === '' || isNaN(count) || count <= 0) {
+                    var displayVal = (raw === '' || isNaN(count)) ? (raw || 'empty') : count;
+                    $scope.runtimeError = '⚠️ PHP Fatal / ValueError: Value of N must be a positive integer greater than zero (N > 0). Negative values (' + displayVal + ') or zero are invalid for generating sequences!';
+                    $scope.numbers = [];
+                    $scope.stats = { total: 0, evens: 0, odds: 0 };
+                    $scope.stdout = 'X-Powered-By: PHP/8.2.10\nContent-Type: text/html; charset=UTF-8\n\n' +
+                        'Fatal error: Uncaught ValueError: Input N must be a positive integer > 0 (received: ' + displayVal + ') in /var/www/html/practical9_2.php:12\n' +
+                        'Stack trace:\n' +
+                        '#0 {main}\n' +
+                        '  thrown in /var/www/html/practical9_2.php on line 12\n\n' +
+                        'Process finished with exit code 255 (FATAL_ERROR)';
+                    $scope.executionTime = '8ms';
+                    $scope.isRunning = false;
+                    $scope.hasRun = true;
+                    return;
+                }
+
                 if (count > 200) count = 200;
-                if (count < 1) count = 1;
 
                 var list = [];
                 var sum = 0, evens = 0, odds = 0;
@@ -1381,13 +1569,33 @@
         $scope.activeOutputTab = 'web';
         $scope.patterns = { right: '', centered: '', inverted: '' };
         $scope.stdout = '';
+        $scope.runtimeError = '';
 
         $scope.runScript = function () {
             $scope.isRunning = true;
+            $scope.runtimeError = '';
             $timeout(function () {
-                var r = parseInt($scope.rows, 10) || 5;
-                if (r > 15) r = 15;
-                if (r < 1) r = 1;
+                var rawRows = ($scope.rows === undefined || $scope.rows === null || $scope.rows === '') ? '' : String($scope.rows).trim();
+                var r = parseInt(rawRows, 10);
+
+                // Logical & Runtime Validation: rows cannot be negative or zero
+                if (rawRows === '' || isNaN(r) || r <= 0) {
+                    var displayR = (rawRows === '' || isNaN(r)) ? (rawRows || 'empty') : r;
+                    $scope.runtimeError = '⚠️ PHP Fatal / ValueError: Number of rows must be a positive integer between 1 and 20. Input rows (' + displayR + ') is invalid for geometric pyramid generation!';
+                    $scope.patterns = { right: '', centered: '', inverted: '' };
+                    $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                        'Fatal error: Uncaught ValueError: str_repeat(): Argument #2 ($times) must be greater than or equal to 0 (tried to repeat with negative/zero rows: ' + displayR + ') in /var/www/html/practical9_3.php:41\n' +
+                        'Stack trace:\n' +
+                        '#0 {main}\n' +
+                        '  thrown in /var/www/html/practical9_3.php on line 41\n\n' +
+                        'Process finished with exit code 255 (FATAL_ERROR)';
+                    $scope.executionTime = '7ms';
+                    $scope.isRunning = false;
+                    $scope.hasRun = true;
+                    return;
+                }
+
+                if (r > 20) r = 20;
                 var sym = $scope.symbol || '*';
 
                 // 1. Right Angled
@@ -1399,14 +1607,14 @@
                 // 2. Centered Pyramid
                 var centered = '';
                 for (var j = 1; j <= r; j++) {
-                    var spaces = ' '.repeat((r - j) * 2);
+                    var spaces = ' '.repeat(Math.max(0, (r - j) * 2));
                     centered += spaces + (sym + ' ').repeat(j) + '\n';
                 }
 
                 // 3. Inverted Pyramid
                 var inverted = '';
                 for (var k = r; k >= 1; k--) {
-                    var invSpaces = ' '.repeat((r - k) * 2);
+                    var invSpaces = ' '.repeat(Math.max(0, (r - k) * 2));
                     inverted += invSpaces + (sym + ' ').repeat(k) + '\n';
                 }
 
@@ -1419,7 +1627,6 @@
                     'Pattern 2 (Centered Pyramid):\n' + centered + '\n' +
                     'Pattern 3 (Inverted Pyramid):\n' + inverted + '\n' +
                     'Script completed with exit code 0';
-
                 $scope.executionTime = Math.floor(16 + Math.random() * 8) + 'ms';
                 $scope.isRunning = false;
                 $scope.hasRun = true;
@@ -1514,20 +1721,38 @@
         $scope.isRunning = false;
         $scope.activeOutputTab = 'web';
         $scope.stdout = '';
+        $scope.runtimeError = '';
 
         $scope.runScript = function () {
             $scope.isRunning = true;
+            $scope.runtimeError = '';
             $timeout(function () {
-                var v1 = parseFloat($scope.n1) || 0;
-                var v2 = parseFloat($scope.n2) || 0;
-                var v3 = parseFloat($scope.n3) || 0;
+                var s1 = String($scope.n1).trim();
+                var s2 = String($scope.n2).trim();
+                var s3 = String($scope.n3).trim();
+
+                var v1 = parseFloat(s1);
+                var v2 = parseFloat(s2);
+                var v3 = parseFloat(s3);
+
+                if (s1 === '' || s2 === '' || s3 === '' || isNaN(v1) || isNaN(v2) || isNaN(v3)) {
+                    $scope.runtimeError = '⚠️ PHP Runtime Error (TypeError): All 3 inputs must be valid numeric values.';
+                    $scope.stdout = 'X-Powered-By: PHP/8.2.10\nContent-Type: text/html; charset=UTF-8\n\n' +
+                        'Fatal error: Uncaught TypeError: Non-numeric parameter encountered in /var/www/html/practical11_1.php:15\n\n' +
+                        'Process finished with exit code 255 (FATAL_ERROR)';
+                    $scope.executionTime = '6ms';
+                    $scope.isRunning = false;
+                    $scope.hasRun = true;
+                    return;
+                }
+
                 $scope.max = Math.max(v1, v2, v3);
                 $scope.min = Math.min(v1, v2, v3);
 
                 $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
                     '--- PHP STDOUT (practical11_1.php) ---\n' +
                     'Inputs: numA=' + v1 + ', numB=' + v2 + ', numC=' + v3 + '\n' +
-                    'if-else Decision logic evaluated.\n' +
+                    'if-else Decision logic evaluated successfully.\n' +
                     'Maximum: ' + $scope.max + '\n' +
                     'Minimum: ' + $scope.min + '\n\n' +
                     'Script completed with exit code 0';
@@ -1546,12 +1771,33 @@
         $scope.isRunning = false;
         $scope.activeOutputTab = 'web';
         $scope.stdout = '';
+        $scope.runtimeError = '';
 
         $scope.runScript = function () {
             $scope.isRunning = true;
+            $scope.runtimeError = '';
             $timeout(function () {
+                var rawHour = ($scope.simulatedHour === undefined || $scope.simulatedHour === null || $scope.simulatedHour === '') ? '' : String($scope.simulatedHour).trim();
+                var h = parseInt(rawHour, 10);
+
+                // Logical & Runtime Validation: Hour cannot be negative or > 23
+                if (rawHour === '' || isNaN(h) || h < 0 || h > 23) {
+                    var displayH = (rawHour === '' || isNaN(h)) ? (rawHour || 'empty') : h;
+                    $scope.runtimeError = '⚠️ PHP Runtime Error (RangeError): Invalid hour (' + displayH + '). In 24-hour timekeeping, hours cannot be negative or > 23 (allowed range: 0 to 23).';
+                    $scope.greeting = '';
+                    $scope.stdout = 'X-Powered-By: PHP/8.2.10\n\n' +
+                        'Fatal error: Uncaught RangeError: Hour must be between 0 and 23, received: ' + displayH + ' in /var/www/html/practical11_2.php:16\n' +
+                        'Stack trace:\n' +
+                        '#0 {main}\n' +
+                        '  thrown in /var/www/html/practical11_2.php on line 16\n\n' +
+                        'Process finished with exit code 255 (FATAL_ERROR)';
+                    $scope.executionTime = '6ms';
+                    $scope.isRunning = false;
+                    $scope.hasRun = true;
+                    return;
+                }
+
                 var now = new Date();
-                var h = parseInt($scope.simulatedHour, 10);
                 var greeting = '';
                 var color = '';
 
