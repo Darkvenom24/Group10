@@ -1,0 +1,753 @@
+<div class="pma-master-container">
+    <!-- phpMyAdmin Fixed 240px Left Navigation Sidebar -->
+    <aside class="pma-sidebar">
+        <!-- Brand & Navigation Controls -->
+        <div class="pma-sidebar-header">
+            <div class="pma-sidebar-logo">
+                <span class="pma-logo-blue">php</span><span class="pma-logo-orange">MyAdmin</span>
+                <span class="pma-version-tag">5.2.1</span>
+            </div>
+            <div class="pma-sidebar-tools">
+                <button type="button" class="pma-tool-btn" ng-click="selectDatabase()" title="Server / Database Home">🏠</button>
+                <button type="button" class="pma-tool-btn" ng-click="loadDbStructure()" title="Reload navigation tree">🔄</button>
+                <button type="button" class="pma-tool-btn" ng-click="switchDbTab('sql')" title="SQL Query Window">⚡</button>
+                <button type="button" class="pma-tool-btn" ng-click="resetDatabaseSeed()" title="Reset All Tables to Realistic Indian Seed Data">🌱</button>
+            </div>
+        </div>
+
+        <!-- Sidebar Fast Filter -->
+        <div class="pma-sidebar-search">
+            <input type="text" ng-model="sidebarFilter" placeholder="Filter tables..." class="pma-input-filter">
+        </div>
+
+        <!-- Expandable Database Tree Structure -->
+        <div class="pma-tree-container">
+            <!-- Database Header Segment -->
+            <div class="pma-tree-db" ng-class="{'is-active': activeView === 'database'}" ng-click="selectDatabase()">
+                <span class="pma-tree-toggle" ng-click="dbTreeExpanded = !dbTreeExpanded; $event.stopPropagation()">
+                    {{dbTreeExpanded ? '[-]' : '[+]'}}
+                </span>
+                <span class="pma-tree-db-icon">🗄️</span>
+                <span class="pma-tree-db-name" title="Current Database: {{serverInfo.database}}">
+                    {{serverInfo.database}}
+                </span>
+                <span class="pma-tree-count">({{tables.length}})</span>
+            </div>
+
+            <!-- Tables List Under Database -->
+            <ul class="pma-tree-tables" ng-if="dbTreeExpanded">
+                <li ng-repeat="tbl in tables | filter: {Name: sidebarFilter}" 
+                    class="pma-tree-table-item" 
+                    ng-class="{'is-selected': activeTable === tbl.Name && activeView === 'table'}">
+                    
+                    <!-- Mini Table Browse Icon -->
+                    <span class="pma-mini-icon pma-mini-browse" 
+                          ng-click="openTableBrowse(tbl.Name); $event.stopPropagation()" 
+                          title="Browse Table: {{tbl.Name}}">
+                        📋
+                    </span>
+
+                    <!-- Mini Table Structure Icon -->
+                    <span class="pma-mini-icon pma-mini-struct" 
+                          ng-click="openTableStructure(tbl.Name); $event.stopPropagation()" 
+                          title="Structure: {{tbl.Name}}">
+                        📐
+                    </span>
+
+                    <!-- Table Name Clickable Link -->
+                    <span class="pma-table-link" ng-click="selectTable(tbl.Name)" title="{{tbl.Comment || tbl.Name}}">
+                        {{tbl.Name}}
+                    </span>
+
+                    <span class="pma-row-counter">({{tbl.Rows}})</span>
+                </li>
+            </ul>
+
+            <div class="pma-sidebar-footer">
+                <div class="pma-connection-indicator">
+                    <span class="pma-dot" ng-class="{'is-live': connectionMode === 'live_mysql', 'is-demo': connectionMode === 'client_engine'}">●</span>
+                    <span class="pma-indicator-text">{{serverStatusText}}</span>
+                </div>
+                <div class="pma-sidebar-hint">Group 10 GMCA Database Architecture</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- phpMyAdmin Main Content Area -->
+    <main class="pma-main-content">
+        
+        <!-- Top Dark Breadcrumb Bar (#235a81) -->
+        <div class="pma-breadcrumb-bar">
+            <span class="pma-bc-item" ng-click="selectDatabase()" title="Server: Cloud MySQL">
+                🖥️ Server: <b class="pma-bc-link">{{serverInfo.host}}</b>
+            </span>
+            <span class="pma-bc-sep">&gt;&gt;</span>
+            <span class="pma-bc-item" ng-click="selectDatabase()" title="Database: {{serverInfo.database}}">
+                📂 Database: <b class="pma-bc-link">{{serverInfo.database}}</b>
+            </span>
+            <span ng-if="activeView === 'table' && activeTable" class="pma-bc-sep">&gt;&gt;</span>
+            <span ng-if="activeView === 'table' && activeTable" class="pma-bc-item" ng-click="selectTable(activeTable)" title="Table: {{activeTable}}">
+                📋 Table: <b class="pma-bc-link pma-bc-active-table">{{activeTable}}</b>
+            </span>
+
+            <div class="pma-top-actions">
+                <button type="button" class="pma-top-btn" ng-click="resetDatabaseSeed()" title="Seed database with realistic Indian records">
+                    🌱 Reset Seed Data
+                </button>
+                <button type="button" class="pma-top-btn" ng-click="exportSql()" title="Export entire database as SQL dump">
+                    📥 SQL Dump
+                </button>
+                <a href="#/" class="pma-top-btn pma-top-return" title="Return to College Portal">
+                    ← Return to Portal
+                </a>
+            </div>
+        </div>
+
+        <!-- Top Navigation Tabs (Classic phpMyAdmin Bordered Tabs) -->
+        <nav class="pma-nav-tabs">
+            <!-- TABS WHEN DATABASE IS SELECTED (No specific table chosen) -->
+            <ul class="pma-tab-list" ng-if="activeView === 'database'">
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'structure'}" ng-click="switchDbTab('structure')">
+                    <span class="pma-tab-icon">📐</span> Structure
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'sql'}" ng-click="switchDbTab('sql')">
+                    <span class="pma-tab-icon">⚡</span> SQL
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'search'}" ng-click="switchDbTab('search')">
+                    <span class="pma-tab-icon">🔍</span> Search
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'query'}" ng-click="switchDbTab('query')">
+                    <span class="pma-tab-icon">⚙️</span> Query
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'export'}" ng-click="switchDbTab('export')">
+                    <span class="pma-tab-icon">📤</span> Export
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeDbTab === 'operations'}" ng-click="switchDbTab('operations')">
+                    <span class="pma-tab-icon">🛠️</span> Operations
+                </li>
+            </ul>
+
+            <!-- TABS WHEN TABLE IS SELECTED -->
+            <ul class="pma-tab-list" ng-if="activeView === 'table'">
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'browse'}" ng-click="switchTableTab('browse')">
+                    <span class="pma-tab-icon">📋</span> Browse
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'structure'}" ng-click="switchTableTab('structure')">
+                    <span class="pma-tab-icon">📐</span> Structure
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'sql'}" ng-click="switchTableTab('sql')">
+                    <span class="pma-tab-icon">⚡</span> SQL
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'search'}" ng-click="switchTableTab('search')">
+                    <span class="pma-tab-icon">🔍</span> Search
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'insert'}" ng-click="switchTableTab('insert')">
+                    <span class="pma-tab-icon">✏️</span> Insert
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'export'}" ng-click="switchTableTab('export')">
+                    <span class="pma-tab-icon">📤</span> Export
+                </li>
+                <li class="pma-tab-item" ng-class="{'active': activeTableTab === 'operations'}" ng-click="switchTableTab('operations')">
+                    <span class="pma-tab-icon">🛠️</span> Operations
+                </li>
+                <li class="pma-tab-item pma-tab-danger" ng-click="confirmEmptyTable()" title="Truncate Table">
+                    <span class="pma-tab-icon">🗑️</span> Empty
+                </li>
+                <li class="pma-tab-item pma-tab-danger" ng-click="confirmDropTable()" title="Drop Table">
+                    <span class="pma-tab-icon">❌</span> Drop
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Feedback & Notice Banners -->
+        <div ng-if="actionMessage" class="pma-banner-success">
+            <span class="pma-banner-icon">✓</span>
+            <span>{{actionMessage}}</span>
+            <button type="button" class="pma-banner-close" ng-click="actionMessage = ''">&times;</button>
+        </div>
+
+        <div ng-if="actionError" class="pma-banner-error">
+            <span class="pma-banner-icon">⚠️</span>
+            <span>{{actionError}}</span>
+            <button type="button" class="pma-banner-close" ng-click="actionError = ''">&times;</button>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- VIEW A: DATABASE STRUCTURE EXPLORER (Default Database View)         -->
+        <!-- =================================================================== -->
+        <section ng-if="activeView === 'database' && activeDbTab === 'structure'" class="pma-content-pane">
+            
+            <div class="pma-section-title">
+                <h3>Database: <code>{{serverInfo.database}}</code> &bull; Structure</h3>
+            </div>
+
+            <!-- Dense phpMyAdmin Tables Overview Table -->
+            <div class="pma-table-container">
+                <table class="pma-grid-table" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="24" class="pma-th-chk"><input type="checkbox" title="Check All"></th>
+                            <th>Table</th>
+                            <th class="pma-th-actions" style="text-align: center;">Action</th>
+                            <th class="pma-th-num">Rows</th>
+                            <th>Type</th>
+                            <th>Collation</th>
+                            <th class="pma-th-num">Size</th>
+                            <th class="pma-th-num">Overhead</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="t in tables" class="pma-grid-row" ng-class-odd="'pma-row-odd'" ng-class-even="'pma-row-even'">
+                            <td class="pma-td-chk"><input type="checkbox"></td>
+                            <td class="pma-td-name">
+                                <a href="javascript:void(0)" ng-click="selectTable(t.Name)" class="pma-table-name-link">
+                                    {{t.Name}}
+                                </a>
+                                <span ng-if="t.Comment" class="pma-table-comment" title="{{t.Comment}}">&mdash; {{t.Comment}}</span>
+                            </td>
+                            <td class="pma-td-actions">
+                                <a href="javascript:void(0)" ng-click="openTableBrowse(t.Name)" class="pma-action-link" title="Browse">
+                                    <span class="pma-act-icon">📋</span> Browse
+                                </a>
+                                <a href="javascript:void(0)" ng-click="openTableStructure(t.Name)" class="pma-action-link" title="Structure">
+                                    <span class="pma-act-icon">📐</span> Structure
+                                </a>
+                                <a href="javascript:void(0)" ng-click="selectTable(t.Name); switchTableTab('search')" class="pma-action-link" title="Search">
+                                    <span class="pma-act-icon">🔍</span> Search
+                                </a>
+                                <a href="javascript:void(0)" ng-click="selectTable(t.Name); switchTableTab('insert')" class="pma-action-link" title="Insert">
+                                    <span class="pma-act-icon">✏️</span> Insert
+                                </a>
+                                <a href="javascript:void(0)" ng-click="activeTable = t.Name; confirmEmptyTable()" class="pma-action-link pma-link-danger" title="Empty">
+                                    <span class="pma-act-icon">🗑️</span> Empty
+                                </a>
+                                <a href="javascript:void(0)" ng-click="activeTable = t.Name; confirmDropTable()" class="pma-action-link pma-link-danger" title="Drop">
+                                    <span class="pma-act-icon">❌</span> Drop
+                                </a>
+                            </td>
+                            <td class="pma-td-num">{{t.Rows | number}}</td>
+                            <td>{{t.Engine || 'InnoDB'}}</td>
+                            <td>{{t.Collation || 'utf8mb4_unicode_ci'}}</td>
+                            <td class="pma-td-num">{{t.Size_formatted}}</td>
+                            <td class="pma-td-num">-</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="pma-grid-tfoot">
+                        <tr>
+                            <th></th>
+                            <th><b>{{tables.length}} tables</b></th>
+                            <th style="text-align: center;"><b>Sum</b></th>
+                            <th class="pma-th-num"><b>{{serverInfo.total_rows | number}}</b></th>
+                            <th><b>InnoDB</b></th>
+                            <th><b>utf8mb4_unicode_ci</b></th>
+                            <th class="pma-th-num"><b>{{serverInfo.total_size_kib}} KiB</b></th>
+                            <th class="pma-th-num"><b>0 B</b></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- With Selected Dropdown -->
+            <div class="pma-with-selected-bar">
+                <span class="pma-sub-arrow">↳</span>
+                <label><input type="checkbox"> Check all</label>
+                <span class="pma-with-text">With selected:</span>
+                <select class="pma-select-action">
+                    <option value="">Choose an action...</option>
+                    <option value="empty">Empty (Truncate)</option>
+                    <option value="drop">Drop</option>
+                    <option value="optimize">Optimize table</option>
+                    <option value="check">Check table</option>
+                    <option value="analyze">Analyze table</option>
+                </select>
+            </div>
+
+            <!-- Create New Table Box -->
+            <div class="pma-box-create-table">
+                <div class="pma-box-header">
+                    <span>➕ Create table</span>
+                </div>
+                <div class="pma-box-body">
+                    <form ng-submit="createNewTable()" class="pma-create-form">
+                        <label>
+                            Name:
+                            <input type="text" ng-model="newTable.name" placeholder="new_table_name" class="pma-input-text" required>
+                        </label>
+                        <label>
+                            Number of columns:
+                            <input type="number" ng-model="newTable.columnsCount" min="1" max="20" class="pma-input-number">
+                        </label>
+                        <button type="submit" class="pma-btn-go">Go</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Server Details & Version Box -->
+            <div class="pma-server-info-box">
+                <div class="pma-info-row">
+                    <span>Database server: <b>MySQL (Cloud Internal Instance)</b></span>
+                    <span>Server version: <b>{{serverInfo.version}}</b></span>
+                    <span>Protocol version: <b>10</b></span>
+                    <span>Server charset: <b>UTF-8 Unicode (utf8mb4)</b></span>
+                </div>
+                <div class="pma-info-row" style="margin-top: 6px;">
+                    <span>Web server: <b>Vercel Serverless / Node.js Relational Environment</b></span>
+                    <span>PHP version: <b>8.2.10</b></span>
+                    <span>phpMyAdmin Version: <b>5.2.1 Authentic Clone</b></span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW B: TABLE BROWSE EXPLORER (`Browse` Tab)                         -->
+        <!-- =================================================================== -->
+        <section ng-if="activeView === 'table' && activeTableTab === 'browse'" class="pma-content-pane">
+            
+            <!-- Classic phpMyAdmin Green Confirmation Query Box (#ebf8a4) -->
+            <div class="pma-query-confirmation-box">
+                <div class="pma-confirmation-header">
+                    <span class="pma-icon-check">✓</span>
+                    <span>
+                        Showing rows {{browseData.offset}} - {{browseData.offset + browseData.rows.length}} 
+                        (~{{browseData.total}} total, Query took <b>{{browseData.executionTime}}</b> seconds.)
+                    </span>
+                </div>
+                <!-- White Monospace Code Box -->
+                <div class="pma-sql-code-box">
+                    <code>{{browseData.executedQuery}}</code>
+                    <div class="pma-sql-code-actions">
+                        <a href="javascript:void(0)" ng-click="switchTableTab('sql')">[Edit inline]</a>
+                        <a href="javascript:void(0)" ng-click="switchTableTab('sql')">[Edit]</a>
+                        <a href="javascript:void(0)" ng-click="exportSql()">[Create PHP code]</a>
+                        <a href="javascript:void(0)" ng-click="loadTableBrowse()">[Refresh]</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browse Controls Bar -->
+            <div class="pma-browse-controls">
+                <div class="pma-ctrl-group">
+                    <label>
+                        Number of rows:
+                        <select ng-model="pageSize" ng-change="changePageSize()" class="pma-select-small">
+                            <option ng-value="10">10</option>
+                            <option ng-value="25">25</option>
+                            <option ng-value="50">50</option>
+                            <option ng-value="100">100</option>
+                        </select>
+                    </label>
+
+                    <button type="button" class="pma-btn-page" ng-disabled="pageOffset === 0" ng-click="prevPage()">&lt; Prev</button>
+                    <span class="pma-page-stat">Page {{Math.floor(pageOffset / pageSize) + 1}}</span>
+                    <button type="button" class="pma-btn-page" ng-disabled="pageOffset + pageSize >= browseData.total" ng-click="nextPage()">Next &gt;</button>
+                </div>
+
+                <div class="pma-ctrl-group">
+                    <label>
+                        Filter rows:
+                        <input type="text" ng-model="tableSearch" ng-change="filterBrowseRows()" placeholder="Search this table..." class="pma-input-search">
+                    </label>
+
+                    <button type="button" class="pma-btn-page" ng-click="exportCsv()" title="Download CSV">📥 Export CSV</button>
+                    <button type="button" class="pma-btn-page" ng-click="switchTableTab('insert')">➕ Insert Row</button>
+                </div>
+            </div>
+
+            <!-- Dense Alternating Data Table with Row Action Columns -->
+            <div class="pma-table-container">
+                <table class="pma-data-grid-table" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="24" class="pma-th-chk">
+                                <input type="checkbox" ng-click="toggleSelectAllRows()" ng-checked="selectAllRows">
+                            </th>
+                            <th width="50" class="pma-th-action-col">Action</th>
+                            <th ng-repeat="col in browseData.columns" 
+                                class="pma-th-data-col" 
+                                ng-click="sortByColumn(col)" 
+                                title="Click to sort by {{col}}">
+                                <span class="pma-col-header-text">{{col}}</span>
+                                <span ng-if="sortCol === col" class="pma-sort-arrow">{{sortDir === 'ASC' ? '▲' : '▼'}}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-if="browseData.rows.length === 0">
+                            <td colspan="{{browseData.columns.length + 2}}" class="pma-td-empty">
+                                MySQL returned an empty result set (i.e. zero rows). Click 'Insert' tab to add a record.
+                            </td>
+                        </tr>
+                        <tr ng-repeat="row in browseData.rows" 
+                            class="pma-data-row" 
+                            ng-class-odd="'pma-data-odd'" 
+                            ng-class-even="'pma-data-even'">
+                            
+                            <!-- Checkbox -->
+                            <td class="pma-td-chk">
+                                <input type="checkbox" ng-model="selectedRows[row.id]">
+                            </td>
+
+                            <!-- Row Action Buttons: Edit, Copy, Delete -->
+                            <td class="pma-td-row-actions">
+                                <span class="pma-row-btn pma-btn-edit" ng-click="editRow(row)" title="Edit this row">
+                                    ✏️ <span class="pma-btn-label">Edit</span>
+                                </span>
+                                <span class="pma-row-btn pma-btn-copy" ng-click="copyRow(row)" title="Copy / Duplicate into Insert form">
+                                    📋 <span class="pma-btn-label">Copy</span>
+                                </span>
+                                <span class="pma-row-btn pma-btn-del" ng-click="deleteRow(row)" title="Delete this row from database">
+                                    ❌ <span class="pma-btn-label">Delete</span>
+                                </span>
+                            </td>
+
+                            <!-- Column Values -->
+                            <td ng-repeat="col in browseData.columns" class="pma-td-val">
+                                <span ng-if="row[col] === null || row[col] === undefined" class="pma-tag-null"><i>NULL</i></span>
+                                <span ng-if="row[col] !== null && row[col] !== undefined">{{row[col]}}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Inline Edit Modal when Edit is clicked on any row -->
+            <div ng-if="editingRow" class="pma-modal-backdrop" ng-click="cancelEditRow()">
+                <div class="pma-modal-card" ng-click="$event.stopPropagation()">
+                    <div class="pma-modal-header">
+                        <h4>Edit row in table <code>{{activeTable}}</code> (ID: {{editingRow.id}})</h4>
+                        <button type="button" class="pma-modal-close" ng-click="cancelEditRow()">&times;</button>
+                    </div>
+                    <form ng-submit="saveEditRow()" class="pma-modal-body">
+                        <table class="pma-insert-grid" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="c in tableStructure">
+                                    <td class="pma-ins-col"><b>{{c.Field}}</b></td>
+                                    <td class="pma-ins-type"><code>{{c.Type}}</code></td>
+                                    <td class="pma-ins-val">
+                                        <input type="text" ng-model="editingRow[c.Field]" class="pma-ins-input" ng-disabled="c.Field === 'id'">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pma-modal-footer">
+                            <button type="submit" class="pma-btn-go">Save Changes (Go)</button>
+                            <button type="button" class="pma-btn-cancel" ng-click="cancelEditRow()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW C: TABLE STRUCTURE EXPLORER (`Structure` Tab)                   -->
+        <!-- =================================================================== -->
+        <section ng-if="activeView === 'table' && activeTableTab === 'structure'" class="pma-content-pane">
+            
+            <div class="pma-section-title">
+                <h3>Table: <code>{{activeTable}}</code> &bull; Structure</h3>
+            </div>
+
+            <!-- Columns Table -->
+            <div class="pma-table-container">
+                <table class="pma-grid-table" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="30">#</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Collation</th>
+                            <th>Attributes</th>
+                            <th>Null</th>
+                            <th>Default</th>
+                            <th>Comments</th>
+                            <th>Extra</th>
+                            <th class="pma-th-actions" style="text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="col in tableStructure" class="pma-grid-row" ng-class-odd="'pma-row-odd'" ng-class-even="'pma-row-even'">
+                            <td>{{$index + 1}}</td>
+                            <td>
+                                <!-- Primary key icon -->
+                                <span ng-if="col.Key === 'PRI'" class="pma-key-primary" title="Primary Key">🔑</span>
+                                <span ng-if="col.Key === 'UNI'" class="pma-key-unique" title="Unique Key">🔒</span>
+                                <span ng-if="col.Key === 'MUL'" class="pma-key-index" title="Index / Foreign Key">🏷️</span>
+                                <b>{{col.Field}}</b>
+                            </td>
+                            <td><code>{{col.Type}}</code></td>
+                            <td>{{col.Collation || '-'}}</td>
+                            <td>{{col.Attributes || '-'}}</td>
+                            <td>{{col.Null}}</td>
+                            <td>{{col.Default !== null ? col.Default : 'None'}}</td>
+                            <td>{{col.Comment || '-'}}</td>
+                            <td>
+                                <span ng-if="col.Extra" class="pma-extra-pill">{{col.Extra}}</span>
+                                <span ng-if="!col.Extra">-</span>
+                            </td>
+                            <td class="pma-td-actions" style="text-align: center;">
+                                <a href="javascript:void(0)" class="pma-action-link" title="Change column definition">Change</a>
+                                <a href="javascript:void(0)" class="pma-action-link pma-link-danger" title="Drop column">Drop</a>
+                                <a href="javascript:void(0)" class="pma-action-link" title="Set as Primary">Primary</a>
+                                <a href="javascript:void(0)" class="pma-action-link" title="Set Unique">Unique</a>
+                                <a href="javascript:void(0)" class="pma-action-link" title="Set Index">Index</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Indexes Table -->
+            <div class="pma-section-sub">
+                <h4>Indexes</h4>
+                <div class="pma-table-container">
+                    <table class="pma-grid-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Keyname</th>
+                                <th>Type</th>
+                                <th>Unique</th>
+                                <th>Packed</th>
+                                <th>Column</th>
+                                <th>Cardinality</th>
+                                <th>Collation</th>
+                                <th>Null</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="idx in tableIndexes" class="pma-grid-row">
+                                <td>
+                                    <span ng-if="idx.Key_name === 'PRIMARY'">🔑</span>
+                                    <b>{{idx.Key_name}}</b>
+                                </td>
+                                <td>{{idx.Type || 'BTREE'}}</td>
+                                <td>{{idx.Unique || (idx.non_unique === 0 ? 'Yes' : 'No')}}</td>
+                                <td>No</td>
+                                <td><code>{{idx.Column_name}}</code></td>
+                                <td>{{idx.Cardinality || 6}}</td>
+                                <td>A</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Space Usage Information Box -->
+            <div class="pma-section-sub">
+                <h4>Information & Space Usage</h4>
+                <div class="pma-space-box">
+                    <div class="pma-space-card">
+                        <span class="pma-space-label">Data space:</span>
+                        <span class="pma-space-val">{{tableSpace.data_size || '16.0 KiB'}}</span>
+                    </div>
+                    <div class="pma-space-card">
+                        <span class="pma-space-label">Index space:</span>
+                        <span class="pma-space-val">{{tableSpace.index_size || '16.0 KiB'}}</span>
+                    </div>
+                    <div class="pma-space-card pma-space-total">
+                        <span class="pma-space-label">Total space:</span>
+                        <span class="pma-space-val">{{tableSpace.total_size || '32.0 KiB'}}</span>
+                    </div>
+                    <div class="pma-space-card">
+                        <span class="pma-space-label">Row count:</span>
+                        <span class="pma-space-val">{{tableSpace.row_count || browseData.total}}</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW D: TABLE INSERT TAB (`Insert` Tab)                              -->
+        <!-- =================================================================== -->
+        <section ng-if="activeView === 'table' && activeTableTab === 'insert'" class="pma-content-pane">
+            
+            <div class="pma-section-title">
+                <h3>Insert into table <code>{{activeTable}}</code></h3>
+            </div>
+
+            <form ng-submit="submitInsertRow()" class="pma-insert-form">
+                <div class="pma-table-container">
+                    <table class="pma-insert-grid" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="180">Column</th>
+                                <th width="140">Type</th>
+                                <th width="120">Function</th>
+                                <th width="60">Null</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="col in tableStructure">
+                                <td class="pma-ins-col">
+                                    <span ng-if="col.Key === 'PRI'" class="pma-key-primary">🔑</span>
+                                    <b>{{col.Field}}</b>
+                                </td>
+                                <td class="pma-ins-type">
+                                    <code>{{col.Type}}</code>
+                                </td>
+                                <td>
+                                    <select ng-model="insertFunctions[col.Field]" class="pma-select-func">
+                                        <option value="">None</option>
+                                        <option value="NOW">NOW()</option>
+                                        <option value="MD5">MD5()</option>
+                                        <option value="UPPER">UPPER()</option>
+                                        <option value="LOWER">LOWER()</option>
+                                    </select>
+                                </td>
+                                <td style="text-align: center;">
+                                    <input type="checkbox" ng-model="insertNulls[col.Field]" ng-disabled="col.Null === 'NO'">
+                                </td>
+                                <td>
+                                    <input type="text" 
+                                           ng-model="insertForm[col.Field]" 
+                                           ng-disabled="insertNulls[col.Field]" 
+                                           placeholder="{{col.Extra === 'auto_increment' ? 'auto-generated' : (col.Default || '')}}" 
+                                           class="pma-ins-input">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pma-insert-footer">
+                    <button type="submit" class="pma-btn-go-lg">Go (Insert Row)</button>
+                    <button type="button" class="pma-btn-cancel" ng-click="switchTableTab('browse')">Cancel</button>
+                </div>
+            </form>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW E: SQL QUERY RUNNER TAB (`SQL` Tab)                            -->
+        <!-- =================================================================== -->
+        <section ng-if="(activeView === 'database' && activeDbTab === 'sql') || (activeView === 'table' && activeTableTab === 'sql')" class="pma-content-pane">
+            
+            <div class="pma-section-title">
+                <h3>Run SQL query/queries on database <code>{{serverInfo.database}}</code></h3>
+            </div>
+
+            <div class="pma-sql-runner-box">
+                <!-- Large Monospace SQL Editor -->
+                <textarea ng-model="sqlQuery" 
+                          rows="7" 
+                          class="pma-sql-textarea" 
+                          placeholder="Type SQL query (e.g. SELECT * FROM users;)"></textarea>
+
+                <!-- Quick Query Helper Buttons -->
+                <div class="pma-quick-buttons">
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('SELECT * FROM `' + (activeTable || 'users') + '` WHERE 1;')">SELECT *</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('SELECT `id`, `full_name`, `email` FROM `users` WHERE 1;')">SELECT</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('INSERT INTO `' + (activeTable || 'users') + '` VALUES ();')">INSERT</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('UPDATE `' + (activeTable || 'users') + '` SET `last_login` = NOW() WHERE `id` = 1;')">UPDATE</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('DELETE FROM `' + (activeTable || 'users') + '` WHERE `id` = 99;')">DELETE</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('SHOW TABLES;')">SHOW TABLES</button>
+                    <button type="button" class="pma-quick-btn" ng-click="setQuickQuery('SHOW TABLE STATUS;')">SHOW TABLE STATUS</button>
+                    <button type="button" class="pma-quick-btn pma-btn-clear" ng-click="clearQuery()">Clear</button>
+                </div>
+
+                <!-- Run / Go Button -->
+                <div class="pma-sql-run-bar">
+                    <span class="pma-sql-hint">Supports: SELECT, INSERT, UPDATE, DELETE, SHOW, DESCRIBE, ALTER, CREATE</span>
+                    <button type="button" 
+                            class="pma-btn-go-lg" 
+                            ng-class="{'is-running': isQueryRunning}" 
+                            ng-click="runCustomQuery()">
+                        <span ng-if="!isQueryRunning">Go (Execute Query)</span>
+                        <span ng-if="isQueryRunning">⚡ Executing...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SQL Query Result Display Section -->
+            <div ng-if="sqlResult" class="pma-sql-result-wrap">
+                
+                <!-- 1. Success Message Box -->
+                <div ng-if="sqlResult.success" class="pma-query-confirmation-box">
+                    <div class="pma-confirmation-header">
+                        <span class="pma-icon-check">✓</span>
+                        <span>
+                            {{sqlResult.message || 'MySQL returned an empty result set (i.e. zero rows) or matching records:'}} 
+                            ({{sqlResult.row_count || sqlResult.affected_rows || 0}} total, Query took <b>{{sqlResult.execution_time_seconds || '0.0014'}}</b> seconds.)
+                        </span>
+                    </div>
+                    <div class="pma-sql-code-box">
+                        <code>{{sqlResult.query}}</code>
+                    </div>
+                </div>
+
+                <!-- 2. Error Message Box -->
+                <div ng-if="!sqlResult.success" class="pma-banner-error" style="margin-top: 10px;">
+                    <span class="pma-banner-icon">⚠️</span>
+                    <div>
+                        <b>Error in SQL execution:</b>
+                        <div>{{sqlResult.error}}</div>
+                    </div>
+                </div>
+
+                <!-- 3. Result Table Grid -->
+                <div ng-if="sqlResult.success && sqlResult.rows && sqlResult.rows.length > 0" class="pma-table-container" style="margin-top: 14px;">
+                    <table class="pma-data-grid-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="30">#</th>
+                                <th ng-repeat="c in sqlResult.columns">{{c}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="r in sqlResult.rows" class="pma-data-row" ng-class-odd="'pma-data-odd'" ng-class-even="'pma-data-even'">
+                                <td style="text-align: center; color: #888;">{{$index + 1}}</td>
+                                <td ng-repeat="c in sqlResult.columns">
+                                    <span ng-if="r[c] === null || r[c] === undefined" class="pma-tag-null"><i>NULL</i></span>
+                                    <span ng-if="r[c] !== null && r[c] !== undefined">{{r[c]}}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- VIEW F: OPERATIONS TAB                                              -->
+        <!-- =================================================================== -->
+        <section ng-if="(activeView === 'database' && activeDbTab === 'operations') || (activeView === 'table' && activeTableTab === 'operations')" class="pma-content-pane">
+            <div class="pma-section-title">
+                <h3>Operations &bull; {{activeView === 'table' ? ('Table `' + activeTable + '`') : ('Database `' + serverInfo.database + '`')}}</h3>
+            </div>
+
+            <div class="pma-operations-grid">
+                <div class="pma-op-card">
+                    <h4>🌱 Academic Evaluation Reset</h4>
+                    <p>Restore all 6 tables with realistic Indian names, MCA credentials, railway reservations, and audit logs.</p>
+                    <button type="button" class="pma-btn-op" ng-click="resetDatabaseSeed()">Reset All Seed Tables</button>
+                </div>
+
+                <div class="pma-op-card" ng-if="activeView === 'table'">
+                    <h4>🗑️ Truncate Table (Empty)</h4>
+                    <p>Delete all rows from table <code>{{activeTable}}</code> and reset AUTO_INCREMENT to 1.</p>
+                    <button type="button" class="pma-btn-op pma-btn-danger" ng-click="confirmEmptyTable()">TRUNCATE TABLE `{{activeTable}}`</button>
+                </div>
+
+                <div class="pma-op-card">
+                    <h4>📤 Export SQL Dump</h4>
+                    <p>Generate a complete, standard phpMyAdmin SQL dump file with CREATE TABLE and INSERT statements.</p>
+                    <button type="button" class="pma-btn-op" ng-click="exportSql()">Export SQL Dump</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
