@@ -3391,5 +3391,1147 @@ button.pin-key-btn {
     }
 }
 
+/* ==========================================================================
+   14. phpMyAdmin-Inspired Live Database Explorer Styles
+   ========================================================================== */
+.phpmyadmin-wrapper {
+    margin-bottom: 30px;
+}
+
+/* Master Top Navigation / Status Bar */
+.pma-top-bar {
+    background: linear-gradient(135deg, #0F172A, #1E293B);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+    border-left: 5px solid var(--saffron);
+}
+
+.pma-brand-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pma-logo-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pma-logo-icon {
+    font-size: 26px;
+}
+
+.pma-logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.pma-logo-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: 0.4px;
+}
+
+.pma-logo-sub {
+    font-size: 11px;
+    color: var(--saffron);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pma-server-chip, .pma-db-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    color: #E2E8F0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pma-db-highlight {
+    color: #FDE047;
+    font-family: 'Consolas', monospace;
+}
+
+.pma-status-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pma-badge-status {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pma-badge-live {
+    background: #064E3B;
+    color: #A7F3D0;
+    border: 1px solid #059669;
+}
+
+.pma-badge-demo {
+    background: #1E3A8A;
+    color: #BFDBFE;
+    border: 1px solid #3B82F6;
+}
+
+.pma-badge-checking {
+    background: #78350F;
+    color: #FDE68A;
+    border: 1px solid #D97706;
+}
+
+.pma-status-dot {
+    font-size: 10px;
+    animation: pmaPulse 1.8s infinite;
+}
+
+@keyframes pmaPulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.pma-meta-badge {
+    background: rgba(255, 255, 255, 0.1);
+    color: #CBD5E1;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pma-btn-refresh {
+    background: linear-gradient(135deg, var(--saffron), #EA580C);
+    color: #FFFFFF;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+}
+
+.pma-btn-refresh:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.45);
+}
+
+.pma-btn-dump {
+    background: #334155;
+    color: #F8FAFC;
+    border: 1px solid #475569;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.pma-btn-dump:hover {
+    background: #475569;
+}
+
+/* Fallback Notice Banner */
+.pma-notice-banner {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: #1E40AF;
+}
+
+.pma-notice-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pma-notice-icon {
+    font-size: 18px;
+}
+
+.pma-btn-probe {
+    background: #2563EB;
+    color: #FFFFFF;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pma-btn-probe:hover {
+    background: #1D4ED8;
+}
+
+.pma-alert-flash {
+    background: #DCFCE7;
+    border: 1px solid #86EFAC;
+    color: #166534;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    animation: pmaFadeIn 0.3s ease-out;
+}
+
+@keyframes pmaFadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* phpMyAdmin Workspace Layout (Sidebar + Main Area) */
+.pma-workspace {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .pma-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Left Sidebar */
+.pma-sidebar {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.pma-sidebar-header {
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pma-tree-root {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pma-tree-icon {
+    font-size: 18px;
+}
+
+.pma-tree-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--navy);
+    font-family: 'Consolas', monospace;
+}
+
+.pma-sidebar-count {
+    font-size: 11px;
+    background: #E2E8F0;
+    color: #475569;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.pma-sidebar-search {
+    padding: 10px 12px;
+    border-bottom: 1px solid #F1F5F9;
+    background: #FAFAFA;
+}
+
+.pma-sidebar-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #CBD5E1;
+    font-size: 12.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pma-sidebar-input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 2px rgba(0, 0, 128, 0.1);
+}
+
+.pma-table-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.pma-table-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border: none;
+    background: #FFFFFF;
+    text-align: left;
+    cursor: pointer;
+    border-bottom: 1px solid #F8FAFC;
+    transition: all 0.15s ease;
+    font-size: 13px;
+    color: #334155;
+    width: 100%;
+}
+
+.pma-table-item:hover {
+    background: #F1F5F9;
+    color: var(--navy);
+}
+
+.pma-table-item.pma-table-active {
+    background: #EFF6FF;
+    color: #1E40AF;
+    font-weight: 700;
+    border-left: 4px solid var(--navy);
+    padding-left: 12px;
+}
+
+.pma-table-item-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pma-table-icon {
+    color: #94A3B8;
+    font-size: 12px;
+}
+
+.pma-table-active .pma-table-icon {
+    color: var(--navy);
+}
+
+.pma-table-rows-badge {
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    background: #F1F5F9;
+    color: #64748B;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.pma-table-active .pma-table-rows-badge {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.pma-sidebar-footer {
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #64748B;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pma-sidebar-spec {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Right Content Area */
+.pma-content-area {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    padding: 20px 24px;
+    min-height: 540px;
+}
+
+.pma-table-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    border-bottom: 2px solid #F1F5F9;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+}
+
+.pma-current-table-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pma-current-table-icon {
+    font-size: 26px;
+}
+
+.pma-current-table-title h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #0F172A;
+    font-weight: 800;
+}
+
+.pma-highlight-name {
+    color: var(--navy);
+    font-family: 'Consolas', monospace;
+}
+
+.pma-table-meta-pill {
+    font-size: 11.5px;
+    color: #64748B;
+    margin-top: 2px;
+    display: inline-block;
+}
+
+/* phpMyAdmin 3 Main Tabs */
+.pma-tab-nav {
+    display: flex;
+    gap: 6px;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.pma-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.pma-tab-btn:hover {
+    color: #0F172A;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.pma-tab-btn.pma-tab-active {
+    background: #FFFFFF;
+    color: var(--navy);
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.pma-tab-counter {
+    font-size: 11px;
+    color: #64748B;
+    font-weight: normal;
+}
+
+.pma-tab-active .pma-tab-counter {
+    color: var(--saffron);
+    font-weight: 700;
+}
+
+/* Loading Overlay */
+.pma-loading-overlay {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.pma-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3.5px solid #E2E8F0;
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: pmaSpin 0.7s linear infinite;
+}
+
+@keyframes pmaSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Query Box (phpMyAdmin green SQL bar) */
+.pma-query-box {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.pma-query-box-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.pma-query-badge {
+    background: #166534;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.pma-query-text {
+    font-family: 'Consolas', monospace;
+    color: #166534;
+    font-weight: 600;
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.pma-query-time {
+    font-size: 11.5px;
+    color: #15803D;
+    font-weight: 600;
+}
+
+/* Browse Toolbar */
+.pma-browse-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.pma-filter-wrap {
+    position: relative;
+    width: 280px;
+    max-width: 100%;
+}
+
+.pma-filter-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: #94A3B8;
+}
+
+.pma-filter-input {
+    width: 100%;
+    padding: 7px 28px 7px 32px;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 12.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pma-filter-input:focus {
+    border-color: var(--navy);
+}
+
+.pma-btn-clear-filter {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.pma-browse-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pma-rows-count-text {
+    font-size: 12.5px;
+    color: #64748B;
+}
+
+.pma-btn-action {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #334155;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+}
+
+.pma-btn-action:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+/* Responsive Table Container & phpMyAdmin Table */
+.pma-table-responsive-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    max-height: 520px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.pma-data-table {
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+    width: 100%;
+}
+
+.pma-data-table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #000080;
+    color: #FFFFFF;
+}
+
+.pma-th-index {
+    width: 45px;
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 12px;
+    background: #000066;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pma-th-col {
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 12.5px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.pma-th-col:hover {
+    background: #000099;
+}
+
+.pma-th-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.pma-sort-arrow {
+    font-size: 10px;
+    color: var(--saffron);
+}
+
+.pma-data-row {
+    border-bottom: 1px solid #E2E8F0;
+    transition: background 0.1s;
+}
+
+.pma-data-row:nth-child(even) {
+    background: #F8FAFC;
+}
+
+.pma-data-row:hover {
+    background: #FEF3C7 !important;
+}
+
+.pma-td-index {
+    text-align: center;
+    font-size: 11px;
+    color: #94A3B8;
+    background: rgba(0, 0, 0, 0.02);
+    border-right: 1px solid #E2E8F0;
+    padding: 8px 10px;
+    font-family: 'Consolas', monospace;
+}
+
+.pma-td-val {
+    padding: 8px 14px;
+    border-right: 1px solid #F1F5F9;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1E293B;
+}
+
+.pma-null-tag {
+    font-style: italic;
+    color: #94A3B8;
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+}
+
+.pma-id-badge {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #BFDBFE;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+}
+
+.pma-val-text {
+    font-size: 13px;
+}
+
+.pma-empty-table-cell {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.pma-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.pma-empty-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+}
+
+.pma-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.pma-empty-sub {
+    font-size: 13px;
+    color: #64748B;
+}
+
+.pma-browse-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: #64748B;
+    padding-top: 6px;
+}
+
+/* Structure Tab Specifics */
+.pma-panel-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.pma-panel-title-bar h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #0F172A;
+    font-weight: 700;
+}
+
+.pma-structure-table thead tr {
+    background: #334155;
+}
+
+.pma-type-tag {
+    font-family: 'Consolas', monospace;
+    color: #0284C7;
+    font-weight: 600;
+    font-size: 12.5px;
+}
+
+.pma-badge-null-yes {
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.pma-badge-null-no {
+    background: #F1F5F9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.pma-key-pri {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pma-key-uni {
+    background: #CCFBF1;
+    color: #0F766E;
+    border: 1px solid #99F6E4;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.pma-key-mul {
+    background: #DBEAFE;
+    color: #1E40AF;
+    border: 1px solid #BFDBFE;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.pma-extra-badge {
+    background: #DCFCE7;
+    color: #15803D;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-family: 'Consolas', monospace;
+}
+
+.pma-structure-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+@media (max-width: 800px) {
+    .pma-structure-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pma-sub-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pma-sub-card-header {
+    background: #F1F5F9;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 10px 14px;
+}
+
+.pma-sub-card-header h4 {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.pma-sub-card-body {
+    padding: 12px 14px;
+}
+
+.pma-mini-table {
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.pma-mini-table th {
+    background: #E2E8F0;
+    color: #334155;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.pma-mini-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.pma-metric-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 12.5px;
+    color: #475569;
+    border-bottom: 1px dashed #E2E8F0;
+}
+
+/* SQL Runner Tab */
+.pma-quick-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.pma-quick-chip-btn {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #334155;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 11.5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pma-quick-chip-btn:hover {
+    background: #000080;
+    color: #FFFFFF;
+    border-color: #000080;
+}
+
+.pma-sql-editor-wrap {
+    background: #0F172A;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.pma-sql-editor-header {
+    background: #1E293B;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+}
+
+.pma-sql-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.pma-btn-clear {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #94A3B8;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.pma-btn-clear:hover {
+    background: #334155;
+    color: #FFFFFF;
+}
+
+.pma-sql-textarea {
+    width: 100%;
+    background: #0F172A;
+    color: #38BDF8;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border: none;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.pma-sql-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.pma-btn-run-go {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.3);
+    transition: all 0.2s ease;
+}
+
+.pma-btn-run-go:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(5, 150, 105, 0.45);
+}
+
+.pma-btn-run-go.is-running {
+    background: #64748B;
+    cursor: wait;
+}
+
+/* SQL Result Banners */
+.pma-alert-success {
+    background: #F0FDF4;
+    border: 1px solid #86EFAC;
+    border-left: 5px solid #16A34A;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-top: 14px;
+}
+
+.pma-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #166534;
+    font-weight: 700;
+}
+
+.pma-alert-icon {
+    font-size: 16px;
+}
+
+.pma-alert-meta {
+    font-size: 12.5px;
+    color: #15803D;
+    margin: 6px 0;
+}
+
+.pma-alert-sql {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 12.5px;
+    color: #1E293B;
+    overflow-x: auto;
+}
+
+.pma-alert-error {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-left: 5px solid #DC2626;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-top: 14px;
+}
+
+.pma-alert-error .pma-alert-header {
+    color: #991B1B;
+}
+
+.pma-error-msg {
+    color: #B91C1C;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0;
+    word-break: break-all;
+}
+
+/* Navbar DB Explorer Highlight */
+.nav-db-explorer {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px;
+    font-weight: 700 !important;
+    padding: 6px 12px !important;
+    margin-left: 4px;
+    color: #FEF08A !important;
+    border: 1px solid rgba(254, 240, 138, 0.3);
+    transition: all 0.2s ease;
+}
+
+.nav-db-explorer:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 10px rgba(254, 240, 138, 0.4);
+}
+
+
 
 

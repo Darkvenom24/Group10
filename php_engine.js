@@ -328,6 +328,318 @@
         }
     };
 
+    // Database Explorer Simulation Engine (Foolproof Fallback for Vercel evaluation)
+    const DbExplorer = {
+        getTables: function () {
+            initDatabase();
+            const users = JSON.parse(localStorage.getItem(DB_USERS_KEY) || '[]');
+            const students = JSON.parse(localStorage.getItem(DB_PRACTICAL7_KEY) || '[]');
+            const bookings = JSON.parse(localStorage.getItem('gmca_railway_bookings_v3') || '[]');
+            const logs = JSON.parse(localStorage.getItem(DB_SQL_LOG_KEY) || '[]');
+
+            return [
+                {
+                    name: 'users',
+                    engine: 'InnoDB',
+                    rows: users.length,
+                    size_kb: 16.0,
+                    collation: 'utf8mb4_unicode_ci',
+                    comment: 'System user credentials and academic roles'
+                },
+                {
+                    name: 'practical7_students',
+                    engine: 'InnoDB',
+                    rows: students.length,
+                    size_kb: 32.0,
+                    collation: 'utf8mb4_unicode_ci',
+                    comment: 'Practical 7 academic and project registration records'
+                },
+                {
+                    name: 'railway_bookings',
+                    engine: 'InnoDB',
+                    rows: bookings.length,
+                    size_kb: 48.0,
+                    collation: 'utf8mb4_unicode_ci',
+                    comment: 'Practical 3 Indian Railways booking transactions'
+                },
+                {
+                    name: 'gmca_sql_audit_logs',
+                    engine: 'InnoDB',
+                    rows: logs.length,
+                    size_kb: 16.0,
+                    collation: 'utf8mb4_unicode_ci',
+                    comment: 'Session SQL query audit trail'
+                }
+            ];
+        },
+
+        getTableDetails: function (tableName) {
+            initDatabase();
+            const t = (tableName || '').toLowerCase().trim();
+
+            if (t === 'users') {
+                const users = JSON.parse(localStorage.getItem(DB_USERS_KEY) || '[]');
+                return {
+                    table: 'users',
+                    structure: [
+                        { Field: 'id', Type: 'int(11)', Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment' },
+                        { Field: 'enrollment', Type: 'varchar(20)', Null: 'NO', Key: 'UNI', Default: null, Extra: '' },
+                        { Field: 'name', Type: 'varchar(100)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'email', Type: 'varchar(120)', Null: 'NO', Key: 'UNI', Default: null, Extra: '' },
+                        { Field: 'username', Type: 'varchar(50)', Null: 'NO', Key: 'UNI', Default: null, Extra: '' },
+                        { Field: 'password', Type: 'varchar(255)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'role', Type: 'varchar(30)', Null: 'YES', Key: '', Default: 'Student', Extra: '' },
+                        { Field: 'created_at', Type: 'timestamp', Null: 'NO', Key: '', Default: 'CURRENT_TIMESTAMP', Extra: '' }
+                    ],
+                    indexes: [
+                        { key_name: 'PRIMARY', column_name: 'id', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'enrollment', column_name: 'enrollment', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'email', column_name: 'email', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'username', column_name: 'username', non_unique: 0, index_type: 'BTREE' }
+                    ],
+                    columns: ['id', 'enrollment', 'name', 'email', 'username', 'password', 'role', 'created_at'],
+                    rows: users.map(u => ({
+                        id: u.id,
+                        enrollment: u.enrollment,
+                        name: u.name,
+                        email: u.email,
+                        username: u.username,
+                        password: '••••••••',
+                        role: u.role,
+                        created_at: u.createdAt || '2026-08-15 10:30:00'
+                    })),
+                    total_rows: users.length
+                };
+            }
+
+            if (t === 'practical7_students') {
+                const students = JSON.parse(localStorage.getItem(DB_PRACTICAL7_KEY) || '[]');
+                return {
+                    table: 'practical7_students',
+                    structure: [
+                        { Field: 'id', Type: 'int(11)', Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment' },
+                        { Field: 'enrollment', Type: 'varchar(20)', Null: 'NO', Key: 'MUL', Default: null, Extra: '' },
+                        { Field: 'full_name', Type: 'varchar(100)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'email', Type: 'varchar(120)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'phone', Type: 'varchar(15)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'department', Type: 'varchar(100)', Null: 'NO', Key: '', Default: 'MCA', Extra: '' },
+                        { Field: 'semester', Type: 'varchar(20)', Null: 'NO', Key: '', Default: 'Semester 1', Extra: '' },
+                        { Field: 'gender', Type: 'varchar(15)', Null: 'YES', Key: '', Default: 'Not Specified', Extra: '' },
+                        { Field: 'dob', Type: 'date', Null: 'YES', Key: '', Default: null, Extra: '' },
+                        { Field: 'skills', Type: 'text', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'project_title', Type: 'varchar(255)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'status', Type: 'varchar(30)', Null: 'YES', Key: '', Default: 'Submitted', Extra: '' },
+                        { Field: 'created_at', Type: 'timestamp', Null: 'NO', Key: '', Default: 'CURRENT_TIMESTAMP', Extra: '' }
+                    ],
+                    indexes: [
+                        { key_name: 'PRIMARY', column_name: 'id', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'idx_enrollment', column_name: 'enrollment', non_unique: 1, index_type: 'BTREE' }
+                    ],
+                    columns: ['id', 'enrollment', 'full_name', 'email', 'phone', 'department', 'semester', 'gender', 'skills', 'project_title', 'status', 'created_at'],
+                    rows: students.map(s => ({
+                        id: s.id,
+                        enrollment: s.enrollment,
+                        full_name: s.fullName,
+                        email: s.email,
+                        phone: s.phone,
+                        department: s.department,
+                        semester: s.semester,
+                        gender: s.gender,
+                        skills: Array.isArray(s.skills) ? s.skills.join(', ') : s.skills,
+                        project_title: s.projectTitle,
+                        status: s.status,
+                        created_at: s.createdAt
+                    })),
+                    total_rows: students.length
+                };
+            }
+
+            if (t === 'railway_bookings') {
+                const bookings = JSON.parse(localStorage.getItem('gmca_railway_bookings_v3') || '[]');
+                return {
+                    table: 'railway_bookings',
+                    structure: [
+                        { Field: 'id', Type: 'int(11)', Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment' },
+                        { Field: 'pnr', Type: 'varchar(15)', Null: 'NO', Key: 'UNI', Default: null, Extra: '' },
+                        { Field: 'passenger_name', Type: 'varchar(100)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'train_name', Type: 'varchar(120)', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'travel_class', Type: 'varchar(20)', Null: 'NO', Key: '', Default: 'SL', Extra: '' },
+                        { Field: 'passengers', Type: 'int(11)', Null: 'NO', Key: '', Default: '1', Extra: '' },
+                        { Field: 'journey_date', Type: 'date', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'total_fare', Type: 'decimal(10,2)', Null: 'NO', Key: '', Default: '0.00', Extra: '' },
+                        { Field: 'status', Type: 'varchar(20)', Null: 'YES', Key: '', Default: 'Confirmed', Extra: '' },
+                        { Field: 'user_enrollment', Type: 'varchar(20)', Null: 'NO', Key: 'MUL', Default: null, Extra: '' }
+                    ],
+                    indexes: [
+                        { key_name: 'PRIMARY', column_name: 'id', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'idx_pnr', column_name: 'pnr', non_unique: 0, index_type: 'BTREE' },
+                        { key_name: 'idx_user', column_name: 'user_enrollment', non_unique: 1, index_type: 'BTREE' }
+                    ],
+                    columns: ['id', 'pnr', 'passenger_name', 'train_name', 'travel_class', 'passengers', 'journey_date', 'total_fare', 'status', 'user_enrollment'],
+                    rows: bookings.map((b, idx) => ({
+                        id: b.id || (idx + 1),
+                        pnr: b.pnr,
+                        passenger_name: b.passengerName,
+                        train_name: b.train,
+                        travel_class: b.travelClass,
+                        passengers: b.passengers || 1,
+                        journey_date: b.date,
+                        total_fare: b.totalFare,
+                        status: b.status || 'Confirmed',
+                        user_enrollment: b.userEnrollment || '26GMCA61'
+                    })),
+                    total_rows: bookings.length
+                };
+            }
+
+            if (t === 'gmca_sql_audit_logs') {
+                const logs = JSON.parse(localStorage.getItem(DB_SQL_LOG_KEY) || '[]');
+                return {
+                    table: 'gmca_sql_audit_logs',
+                    structure: [
+                        { Field: 'id', Type: 'int(11)', Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment' },
+                        { Field: 'action', Type: 'varchar(30)', Null: 'NO', Key: '', Default: 'QUERY', Extra: '' },
+                        { Field: 'query', Type: 'text', Null: 'NO', Key: '', Default: null, Extra: '' },
+                        { Field: 'timestamp', Type: 'varchar(50)', Null: 'NO', Key: '', Default: null, Extra: '' }
+                    ],
+                    indexes: [
+                        { key_name: 'PRIMARY', column_name: 'id', non_unique: 0, index_type: 'BTREE' }
+                    ],
+                    columns: ['id', 'action', 'query', 'timestamp'],
+                    rows: logs.map((l, idx) => ({
+                        id: idx + 1,
+                        action: l.action || 'QUERY',
+                        query: l.query,
+                        timestamp: l.timestamp
+                    })),
+                    total_rows: logs.length
+                };
+            }
+
+            return null;
+        },
+
+        runQuery: function (sql) {
+            initDatabase();
+            const start = performance.now();
+            const q = (sql || '').trim();
+
+            if (!q) {
+                return { success: false, error: "Empty query string provided." };
+            }
+
+            logSQL(q, 'CONSOLE');
+
+            // Handle SHOW TABLES
+            if (/^SHOW\s+TABLES/i.test(q)) {
+                const tables = this.getTables().map(t => ({ "Tables_in_gmca_group10_db": t.name }));
+                const duration = Math.round((performance.now() - start) * 100) / 100;
+                return {
+                    success: true,
+                    query: q,
+                    execution_time_ms: duration,
+                    row_count: tables.length,
+                    columns: ["Tables_in_gmca_group10_db"],
+                    rows: tables
+                };
+            }
+
+            // Handle SELECT DATABASE(), VERSION(), USER()
+            if (/^SELECT\s+(DATABASE|VERSION|USER)/i.test(q)) {
+                const row = {
+                    "DATABASE()": "gmca_group10_db",
+                    "VERSION()": "8.0.35-GMCA-Relational-Engine",
+                    "USER()": "group10_admin@cloud-sql.internal"
+                };
+                const duration = Math.round((performance.now() - start) * 100) / 100;
+                return {
+                    success: true,
+                    query: q,
+                    execution_time_ms: duration,
+                    row_count: 1,
+                    columns: Object.keys(row),
+                    rows: [row]
+                };
+            }
+
+            // Handle DESCRIBE table / SHOW COLUMNS FROM table
+            const descMatch = q.match(/^(?:DESCRIBE|DESC|SHOW\s+COLUMNS\s+FROM)\s+[`]?([a-zA-Z0-9_]+)[`]?/i);
+            if (descMatch) {
+                const details = this.getTableDetails(descMatch[1]);
+                if (details) {
+                    const duration = Math.round((performance.now() - start) * 100) / 100;
+                    return {
+                        success: true,
+                        query: q,
+                        execution_time_ms: duration,
+                        row_count: details.structure.length,
+                        columns: ['Field', 'Type', 'Null', 'Key', 'Default', 'Extra'],
+                        rows: details.structure
+                    };
+                }
+                return {
+                    success: false,
+                    query: q,
+                    error: `#1146 - Table 'gmca_group10_db.${descMatch[1]}' doesn't exist`,
+                    execution_time_ms: Math.round((performance.now() - start) * 100) / 100
+                };
+            }
+
+            // Handle SELECT * FROM table
+            const selectMatch = q.match(/^SELECT\s+(.*?)\s+FROM\s+[`]?([a-zA-Z0-9_]+)[`]?/i);
+            if (selectMatch) {
+                const tableName = selectMatch[2];
+                const details = this.getTableDetails(tableName);
+                if (details) {
+                    let rows = details.rows;
+
+                    // Handle simple WHERE filters
+                    if (q.toLowerCase().includes('where')) {
+                        const whereClause = q.split(/where/i)[1].split(/order|limit|;/i)[0].trim();
+                        if (whereClause.includes('status =') || whereClause.includes('status=')) {
+                            const val = whereClause.split('=')[1].replace(/['";\s]/g, '');
+                            rows = rows.filter(r => String(r.status || '').toLowerCase() === val.toLowerCase());
+                        } else if (whereClause.includes('role =') || whereClause.includes('role=')) {
+                            const val = whereClause.split('=')[1].replace(/['";\s]/g, '');
+                            rows = rows.filter(r => String(r.role || '').toLowerCase() === val.toLowerCase());
+                        }
+                    }
+
+                    // Handle LIMIT
+                    const limitMatch = q.match(/LIMIT\s+(\d+)/i);
+                    if (limitMatch) {
+                        rows = rows.slice(0, parseInt(limitMatch[1], 10));
+                    }
+
+                    const duration = Math.round((performance.now() - start) * 100) / 100;
+                    return {
+                        success: true,
+                        query: q,
+                        execution_time_ms: duration,
+                        row_count: rows.length,
+                        columns: details.columns,
+                        rows: rows
+                    };
+                }
+
+                return {
+                    success: false,
+                    query: q,
+                    error: `#1146 - Table 'gmca_group10_db.${tableName}' doesn't exist`,
+                    execution_time_ms: Math.round((performance.now() - start) * 100) / 100
+                };
+            }
+
+            // Check for syntax error simulation
+            return {
+                success: false,
+                query: q,
+                error: `#1064 - You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '${q.slice(0, 30)}...'`,
+                execution_time_ms: Math.round((performance.now() - start) * 100) / 100
+            };
+        }
+    };
+
     // Code copying & file download utilities
     function copyCode(elementId, btnElem) {
         const target = document.getElementById(elementId);
@@ -366,6 +678,7 @@
     window.PhpEngine = {
         Auth: Auth,
         Practical7: Practical7,
+        DbExplorer: DbExplorer,
         copyCode: copyCode,
         downloadPhpFile: downloadPhpFile,
         logSQL: logSQL

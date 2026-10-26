@@ -76,10 +76,18 @@ Group10-1/
 │   ├── practical11_2.php                    # 11.2 Date/time greeting
 │   ├── practical11_3.php                    # 11.3 Profile form POST processor
 │   ├── practical11_4.php                    # 11.4 String operations
-│   └── practical12_crud.php                 # 12.0 Complete MySQL CRUD API & Web GUI
+│   ├── practical12_crud.php                 # 12.0 Complete MySQL CRUD API & Web GUI
+│   └── db_explorer.php                      # phpMyAdmin-Inspired Live Database Explorer Backend API
+│
+├── api/
+│   └── db_explorer.php                      # Vercel Serverless Function Proxy for Database Explorer
+│
+├── views/
+│   ├── ...
+│   └── db-explorer.html                     # phpMyAdmin Live Database Explorer Interface (Browse, Structure, SQL)
 │
 ├── php_engine.js                            # Client-Side PHP Simulation & Relational Storage Engine for Vercel
-├── style.css                                # Master Stylesheet (Tricolor theme, nested dropdowns, PHP terminals)
+├── style.css                                # Master Stylesheet (Tricolor theme, phpMyAdmin dashboard, terminals)
 ├── script.js                                # Master JavaScript for Railway Portal & Visit Counter
 │
 ├── ridham.jpeg                              # Ridham Bambhaniya's Profile Photo
@@ -87,7 +95,7 @@ Group10-1/
 ├── vaibhav.jpeg                             # Vaibhav Senjaliya's Profile Photo
 ├── temp.jpeg                                # Vaibhav Senjaliya's Profile Photo Alias
 │
-├── vercel.json                              # Vercel Deployment Configuration
+├── vercel.json                              # Vercel Deployment Configuration with PHP serverless runtime
 └── README.md                                # Comprehensive Project Documentation
 ```
 

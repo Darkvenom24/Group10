@@ -1,0 +1,544 @@
+<div class="spa-view-enter phpmyadmin-wrapper">
+    <!-- Top Breadcrumb & Quick Portal Return -->
+    <div class="spa-breadcrumb" style="margin-bottom: 12px;">
+        <a href="#/">Home</a> <span>/</span> 
+        <a href="#/php/hub">PHP Practicals</a> <span>/</span> 
+        <a href="#/php/12">Practical 12</a> <span>/</span> 
+        <span>Live Database Explorer (phpMyAdmin)</span>
+    </div>
+
+    <!-- phpMyAdmin Master Top Navbar & Status Bar -->
+    <div class="pma-top-bar">
+        <div class="pma-brand-group">
+            <div class="pma-logo-badge">
+                <span class="pma-logo-icon">🗄️</span>
+                <div class="pma-logo-text">
+                    <span class="pma-logo-title">phpMyAdmin</span>
+                    <span class="pma-logo-sub">Cloud SQL Edition</span>
+                </div>
+            </div>
+            
+            <div class="pma-server-chip">
+                <span class="pma-chip-icon">🖥️</span>
+                <span>Server: <b>{{serverInfo.host}}</b></span>
+            </div>
+
+            <div class="pma-db-chip">
+                <span class="pma-chip-icon">📂</span>
+                <span>Database: <b class="pma-db-highlight">{{serverInfo.database}}</b></span>
+            </div>
+        </div>
+
+        <div class="pma-status-group">
+            <!-- Server Status Badge -->
+            <span class="pma-badge-status" 
+                  ng-class="{'pma-badge-live': connectionMode === 'live_mysql', 'pma-badge-demo': connectionMode === 'client_engine', 'pma-badge-checking': connectionMode === 'checking'}">
+                <span class="pma-status-dot">●</span> 
+                {{serverStatusText}}
+            </span>
+
+            <span class="pma-meta-badge" title="Total Tables In Database">
+                📊 <b>{{tables.length}}</b> Tables
+            </span>
+
+            <span class="pma-meta-badge" title="Cumulative Row Count Across All Tables">
+                🔢 <b>{{serverInfo.totalRows}}</b> Total Rows
+            </span>
+
+            <!-- Refresh Live Data Button -->
+            <button type="button" class="pma-btn-refresh" ng-click="refreshLive()" title="Sync and refresh all live MySQL tables and data">
+                <span>🔄</span> Refresh Live Data
+            </button>
+            
+            <!-- SQL Dump Export Button -->
+            <button type="button" class="pma-btn-dump" ng-click="exportSql()" title="Export database schema as SQL dump">
+                <span>📥</span> SQL Dump
+            </button>
+        </div>
+    </div>
+
+    <!-- Optional Fallback Notification Banner -->
+    <div ng-if="serverInfo.fallbackNotice && connectionMode === 'client_engine'" class="pma-notice-banner">
+        <div class="pma-notice-content">
+            <span class="pma-notice-icon">💡</span>
+            <div>
+                <b>Cloud Relational Engine Active:</b> Serving persistent relational tables (<code style="background:#E2E8F0; padding:1px 4px; border-radius:3px;">users</code>, <code style="background:#E2E8F0; padding:1px 4px; border-radius:3px;">practical7_students</code>, <code style="background:#E2E8F0; padding:1px 4px; border-radius:3px;">railway_bookings</code>, <code style="background:#E2E8F0; padding:1px 4px; border-radius:3px;">gmca_sql_audit_logs</code>) with complete MySQL schemas, full CRUD, and SQL Runner support.
+            </div>
+        </div>
+        <button type="button" class="pma-btn-probe" ng-click="refreshLive()">
+            Probe Live PHP/MySQL Endpoint ⚡
+        </button>
+    </div>
+
+    <!-- Live Update Flash Feedback Alert -->
+    <div ng-if="refreshFeedback" class="pma-alert-flash">
+        {{refreshFeedback}}
+    </div>
+
+    <!-- Main phpMyAdmin Split-Screen Workspace (Left Sidebar + Right Tabs Workspace) -->
+    <div class="pma-workspace">
+        
+        <!-- LEFT SIDEBAR: Database & Table Tree -->
+        <aside class="pma-sidebar">
+            <div class="pma-sidebar-header">
+                <div class="pma-tree-root">
+                    <span class="pma-tree-icon">🗃️</span>
+                    <span class="pma-tree-title">{{serverInfo.database}}</span>
+                </div>
+                <div class="pma-sidebar-actions">
+                    <span class="pma-sidebar-count">{{tables.length}} tables</span>
+                </div>
+            </div>
+
+            <!-- Table Quick Filter Search -->
+            <div class="pma-sidebar-search">
+                <input type="text" 
+                       ng-model="sidebarFilter" 
+                       placeholder="Filter tables..." 
+                       class="pma-sidebar-input">
+            </div>
+
+            <!-- Table Items List -->
+            <div class="pma-table-list">
+                <button type="button" 
+                        ng-repeat="t in tables | filter:{name: sidebarFilter}" 
+                        class="pma-table-item" 
+                        ng-class="{'pma-table-active': activeTable === t.name}" 
+                        ng-click="selectTable(t.name)"
+                        title="{{t.comment || t.name}} ({{t.rows}} rows, {{t.engine}})">
+                    <div class="pma-table-item-name">
+                        <span class="pma-table-icon">▦</span>
+                        <span>{{t.name}}</span>
+                    </div>
+                    <span class="pma-table-rows-badge">{{t.rows}}</span>
+                </button>
+            </div>
+
+            <!-- Left Sidebar Footer: Server Specs -->
+            <div class="pma-sidebar-footer">
+                <div class="pma-sidebar-spec"><span>Engine:</span> <b>InnoDB</b></div>
+                <div class="pma-sidebar-spec"><span>Collation:</span> <b>utf8mb4</b></div>
+                <div class="pma-sidebar-spec"><span>User:</span> <b>{{serverInfo.user.split('@')[0]}}</b></div>
+            </div>
+        </aside>
+
+        <!-- RIGHT MAIN AREA: Tab Navigation & Tab Content Panels -->
+        <main class="pma-content-area">
+            
+            <!-- Table Header Bar -->
+            <div class="pma-table-header-bar">
+                <div class="pma-current-table-info">
+                    <span class="pma-current-table-icon">📋</span>
+                    <div class="pma-current-table-title">
+                        <h2>Table: <span class="pma-highlight-name">{{activeTable}}</span></h2>
+                        <span class="pma-table-meta-pill" ng-if="activeTableMeta">
+                            {{activeTableMeta.engine}} • {{tableData.total}} rows • {{activeTableMeta.size_kb}} KB
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 3 Main Tabs: Browse, Structure, SQL Runner -->
+                <div class="pma-tab-nav">
+                    <button type="button" 
+                            class="pma-tab-btn" 
+                            ng-class="{'pma-tab-active': activeTab === 'browse'}" 
+                            ng-click="switchTab('browse')">
+                        <span class="pma-tab-btn-icon">👁️</span>
+                        <span>Browse Data</span>
+                        <span class="pma-tab-counter">({{tableData.total}})</span>
+                    </button>
+
+                    <button type="button" 
+                            class="pma-tab-btn" 
+                            ng-class="{'pma-tab-active': activeTab === 'structure'}" 
+                            ng-click="switchTab('structure')">
+                        <span class="pma-tab-btn-icon">📐</span>
+                        <span>Structure / Schema</span>
+                        <span class="pma-tab-counter">({{tableStructure.length}})</span>
+                    </button>
+
+                    <button type="button" 
+                            class="pma-tab-btn" 
+                            ng-class="{'pma-tab-active': activeTab === 'sql'}" 
+                            ng-click="switchTab('sql')">
+                        <span class="pma-tab-btn-icon">⚡</span>
+                        <span>SQL Runner</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Indicator Overlay -->
+            <div ng-if="isLoading" class="pma-loading-overlay">
+                <div class="pma-spinner"></div>
+                <div style="font-weight: 700; color: #1E293B; margin-top: 10px;">Loading Live Database Data...</div>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 1: BROWSE TAB (Live Dynamic Data Table)                   -->
+            <!-- ============================================================= -->
+            <div ng-if="!isLoading && activeTab === 'browse'" class="pma-tab-panel">
+                
+                <!-- SQL Execution Ribbon Banner (phpMyAdmin style) -->
+                <div class="pma-query-box">
+                    <div class="pma-query-box-top">
+                        <span class="pma-query-badge">SQL</span>
+                        <span class="pma-query-text">{{currentQuery}}</span>
+                        <span class="pma-query-time" title="Query execution time">⏱️ {{queryTime}}</span>
+                    </div>
+                </div>
+
+                <!-- Browse Toolbar: Instant Filter, Counter, CSV Export -->
+                <div class="pma-browse-toolbar">
+                    <div class="pma-filter-wrap">
+                        <span class="pma-filter-icon">🔍</span>
+                        <input type="text" 
+                               ng-model="searchFilter" 
+                               placeholder="Filter table rows in real-time..." 
+                               class="pma-filter-input">
+                        <button type="button" ng-if="searchFilter" ng-click="searchFilter=''" class="pma-btn-clear-filter">✕</button>
+                    </div>
+
+                    <div class="pma-browse-actions">
+                        <span class="pma-rows-count-text">
+                            Showing <b>{{filteredRows.length}}</b> of <b>{{tableData.total}}</b> row(s)
+                        </span>
+
+                        <button type="button" class="pma-btn-action" ng-click="exportCsv()" title="Download tabular data as CSV">
+                            <span>📥</span> Export CSV
+                        </button>
+                        
+                        <button type="button" class="pma-btn-action" ng-click="selectTable(activeTable)" title="Reload current table">
+                            <span>🔄</span> Reload
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Responsive Data Table with Dynamic Columns -->
+                <div class="pma-table-responsive-container">
+                    <table class="pma-data-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="pma-th-index">#</th>
+                                <th ng-repeat="col in tableData.columns" 
+                                    ng-click="sortBy(col)" 
+                                    class="pma-th-col"
+                                    title="Click to sort by {{col}}">
+                                    <div class="pma-th-content">
+                                        <span>{{col}}</span>
+                                        <span class="pma-sort-arrow" ng-if="sortCol === col">
+                                            {{sortReverse ? '▼' : '▲'}}
+                                        </span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic Row Rendering with ng-repeat -->
+                            <tr ng-repeat="row in (filteredRows = (tableData.rows | filter:searchFilter | orderBy:sortCol:sortReverse))" 
+                                class="pma-data-row">
+                                <td class="pma-td-index">{{$index + 1}}</td>
+                                <td ng-repeat="col in tableData.columns" class="pma-td-val">
+                                    <!-- NULL value representation -->
+                                    <span ng-if="row[col] === null || row[col] === undefined" class="pma-null-tag">NULL</span>
+                                    <!-- Primary Key ID highlighting -->
+                                    <span ng-if="col === 'id'" class="pma-id-badge">{{row[col]}}</span>
+                                    <!-- Normal value display -->
+                                    <span ng-if="row[col] !== null && row[col] !== undefined && col !== 'id'" class="pma-val-text">
+                                        {{row[col]}}
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- Empty Filter Match State -->
+                            <tr ng-if="filteredRows.length === 0 && tableData.rows.length > 0">
+                                <td colspan="{{tableData.columns.length + 1}}" class="pma-empty-table-cell">
+                                    <div class="pma-empty-state">
+                                        <span class="pma-empty-icon">🔍</span>
+                                        <div class="pma-empty-title">No matching records found</div>
+                                        <div class="pma-empty-sub">No rows match the filter "{{searchFilter}}".</div>
+                                        <button type="button" class="pma-btn-action" style="margin-top: 10px;" ng-click="searchFilter=''">Clear Filter</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Empty Table State -->
+                            <tr ng-if="tableData.rows.length === 0">
+                                <td colspan="{{tableData.columns.length + 1}}" class="pma-empty-table-cell">
+                                    <div class="pma-empty-state">
+                                        <span class="pma-empty-icon">📭</span>
+                                        <div class="pma-empty-title">Table is currently empty</div>
+                                        <div class="pma-empty-sub">MySQL returned 0 rows for table <code>{{activeTable}}</code>.</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bottom Status Bar -->
+                <div class="pma-browse-footer">
+                    <span>MySQL returned {{tableData.rows.length}} row(s). (Query took {{queryTime}})</span>
+                    <span>Database: <b>{{serverInfo.database}}</b> | Table: <b>{{activeTable}}</b></span>
+                </div>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 2: STRUCTURE TAB (Table Schema & Field Attributes)       -->
+            <!-- ============================================================= -->
+            <div ng-if="!isLoading && activeTab === 'structure'" class="pma-tab-panel">
+                
+                <div class="pma-panel-title-bar">
+                    <h3><span>📐</span> Table Structure: <code style="color: #D97706;">`{{activeTable}}`</code></h3>
+                    <span class="pma-rows-count-text">Fields Count: <b>{{tableStructure.length}}</b></span>
+                </div>
+
+                <!-- Structure Schema Table (phpMyAdmin Exact Spec) -->
+                <div class="pma-table-responsive-container">
+                    <table class="pma-data-table pma-structure-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th>Field / Column</th>
+                                <th>Type</th>
+                                <th>Collation</th>
+                                <th>Null</th>
+                                <th>Key</th>
+                                <th>Default</th>
+                                <th>Extra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="f in tableStructure" class="pma-data-row">
+                                <td class="pma-td-index">{{$index + 1}}</td>
+                                
+                                <!-- Field Name -->
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span ng-if="f.Key === 'PRI'" class="pma-key-icon" title="Primary Key">🔑</span>
+                                        <b style="color: #0F172A; font-family: 'Consolas', monospace;">{{f.Field}}</b>
+                                    </div>
+                                </td>
+
+                                <!-- Type -->
+                                <td>
+                                    <span class="pma-type-tag">{{f.Type}}</span>
+                                </td>
+
+                                <!-- Collation -->
+                                <td style="color: #64748B; font-size: 12px;">
+                                    utf8mb4_unicode_ci
+                                </td>
+
+                                <!-- Null -->
+                                <td>
+                                    <span ng-if="f.Null === 'YES'" class="pma-badge-null-yes">YES</span>
+                                    <span ng-if="f.Null === 'NO'" class="pma-badge-null-no">NO</span>
+                                </td>
+
+                                <!-- Key (Primary in Gold, Unique in Purple, Index in Blue) -->
+                                <td>
+                                    <span ng-if="f.Key === 'PRI'" class="pma-key-pri">
+                                        🔑 PRIMARY
+                                    </span>
+                                    <span ng-if="f.Key === 'UNI'" class="pma-key-uni">
+                                        ⚡ UNIQUE
+                                    </span>
+                                    <span ng-if="f.Key === 'MUL'" class="pma-key-mul">
+                                        INDEX (MUL)
+                                    </span>
+                                    <span ng-if="!f.Key" style="color: #94A3B8;">—</span>
+                                </td>
+
+                                <!-- Default -->
+                                <td>
+                                    <span ng-if="f.Default === null" class="pma-null-tag">NULL</span>
+                                    <span ng-if="f.Default !== null" style="font-family: 'Consolas', monospace; font-size: 12.5px;">{{f.Default}}</span>
+                                </td>
+
+                                <!-- Extra (auto_increment) -->
+                                <td>
+                                    <span ng-if="f.Extra" class="pma-extra-badge">
+                                        {{f.Extra}}
+                                    </span>
+                                    <span ng-if="!f.Extra" style="color: #94A3B8;">—</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Secondary Sub-Panel: Indexes & Storage Specifications -->
+                <div class="pma-structure-grid">
+                    <!-- Indexes Card -->
+                    <div class="pma-sub-card">
+                        <div class="pma-sub-card-header">
+                            <h4><span>🔑</span> Defined Table Indexes</h4>
+                        </div>
+                        <div class="pma-sub-card-body">
+                            <table class="pma-mini-table" width="100%" ng-if="tableIndexes.length > 0">
+                                <thead>
+                                    <tr>
+                                        <th>Keyname</th>
+                                        <th>Type</th>
+                                        <th>Column</th>
+                                        <th>Unique</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="idx in tableIndexes">
+                                        <td><b>{{idx.key_name}}</b></td>
+                                        <td><span class="pma-type-tag">{{idx.index_type}}</span></td>
+                                        <td><code>{{idx.column_name}}</code></td>
+                                        <td>
+                                            <span ng-if="idx.non_unique === 0" class="pma-badge-null-no">YES</span>
+                                            <span ng-if="idx.non_unique !== 0" style="color: #64748B;">No</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div ng-if="tableIndexes.length === 0" style="padding: 12px; color: #64748B; font-size: 13px;">
+                                Primary key index assigned.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Storage Engine & Metrics Card -->
+                    <div class="pma-sub-card">
+                        <div class="pma-sub-card-header">
+                            <h4><span>⚙️</span> Storage Engine & Metrics</h4>
+                        </div>
+                        <div class="pma-sub-card-body">
+                            <div class="pma-metric-row"><span>Engine:</span> <b>InnoDB</b></div>
+                            <div class="pma-metric-row"><span>Row Format:</span> <b>Dynamic</b></div>
+                            <div class="pma-metric-row"><span>Total Rows:</span> <b>{{tableData.total}}</b></div>
+                            <div class="pma-metric-row"><span>Data Size:</span> <b>{{activeTableMeta.size_kb || 16.0}} KB</b></div>
+                            <div class="pma-metric-row"><span>Character Set:</span> <b>utf8mb4</b></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 3: SQL RUNNER TAB (Custom Query Terminal)                 -->
+            <!-- ============================================================= -->
+            <div ng-if="!isLoading && activeTab === 'sql'" class="pma-tab-panel">
+                
+                <div class="pma-panel-title-bar">
+                    <h3><span>⚡</span> Run SQL query/queries on database <code style="color: #D97706;">`{{serverInfo.database}}`</code></h3>
+                </div>
+
+                <!-- Quick Query Chips Bar -->
+                <div class="pma-quick-chips">
+                    <span style="font-size: 12.5px; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 4px;">
+                        💡 Quick Queries:
+                    </span>
+                    <button type="button" 
+                            ng-repeat="qq in quickQueries" 
+                            class="pma-quick-chip-btn" 
+                            ng-click="setQuickQuery(qq)"
+                            title="Insert query into editor">
+                        {{qq}}
+                    </button>
+                </div>
+
+                <!-- Monospace SQL Editor -->
+                <div class="pma-sql-editor-wrap">
+                    <div class="pma-sql-editor-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="pma-sql-dot" style="background: #EF4444;"></span>
+                            <span class="pma-sql-dot" style="background: #F59E0B;"></span>
+                            <span class="pma-sql-dot" style="background: #10B981;"></span>
+                            <span style="font-size: 12px; color: #94A3B8; font-family: 'Consolas', monospace; margin-left: 6px;">
+                                SQL Console — database: `{{serverInfo.database}}`
+                            </span>
+                        </div>
+                        <button type="button" class="pma-btn-clear" ng-click="clearQuery()">Clear</button>
+                    </div>
+
+                    <textarea ng-model="sqlQuery" 
+                              rows="6" 
+                              class="pma-sql-textarea" 
+                              placeholder="Type your SQL query here (e.g. SELECT * FROM users;)"></textarea>
+                </div>
+
+                <!-- Execution Action Controls -->
+                <div class="pma-sql-controls">
+                    <div style="font-size: 12px; color: #64748B;">
+                        Supports: <code>SELECT</code>, <code>SHOW</code>, <code>DESCRIBE</code>, <code>EXPLAIN</code>, and safe demo queries.
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" 
+                                class="pma-btn-run-go" 
+                                ng-class="{'is-running': isQueryRunning}" 
+                                ng-click="runCustomQuery()">
+                            <span ng-if="!isQueryRunning">▶ Run Query (Go)</span>
+                            <span ng-if="isQueryRunning">⚡ Executing Query...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Query Result Display Section -->
+                <div ng-if="sqlResult" class="pma-sql-result-area">
+                    
+                    <!-- 1. Success Banner (phpMyAdmin style green banner) -->
+                    <div ng-if="sqlResult.success" class="pma-alert-success">
+                        <div class="pma-alert-header">
+                            <span class="pma-alert-icon">✓</span>
+                            <b>MySQL returned an empty result set (i.e. zero rows) or matching records:</b>
+                        </div>
+                        <div class="pma-alert-meta">
+                            Showing rows 0 - {{sqlResult.row_count || sqlResult.affected_rows || 0}} 
+                            ({{sqlResult.row_count || sqlResult.affected_rows || 0}} total, 
+                            Query took <b>{{sqlResult.execution_time_ms}} ms</b>)
+                        </div>
+                        <div class="pma-alert-sql">
+                            <code>{{sqlResult.query}}</code>
+                        </div>
+                    </div>
+
+                    <!-- 2. Error Banner (phpMyAdmin style red error box) -->
+                    <div ng-if="!sqlResult.success" class="pma-alert-error">
+                        <div class="pma-alert-header">
+                            <span class="pma-alert-icon">⚠️</span>
+                            <b>Error in query:</b>
+                        </div>
+                        <div class="pma-error-msg">
+                            {{sqlResult.error}}
+                        </div>
+                        <div class="pma-alert-sql" ng-if="sqlResult.query">
+                            <code>{{sqlResult.query}}</code>
+                        </div>
+                    </div>
+
+                    <!-- 3. Result Tabular Grid (if rows returned) -->
+                    <div ng-if="sqlResult.success && sqlResult.rows && sqlResult.rows.length > 0" class="pma-table-responsive-container" style="margin-top: 14px;">
+                        <table class="pma-data-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th class="pma-th-index">#</th>
+                                    <th ng-repeat="c in sqlResult.columns" class="pma-th-col">
+                                        {{c}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="r in sqlResult.rows" class="pma-data-row">
+                                    <td class="pma-td-index">{{$index + 1}}</td>
+                                    <td ng-repeat="c in sqlResult.columns" class="pma-td-val">
+                                        <span ng-if="r[c] === null || r[c] === undefined" class="pma-null-tag">NULL</span>
+                                        <span ng-if="r[c] !== null && r[c] !== undefined">{{r[c]}}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+</div>
