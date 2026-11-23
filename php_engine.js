@@ -13,89 +13,30 @@
     const DB_PRACTICAL7_KEY = 'gmca_php_practical7_students';
     const DB_SQL_LOG_KEY = 'gmca_php_sql_logs';
     const DB_LOGIN_ACTIVITY_KEY = 'gmca_php_login_activity';
-    const DB_RAILWAY_BOOKINGS_KEY = 'gmca_railway_bookings_v3';
+    const DB_RAILWAY_BOOKINGS_KEY = 'gmca_railway_bookings_v4';
+    const DB_RAILWAY_SYSTEMS_KEY = 'gmca_group10_railway_systems';
     const DB_USER_PROFILES_KEY = 'gmca_php_user_profiles';
 
-    // 6 Realistic Indian Users
+    // 5 Primary Users (3 Members + 1 Station Master Admin + 1 Passenger) + Division Station Masters
     const SEED_USERS = [
-        {
-            id: 1,
-            full_name: "Ridham Bambhaniya",
-            enrollment_no: "26GMCA61",
-            email: "ridham.26gmca61@gmca.ac.in",
-            username: "ridham61",
-            password: "password123",
-            role: "Team Lead",
-            pin: "0101",
-            avatar: "ridham.jpeg",
-            last_login: "2026-10-26 12:15:00",
-            created_at: "2026-08-15 10:30:00"
-        },
-        {
-            id: 2,
-            full_name: "Riya Thakkar",
-            enrollment_no: "26GMCA33",
-            email: "riya.26gmca33@gmca.ac.in",
-            username: "riya33",
-            password: "password123",
-            role: "Student Member",
-            pin: "9898",
-            avatar: "riya.jpeg",
-            last_login: "2026-10-26 11:45:00",
-            created_at: "2026-08-15 10:30:00"
-        },
-        {
-            id: 3,
-            full_name: "Vaibhav Senjaliya",
-            enrollment_no: "26GMCA52",
-            email: "vaibhav.26gmca52@gmca.ac.in",
-            username: "vaibhav52",
-            password: "password123",
-            role: "Student Member",
-            pin: "9543",
-            avatar: "vaibhav.jpeg",
-            last_login: "2026-10-26 12:30:00",
-            created_at: "2026-08-15 10:30:00"
-        },
-        {
-            id: 4,
-            full_name: "Aarav Patel",
-            enrollment_no: "26GMCA05",
-            email: "aarav.patel@gmca.ac.in",
-            username: "aarav05",
-            password: "password123",
-            role: "Student Member",
-            pin: "1234",
-            avatar: "temp.jpeg",
-            last_login: "2026-10-25 16:20:00",
-            created_at: "2026-08-20 09:15:00"
-        },
-        {
-            id: 5,
-            full_name: "Sneha Joshi",
-            enrollment_no: "26GMCA18",
-            email: "sneha.joshi@gmca.ac.in",
-            username: "sneha18",
-            password: "password123",
-            role: "Student Member",
-            pin: "4321",
-            avatar: "temp.jpeg",
-            last_login: "2026-10-25 14:10:00",
-            created_at: "2026-08-22 11:00:00"
-        },
-        {
-            id: 6,
-            full_name: "Devansh Shah",
-            enrollment_no: "26GMCA44",
-            email: "devansh.shah@gmca.ac.in",
-            username: "devansh44",
-            password: "password123",
-            role: "Student Member",
-            pin: "5678",
-            avatar: "temp.jpeg",
-            last_login: "2026-10-24 18:30:00",
-            created_at: "2026-08-25 14:45:00"
-        }
+        { id: 1, full_name: "Ridham Bambhaniya", enrollment_no: "26GMCA61", email: "ridham.26gmca61@gmca.ac.in", username: "ridham61", password: "password123", role: "Team Lead", division: "WR-ADI", is_admin: 0, avatar: "ridham.jpeg", last_login: "2026-11-23 18:30:00", created_at: "2026-08-15 10:30:00" },
+        { id: 2, full_name: "Riya Thakkar", enrollment_no: "26GMCA33", email: "riya.26gmca33@gmca.ac.in", username: "riya33", password: "password123", role: "Student Member", division: "CR-CSMT", is_admin: 0, avatar: "riya.jpeg", last_login: "2026-11-23 17:45:00", created_at: "2026-08-15 10:30:00" },
+        { id: 3, full_name: "Vaibhav Senjaliya", enrollment_no: "26GMCA52", email: "vaibhav.26gmca52@gmca.ac.in", username: "vaibhav52", password: "password123", role: "Developer", division: "WR-ADI", is_admin: 0, avatar: "vaibhav.jpeg", last_login: "2026-11-23 19:15:00", created_at: "2026-08-15 10:30:00" },
+        { id: 4, full_name: "K. P. Rathod (Station Master)", enrollment_no: "SM-ADI-01", email: "station_master@railways.gov.in", username: "station_master", password: "password123", role: "Station Master (Admin)", division: "WR-ADI", is_admin: 1, avatar: "temp.jpeg", last_login: "2026-11-23 20:00:00", created_at: "2026-08-01 08:00:00" },
+        { id: 5, full_name: "Aarav Patel", enrollment_no: "26GMCA05", email: "aarav.patel@gmca.ac.in", username: "aarav05", password: "password123", role: "Passenger Member", division: "NR-NDLS", is_admin: 0, avatar: "temp.jpeg", last_login: "2026-11-23 16:20:00", created_at: "2026-08-20 14:15:00" },
+        { id: 6, full_name: "Rajesh Sharma (Station Master NDLS)", enrollment_no: "SM-NDLS-02", email: "sm.ndls@railways.gov.in", username: "station_master_ndls", password: "password123", role: "Station Master (Admin)", division: "NR-NDLS", is_admin: 1, avatar: "temp.jpeg", last_login: "2026-11-23 12:00:00", created_at: "2026-08-01 08:00:00" },
+        { id: 7, full_name: "Sanjay Deshmukh (Station Master CSMT)", enrollment_no: "SM-CSMT-03", email: "sm.csmt@railways.gov.in", username: "station_master_csmt", password: "password123", role: "Station Master (Admin)", division: "CR-CSMT", is_admin: 1, avatar: "temp.jpeg", last_login: "2026-11-23 12:00:00", created_at: "2026-08-01 08:00:00" },
+        { id: 8, full_name: "M. S. Ramanathan (Station Master MAS)", enrollment_no: "SM-MAS-04", email: "sm.mas@railways.gov.in", username: "station_master_mas", password: "password123", role: "Station Master (Admin)", division: "SR-MAS", is_admin: 1, avatar: "temp.jpeg", last_login: "2026-11-23 12:00:00", created_at: "2026-08-01 08:00:00" },
+        { id: 9, full_name: "Subhashish Roy (Station Master HWH)", enrollment_no: "SM-HWH-05", email: "sm.hwh@railways.gov.in", username: "station_master_hwh", password: "password123", role: "Station Master (Admin)", division: "ER-HWH", is_admin: 1, avatar: "temp.jpeg", last_login: "2026-11-23 12:00:00", created_at: "2026-08-01 08:00:00" }
+    ];
+
+    // 5 Railway Divisions with Assigned Station Masters (Requirement 6)
+    const SEED_RAILWAY_SYSTEMS = [
+        { id: 1, code: 'WR-ADI', name: 'Western Railway - Ahmedabad Division', zone: 'Western Railway', division: 'Ahmedabad (ADI)', headquarters: 'Ahmedabad, Gujarat', station_master_name: 'K. P. Rathod', station_master_username: 'station_master' },
+        { id: 2, code: 'NR-NDLS', name: 'Northern Railway - New Delhi Division', zone: 'Northern Railway', division: 'New Delhi (NDLS)', headquarters: 'New Delhi', station_master_name: 'Rajesh Sharma', station_master_username: 'station_master_ndls' },
+        { id: 3, code: 'CR-CSMT', name: 'Central Railway - Mumbai CSMT Division', zone: 'Central Railway', division: 'Mumbai CSMT', headquarters: 'Mumbai, Maharashtra', station_master_name: 'Sanjay Deshmukh', station_master_username: 'station_master_csmt' },
+        { id: 4, code: 'SR-MAS', name: 'Southern Railway - Chennai Central Division', zone: 'Southern Railway', division: 'Chennai Central (MAS)', headquarters: 'Chennai, Tamil Nadu', station_master_name: 'M. S. Ramanathan', station_master_username: 'station_master_mas' },
+        { id: 5, code: 'ER-HWH', name: 'Eastern Railway - Howrah Division', zone: 'Eastern Railway', division: 'Howrah (HWH)', headquarters: 'Kolkata, West Bengal', station_master_name: 'Subhashish Roy', station_master_username: 'station_master_hwh' }
     ];
 
     // 6 Realistic Login Activity Logs
@@ -108,15 +49,120 @@
         { id: 6, user_email: "devansh.shah@gmca.ac.in", ip_address: "14.139.122.9", user_agent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_6) Mobile/15E148", login_time: "2026-10-24 18:30:00", status: "SUCCESS" }
     ];
 
-    // 6 Realistic Railway Bookings
-    const SEED_RAILWAY_BOOKINGS = [
-        { id: 101, pnr: "PNR748291", passenger_name: "Ridham Bambhaniya", train_name: "12957 - Ahmedabad Swarna Jayanti Rajdhani", travel_class: "3A", quota: "GN", passengers: 2, journey_date: "2026-11-15", total_fare: 2400.00, status: "Confirmed", user_enrollment: "26GMCA61", booking_date: "2026-10-01 10:15:00" },
-        { id: 102, pnr: "PNR831902", passenger_name: "Ridham Bambhaniya", train_name: "22953 - Gujarat SF Express", travel_class: "SL", quota: "GN", passengers: 1, journey_date: "2026-11-22", total_fare: 400.00, status: "Confirmed", user_enrollment: "26GMCA61", booking_date: "2026-10-05 14:20:00" },
-        { id: 201, pnr: "PNR612944", passenger_name: "Riya Thakkar", train_name: "12009 - Mumbai Central Vande Bharat Express", travel_class: "2A", quota: "GN", passengers: 1, journey_date: "2026-11-18", total_fare: 1800.00, status: "Confirmed", user_enrollment: "26GMCA33", booking_date: "2026-10-04 11:30:00" },
-        { id: 301, pnr: "PNR930182", passenger_name: "Vaibhav Senjaliya", train_name: "12957 - Ahmedabad Swarna Jayanti Rajdhani", travel_class: "2A", quota: "GN", passengers: 1, journey_date: "2026-11-25", total_fare: 1800.00, status: "Confirmed", user_enrollment: "26GMCA52", booking_date: "2026-10-06 09:40:00" },
-        { id: 302, pnr: "PNR441920", passenger_name: "Vaibhav Senjaliya", train_name: "19038 - Avadh Express", travel_class: "SL", quota: "GN", passengers: 2, journey_date: "2026-11-29", total_fare: 700.00, status: "Confirmed", user_enrollment: "26GMCA52", booking_date: "2026-10-08 16:50:00" },
-        { id: 401, pnr: "PNR552199", passenger_name: "Aarav Patel", train_name: "12901 - Gujarat Mail", travel_class: "3A", quota: "GN", passengers: 1, journey_date: "2026-12-05", total_fare: 950.00, status: "Confirmed", user_enrollment: "26GMCA05", booking_date: "2026-10-12 13:00:00" }
-    ];
+    // Deterministic 525 Seeded Bookings Generator (105 per user across 5 divisions)
+    function generateInitial525Bookings() {
+        var existing = [];
+        try {
+            existing = JSON.parse(localStorage.getItem('gmca_railway_bookings_v4') || '[]');
+        } catch (e) {}
+        if (existing && existing.length >= 100) {
+            return existing;
+        }
+
+        var users = [
+            { id: 1, name: "Ridham Bambhaniya", enroll: "26GMCA61", sys: "WR-ADI" },
+            { id: 2, name: "Riya Thakkar", enroll: "26GMCA33", sys: "CR-CSMT" },
+            { id: 3, name: "Vaibhav Senjaliya", enroll: "26GMCA52", sys: "WR-ADI" },
+            { id: 4, name: "K. P. Rathod (Station Master)", enroll: "SM-ADI-01", sys: "WR-ADI" },
+            { id: 5, name: "Aarav Patel", enroll: "26GMCA05", sys: "NR-NDLS" }
+        ];
+        var systems = ["WR-ADI", "NR-NDLS", "CR-CSMT", "SR-MAS", "ER-HWH"];
+        var trains = {
+            'WR-ADI': [
+                { name: '12957 - Swarna Jayanti Rajdhani', base: 2400 },
+                { name: '22953 - Gujarat SF Express', base: 450 },
+                { name: '12009 - Vande Bharat Express', base: 1400 },
+                { name: '19038 - Avadh Express', base: 750 }
+            ],
+            'NR-NDLS': [
+                { name: '12424 - Dibrugarh Rajdhani', base: 3100 },
+                { name: '22436 - Vande Bharat Varanasi', base: 1750 },
+                { name: '12004 - Lucknow Shatabdi', base: 1150 }
+            ],
+            'CR-CSMT': [
+                { name: '22221 - CSMT Rajdhani Express', base: 2850 },
+                { name: '12123 - Deccan Queen Superfast', base: 390 },
+                { name: '12137 - Punjab Mail', base: 890 }
+            ],
+            'SR-MAS': [
+                { name: '12621 - Tamil Nadu Express', base: 2700 },
+                { name: '20643 - Vande Bharat Coimbatore', base: 1550 },
+                { name: '12675 - Kovai Superfast Express', base: 480 }
+            ],
+            'ER-HWH': [
+                { name: '12301 - Howrah Rajdhani Express', base: 2950 },
+                { name: '22301 - Vande Bharat Jalpaiguri', base: 1600 },
+                { name: '12321 - Mumbai Mail via Chheoki', base: 920 }
+            ]
+        };
+
+        var classes = ['1A', '2A', '3A', 'SL', 'CC', 'EC'];
+        var statuses = ['Confirmed', 'Confirmed', 'Confirmed', 'RAC', 'Waiting List'];
+        var quotas = ['GN', 'GN', 'GN', 'TQ', 'LD'];
+        var coaches = { '1A': 'H1', '2A': 'A1', '3A': 'B2', 'SL': 'S4', 'CC': 'C1', 'EC': 'E1' };
+
+        var all = [];
+        var idCounter = 1;
+
+        users.forEach(function (u) {
+            for (var i = 1; i <= 105; i++) {
+                var sysCode = (i <= 65) ? u.sys : systems[(i + u.id) % systems.length];
+                var trainList = trains[sysCode] || trains['WR-ADI'];
+                var tr = trainList[i % trainList.length];
+                var cls = classes[(i + u.id) % classes.length];
+                var st = statuses[(i * 3 + u.id) % statuses.length];
+                var q = quotas[(i + 2) % quotas.length];
+
+                var day = String((i % 28) + 1).padStart(2, '0');
+                var month = String(((i % 12) + 1)).padStart(2, '0');
+                var jDate = '2026-' + month + '-' + day;
+                var bDate = '2026-' + String(((i % 11) + 1)).padStart(2, '0') + '-' + String((i % 27) + 1).padStart(2, '0') + ' 10:30:00';
+
+                var pnr = 'PNR' + (100000 + idCounter);
+                var seat = (coaches[cls] || 'S1') + '-' + ((i % 72) + 1);
+                var mult = { '1A': 3.5, '2A': 2.5, '3A': 1.8, 'SL': 1.0, 'CC': 1.2, 'EC': 3.0 }[cls] || 1.0;
+                var fare = Math.round(tr.base * mult);
+
+                var paxName = u.name;
+                if (i % 5 === 0) paxName = u.name + ' & Family';
+                else if (i % 7 === 0) paxName = 'Colleague of ' + u.name.split(' ')[0];
+
+                all.push({
+                    id: idCounter,
+                    pnr: pnr,
+                    user_id: u.id,
+                    userId: u.id,
+                    booked_by: u.name + ' (' + u.enroll + ')',
+                    bookedBy: u.name + ' (' + u.enroll + ')',
+                    user_enrollment: u.enroll,
+                    userEnrollment: u.enroll,
+                    passenger_name: paxName,
+                    passengerName: paxName,
+                    train_name: tr.name,
+                    train: tr.name,
+                    travel_class: cls,
+                    travelClass: cls,
+                    quota: q,
+                    journey_date: jDate,
+                    date: jDate,
+                    passengers: (i % 3) + 1,
+                    system_code: sysCode,
+                    systemCode: sysCode,
+                    total_fare: fare,
+                    totalFare: fare,
+                    status: st,
+                    coach_seat: seat,
+                    coachSeat: seat,
+                    booking_date: bDate,
+                    bookingDate: bDate
+                });
+                idCounter++;
+            }
+        });
+        return all;
+    }
+
+    const SEED_RAILWAY_BOOKINGS = generateInitial525Bookings();
 
     // 6 Realistic Practical 7 Student Records
     const SEED_STUDENTS = [
@@ -294,6 +340,24 @@
 
     // Table Schema Metadata for authentic Table Structure view
     const TABLE_SCHEMAS = {
+        railway_systems: {
+            columns: [
+                { Field: 'id', Type: 'int(11)', Collation: null, Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment', Privileges: 'select,insert,update,references', Comment: 'System division ID' },
+                { Field: 'code', Type: 'varchar(20)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: 'UNI', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Division code (e.g. WR-ADI)' },
+                { Field: 'name', Type: 'varchar(100)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Full division name' },
+                { Field: 'zone', Type: 'varchar(50)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Railway zone' },
+                { Field: 'division', Type: 'varchar(50)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Division name' },
+                { Field: 'headquarters', Type: 'varchar(50)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Division HQ' },
+                { Field: 'station_master_name', Type: 'varchar(100)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: null, Extra: '', Privileges: 'select,insert,update,references', Comment: 'Assigned Station Master' },
+                { Field: 'station_master_username', Type: 'varchar(50)', Collation: 'utf8mb4_unicode_ci', Null: 'NO', Key: '', Default: 'station_master', Extra: '', Privileges: 'select,insert,update,references', Comment: 'Station Master username' }
+            ],
+            indexes: [
+                { Keyname: 'PRIMARY', Type: 'BTREE', Unique: 'Yes', Packed: 'No', Column: 'id', Cardinality: 5, Collation: 'A', Null: 'No' },
+                { Keyname: 'code', Type: 'BTREE', Unique: 'Yes', Packed: 'No', Column: 'code', Cardinality: 5, Collation: 'A', Null: 'No' }
+            ],
+            comment: '5 Indian Railways Divisions with dedicated Station Masters (Requirement 6)'
+        },
+
         users: {
             columns: [
                 { Field: 'id', Type: 'int(11)', Collation: null, Null: 'NO', Key: 'PRI', Default: null, Extra: 'auto_increment', Privileges: 'select,insert,update,references', Comment: 'Primary key user identifier' },
@@ -417,6 +481,9 @@
         if (force || !localStorage.getItem(DB_LOGIN_ACTIVITY_KEY)) {
             localStorage.setItem(DB_LOGIN_ACTIVITY_KEY, JSON.stringify(SEED_LOGIN_ACTIVITY));
         }
+        if (force || !localStorage.getItem(DB_RAILWAY_SYSTEMS_KEY)) {
+            localStorage.setItem(DB_RAILWAY_SYSTEMS_KEY, JSON.stringify(SEED_RAILWAY_SYSTEMS));
+        }
         if (force || !localStorage.getItem(DB_RAILWAY_BOOKINGS_KEY)) {
             localStorage.setItem(DB_RAILWAY_BOOKINGS_KEY, JSON.stringify(SEED_RAILWAY_BOOKINGS));
         }
@@ -454,6 +521,7 @@
         switch (t) {
             case 'users': return DB_USERS_KEY;
             case 'login_activity': return DB_LOGIN_ACTIVITY_KEY;
+            case 'railway_systems': return DB_RAILWAY_SYSTEMS_KEY;
             case 'railway_bookings': return DB_RAILWAY_BOOKINGS_KEY;
             case 'practical7_students': return DB_PRACTICAL7_KEY;
             case 'user_profiles': return DB_USER_PROFILES_KEY;
@@ -519,7 +587,7 @@
 
         getDbStructure: function () {
             initDatabase();
-            const tableNames = ['users', 'login_activity', 'railway_bookings', 'practical7_students', 'user_profiles', 'sql_query_logs'];
+            const tableNames = ['users', 'railway_systems', 'railway_bookings', 'login_activity', 'practical7_students', 'sql_query_logs'];
             let totalRows = 0;
             let totalData = 0;
             let totalIndex = 0;
@@ -674,6 +742,27 @@
             });
 
             const newRow = Object.assign({}, rowData);
+            if (t === 'railway_bookings') {
+                newRow.passengerName = newRow.passengerName || newRow.passenger_name;
+                newRow.passenger_name = newRow.passenger_name || newRow.passengerName;
+                newRow.train = newRow.train || newRow.train_name;
+                newRow.train_name = newRow.train_name || newRow.train;
+                newRow.travelClass = newRow.travelClass || newRow.travel_class || 'SL';
+                newRow.travel_class = newRow.travel_class || newRow.travelClass;
+                newRow.systemCode = newRow.systemCode || newRow.system_code || 'WR-ADI';
+                newRow.system_code = newRow.system_code || newRow.systemCode;
+                newRow.totalFare = newRow.totalFare || newRow.total_fare || 850;
+                newRow.total_fare = newRow.total_fare || newRow.totalFare;
+                newRow.date = newRow.date || newRow.journey_date || new Date().toISOString().split('T')[0];
+                newRow.journey_date = newRow.journey_date || newRow.date;
+                newRow.bookedBy = newRow.bookedBy || newRow.booked_by || 'Passenger';
+                newRow.booked_by = newRow.booked_by || newRow.bookedBy;
+                newRow.userEnrollment = newRow.userEnrollment || newRow.user_enrollment || '26GMCA61';
+                newRow.user_enrollment = newRow.user_enrollment || newRow.userEnrollment;
+                newRow.status = newRow.status || 'Confirmed';
+                newRow.coachSeat = newRow.coachSeat || newRow.coach_seat || 'B2-21';
+                newRow.coach_seat = newRow.coach_seat || newRow.coachSeat;
+            }
             if (!newRow.id) newRow.id = nextId;
 
             // Timestamp defaults

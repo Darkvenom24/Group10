@@ -2,203 +2,228 @@
     <div class="spa-card">
         <!-- Breadcrumbs -->
         <div class="spa-breadcrumb">
-            <a href="#/">Home</a> <span>/</span> <a href="#/practical/3">Practical 3</a> <span>/</span> <span>Railway Reservations & Laravel Pagination</span>
+            <a href="#/">Home</a> <span>/</span> <a href="#/practical/3">Practical 3</a> <span>/</span> <span>Railway Records</span>
         </div>
 
         <!-- Header Bar -->
         <div class="spa-header-bar">
             <div>
-                <h2><span>🎫</span> Indian Railways Reservations & Laravel Pagination Hub</h2>
-                <div style="font-size: 12.5px; color: #64748B; margin-top: 2px;">
-                    Multi-Division Railway System &bull; 5 User Profiles &bull; Minimum 100 Entries/Account &bull; Laravel Eloquent Paginator
+                <h2><span>🎫</span> Railway Records</h2>
+                <div style="font-size: 13px; color: #64748B; margin-top: 3px;">
+                    Indian Railways Online Reservation Records & Master Travel Dataset
                 </div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <a href="#/laravel" class="btn-php-action" style="font-size: 12px; text-decoration: none; background: #DC2626;">🔴 Laravel Architecture</a>
-                <a href="#/practical/3" class="btn-php-action" style="font-size: 12px; text-decoration: none; background: var(--navy);">+ Book New Ticket</a>
+                <a href="#/practical/3" class="btn-php-action" style="font-size: 12px; text-decoration: none; background: var(--navy); color: #FFFFFF;">
+                    + Book New Ticket
+                </a>
+                <a href="#/phpmyadmin" class="btn-php-action" style="font-size: 12px; text-decoration: none; background: #0284C7; color: #FFFFFF;" title="Inspect raw SQL database tables">
+                    🗄️ Open in phpMyAdmin
+                </a>
             </div>
         </div>
 
-        <!-- 6 Requirements Verification Badges -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px;">
-            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 10px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700; color: #1E40AF; text-transform: uppercase;">Req 1 & 4: Pagination</div>
-                <div style="font-size: 14px; font-weight: 800; color: #1E3A8A; margin-top: 2px;">Laravel Paginator</div>
-                <div style="font-size: 11px; color: #3B82F6;">15 per page &bull; Page window</div>
-            </div>
-            <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 6px; padding: 10px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase;">Req 2: Total Users</div>
-                <div style="font-size: 14px; font-weight: 800; color: #15803D; margin-top: 2px;">5 Users</div>
-                <div style="font-size: 11px; color: #22C55E;">3 Members + 1 Admin + 1 Pax</div>
-            </div>
-            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase;">Req 3: Entries/Account</div>
-                <div style="font-size: 14px; font-weight: 800; color: #B45309; margin-top: 2px;">105 Entries / User</div>
-                <div style="font-size: 11px; color: #D97706;">525 Total Bookings Seeded</div>
-            </div>
-            <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 10px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700; color: #991B1B; text-transform: uppercase;">Req 5: Admin Role</div>
-                <div style="font-size: 14px; font-weight: 800; color: #DC2626; margin-top: 2px;">station_master</div>
-                <div style="font-size: 11px; color: #EF4444;">Station Master (Admin)</div>
-            </div>
-            <div style="background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: 6px; padding: 10px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700; color: #6B21A8; text-transform: uppercase;">Req 6: Systems</div>
-                <div style="font-size: 14px; font-weight: 800; color: #7E22CE; margin-top: 2px;">5 Railway Divisions</div>
-                <div style="font-size: 11px; color: #A855F7;">5 Dedicated Station Masters</div>
-            </div>
-        </div>
-
-        <!-- Requirement 6: Railway Systems / Divisions Selector -->
-        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-                <span style="font-size: 12.5px; font-weight: 700; color: #1E293B;">
-                    🏛️ Select Railway Division / System (Requirement 6):
-                </span>
-                <span style="font-size: 11.5px; color: #64748B;">Showing data specific to selected division</span>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button type="button"
-                        ng-click="filterBySystem('')"
-                        class="btn-php-action"
-                        style="font-size: 12px; padding: 6px 12px;"
-                        ng-class="{'btn-secondary': selectedSystem !== ''}"
-                        ng-style="selectedSystem === '' ? {'background': 'var(--navy)', 'color': '#FFFFFF'} : {}">
-                    🌐 All Divisions (5 Systems)
-                </button>
-                <button type="button"
-                        ng-repeat="sys in systems"
-                        ng-click="filterBySystem(sys.code)"
-                        class="btn-php-action"
-                        style="font-size: 12px; padding: 6px 12px;"
-                        ng-class="{'btn-secondary': selectedSystem !== sys.code}"
-                        ng-style="selectedSystem === sys.code ? {'background': sys.badge, 'color': '#FFFFFF', 'font-weight': '700'} : {}">
-                    <span>{{sys.code}}</span> &bull; <span>{{sys.division}}</span>
-                </button>
-            </div>
-
-            <!-- Active Division Info Banner -->
-            <div ng-if="selectedSystem && getActiveDivisionObj()" style="margin-top: 10px; padding: 8px 12px; background: #FFFFFF; border-left: 4px solid {{getActiveDivisionObj().badge}}; border-radius: 4px; font-size: 12px; color: #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <!-- 1. Regular User (Passenger / Student) Dashboard View -->
+        <div ng-if="!isAdminUser" style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 26px;">👤</span>
                 <div>
-                    <b>{{getActiveDivisionObj().name}}</b> &bull; HQ: {{getActiveDivisionObj().hq}}
+                    <div style="font-size: 14.5px; font-weight: 700; color: #1E293B;">
+                        Personal Dashboard: {{currentUser.full_name}}
+                    </div>
+                    <div style="font-size: 12.5px; color: #64748B; margin-top: 2px;">
+                        Enrollment: <b style="color: var(--navy);">{{currentUser.enrollment_no}}</b> &bull; Account: <b>{{currentUser.username}}</b> &bull; Showing your personal travel records
+                    </div>
                 </div>
-                <div>
-                    Assigned Admin: <b style="color: #DC2626;">{{getActiveDivisionObj().admin}}</b> (Username: <code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">{{getActiveDivisionObj().adminUser}}</code>)
-                </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="php-badge badge-php" style="background: #166534; color: #FFFFFF; font-size: 12px; padding: 4px 10px;">
+                    {{totalFiltered}} Personal Records
+                </span>
+                <button type="button" ng-click="switchToAdmin()" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 12px;" title="Switch to Station Master Admin to view master multi-division dataset">
+                    👑 Station Master View
+                </button>
             </div>
         </div>
 
-        <!-- Requirement 2 & 3: User Accounts Selector (Minimum 100 Entries Per User) -->
-        <div style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-                <span style="font-size: 12.5px; font-weight: 700; color: #166534;">
-                    👤 Filter by User Account (Requirements 2 & 3: Min 100 entries per user):
-                </span>
-                <span style="font-size: 11.5px; color: #15803D;">Click user to filter entries or switch active session</span>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                <button type="button"
-                        ng-repeat="u in primaryUsers"
-                        ng-click="filterByUser(u.enrollment_no)"
-                        class="btn-php-action"
-                        style="font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;"
-                        ng-class="{'btn-secondary': selectedUserEnroll !== u.enrollment_no}"
-                        ng-style="selectedUserEnroll === u.enrollment_no ? {'background': u.isAdmin ? '#DC2626' : '#166534', 'color': '#FFFFFF', 'font-weight': '700'} : {}">
-                    <span>{{u.isAdmin ? '🛡️' : '👤'}}</span>
-                    <span>{{u.full_name.split(' ')[0]}} ({{u.username}})</span>
-                    <span style="background: rgba(255,255,255,0.3); padding: 1px 6px; border-radius: 10px; font-size: 10.5px;">105 entries</span>
-                </button>
-                <button type="button"
-                        ng-click="filterByUser('ALL')"
-                        class="btn-php-action"
-                        style="font-size: 12px; padding: 6px 12px;"
-                        ng-class="{'btn-secondary': selectedUserEnroll !== 'ALL'}"
-                        ng-style="selectedUserEnroll === 'ALL' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}">
-                    🌐 All Users (525 Total)
-                </button>
+        <!-- 2. Station Master (Admin) Dashboard View -->
+        <div ng-if="isAdminUser" style="background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 26px;">👑</span>
+                    <div>
+                        <div style="font-size: 15px; font-weight: 800; color: #92400E;">
+                            Station Master Administrative Control Panel
+                        </div>
+                        <div style="font-size: 12px; color: #B45309; margin-top: 2px;">
+                            Master Access: <b>{{currentUser.full_name}}</b> (Username: <code>{{currentUser.username}}</code>) &bull; Managing All 5 Railway Divisions & Users
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="php-badge badge-php" style="background: #DC2626; color: #FFFFFF; font-size: 11.5px; padding: 4px 10px;">
+                        Admin Mode Active
+                    </span>
+                    <button type="button" ng-click="switchToMember('26GMCA61')" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 12px;" title="Switch to regular student view">
+                        👤 Switch to Student View
+                    </button>
+                </div>
             </div>
 
-            <!-- 1-Click Session Switcher -->
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #86EFAC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px;">
-                <div style="color: #166534;">
-                    Current Active Logged-In User: <b>{{currentUser.full_name}}</b> (Enrollment: <b>{{currentUser.enrollment_no}}</b>)
+            <!-- Railway Division Filter Tabs (for Station Master) -->
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #FDE68A;">
+                <div style="font-size: 12px; font-weight: 700; color: #78350F; margin-bottom: 8px;">
+                    Select Railway Division:
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center;">
-                    <span style="color: #64748B; font-size: 11px;">1-Click Login As:</span>
-                    <button type="button" ng-repeat="u in primaryUsers" ng-click="quickSwitchUser(u)" class="btn-php-action btn-secondary" style="font-size: 10.5px; padding: 3px 7px;">
-                        {{u.username}}
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                    <button type="button"
+                            ng-click="filterBySystem('')"
+                            class="btn-php-action"
+                            style="font-size: 11.5px; padding: 5px 12px;"
+                            ng-class="{'btn-secondary': selectedSystem !== ''}"
+                            ng-style="selectedSystem === '' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}">
+                        🌐 All Divisions (5 Systems)
+                    </button>
+                    <button type="button"
+                            ng-repeat="sys in systems"
+                            ng-click="filterBySystem(sys.code)"
+                            class="btn-php-action"
+                            style="font-size: 11.5px; padding: 5px 12px;"
+                            ng-class="{'btn-secondary': selectedSystem !== sys.code}"
+                            ng-style="selectedSystem === sys.code ? {'background': sys.badge, 'color': '#FFFFFF', 'font-weight': '700'} : {}">
+                        {{sys.code}} &bull; {{sys.division}}
+                    </button>
+                </div>
+
+                <!-- Division Station Master Card -->
+                <div ng-if="selectedSystem && getActiveDivisionObj()" style="margin-top: 8px; padding: 8px 12px; background: #FFFFFF; border-left: 3px solid {{getActiveDivisionObj().badge}}; border-radius: 4px; font-size: 12px; color: #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <div><b>{{getActiveDivisionObj().name}}</b> &bull; HQ: {{getActiveDivisionObj().hq}}</div>
+                    <div>Division Station Master: <b style="color: #DC2626;">{{getActiveDivisionObj().admin}}</b> (<code>{{getActiveDivisionObj().adminUser}}</code>)</div>
+                </div>
+            </div>
+
+            <!-- User Filter Tabs (for Station Master) -->
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #FDE68A;">
+                <div style="font-size: 12px; font-weight: 700; color: #78350F; margin-bottom: 8px;">
+                    Filter by User Account:
+                </div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                    <button type="button"
+                            ng-click="filterByUser('ALL')"
+                            class="btn-php-action"
+                            style="font-size: 11px; padding: 4px 10px;"
+                            ng-class="{'btn-secondary': selectedUserEnroll !== 'ALL'}"
+                            ng-style="selectedUserEnroll === 'ALL' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}">
+                        All Users
+                    </button>
+                    <button type="button"
+                            ng-repeat="u in primaryUsers"
+                            ng-click="filterByUser(u.enrollment_no)"
+                            class="btn-php-action"
+                            style="font-size: 11px; padding: 4px 10px;"
+                            ng-class="{'btn-secondary': selectedUserEnroll !== u.enrollment_no}"
+                            ng-style="selectedUserEnroll === u.enrollment_no ? {'background': '#B45309', 'color': '#FFFFFF', 'font-weight': '700'} : {}">
+                        {{u.full_name.split(' ')[0]}} ({{u.username}})
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Search Bar & Pagination Selector -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-            <!-- Live Search -->
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 400px;">
-                <input type="text"
-                       class="php-form-control"
-                       ng-model="searchQuery"
-                       ng-change="onSearch()"
-                       placeholder="🔍 Search PNR, Passenger, Train, Class, Status..."
-                       style="font-size: 13px; padding: 8px 12px; border-radius: 6px;">
+        <!-- Search Bar, Class Filter & Per Page Controls -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+            <div style="display: flex; gap: 8px; flex: 1; max-width: 500px; flex-wrap: wrap;">
+                <div style="position: relative; flex: 1; min-width: 220px;">
+                    <input type="text"
+                           ng-model="searchQuery"
+                           ng-change="onSearchChange()"
+                           placeholder="🔍 Search PNR, Passenger, Train..."
+                           class="php-form-control"
+                           style="padding-left: 12px; font-size: 13px; height: 38px;">
+                </div>
+                <select ng-model="filterClass" ng-change="applyFilter()" class="php-form-control" style="width: 140px; font-size: 12.5px; height: 38px;">
+                    <option value="">All Classes</option>
+                    <option value="1A">1A (First AC)</option>
+                    <option value="2A">2A (Second AC)</option>
+                    <option value="3A">3A (Third AC)</option>
+                    <option value="SL">SL (Sleeper)</option>
+                    <option value="CC">CC (Chair Car)</option>
+                    <option value="EC">EC (Executive CC)</option>
+                </select>
             </div>
 
-            <!-- Per-Page Dropdown (Requirement 4: Laravel LengthAwarePaginator) -->
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #475569;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748B;">
                 <span>Show:</span>
-                <select class="php-form-control" ng-model="perPage" ng-change="setPerPage(perPage)" style="width: auto; padding: 6px 10px; font-size: 12.5px; font-weight: 600;">
-                    <option value="10">10 entries</option>
-                    <option value="15" selected>15 entries (Laravel Default)</option>
-                    <option value="25">25 entries</option>
-                    <option value="50">50 entries</option>
-                    <option value="100">100 entries</option>
+                <select ng-model="perPage" ng-change="changePerPage()" class="php-form-control" style="width: 110px; font-size: 12.5px; height: 36px; padding: 4px 8px;">
+                    <option ng-value="10">10 entries</option>
+                    <option ng-value="15">15 entries</option>
+                    <option ng-value="25">25 entries</option>
+                    <option ng-value="50">50 entries</option>
                 </select>
                 <span>per page</span>
             </div>
         </div>
 
-        <!-- Bookings Table -->
-        <div ng-if="paginatedBookings.length > 0" class="table-responsive">
-            <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse: collapse; font-size: 13px; text-align: left;">
+        <!-- Reservation Records Table -->
+        <div class="table-responsive" style="margin-top: 8px; overflow-x: auto;">
+            <table class="table-data" style="width: 100%; font-size: 12.5px;">
                 <thead>
-                    <tr bgcolor="#000080" style="color: #FFFFFF;">
+                    <tr>
+                        <th style="width: 40px;">#</th>
                         <th>PNR</th>
                         <th>Passenger Name</th>
+                        <th>Train & Route</th>
                         <th>Division</th>
-                        <th>Train Name</th>
                         <th>Class</th>
-                        <th>Quota</th>
-                        <th>Date of Journey</th>
-                        <th>Seat / Coach</th>
-                        <th>Total Fare</th>
+                        <th>Date</th>
+                        <th>Fare</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Coach/Seat</th>
+                        <th style="text-align: center; width: 110px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="b in paginatedBookings" style="border-bottom: 1px solid #E2E8F0;">
-                        <td><b style="color: var(--navy);">{{b.pnr}}</b></td>
+                    <tr ng-repeat="b in paginatedBookings track by b.id">
+                        <td style="color: #64748B; font-weight: bold;">{{fromIndex + $index}}</td>
                         <td>
-                            <div>{{b.passengerName}}</div>
-                            <div style="font-size: 11px; color: #64748B;">By: {{b.bookedBy}} ({{b.userEnrollment}})</div>
-                        </td>
-                        <td>
-                            <span class="php-badge" style="background: #1E293B; color: #FFFFFF; font-size: 11px;">
-                                {{b.systemCode || 'WR-ADI'}}
+                            <span class="pnr-badge" style="font-family: monospace; font-weight: 700; color: var(--navy); background: #EEF2FF; padding: 2px 6px; border-radius: 4px; border: 1px solid #C7D2FE;">
+                                {{b.pnr}}
                             </span>
                         </td>
-                        <td>{{b.train}}</td>
-                        <td><span class="php-badge badge-php">{{b.travelClass}}</span></td>
-                        <td><span class="php-badge" style="background: #F1F5F9; color: #334155;">{{b.quota || 'GN'}}</span></td>
-                        <td>{{b.date}}</td>
-                        <td><code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">{{b.coachSeat || 'S4-28'}}</code></td>
-                        <td><b style="color: var(--saffron);">₹{{b.totalFare}}</b></td>
                         <td>
-                            <span class="php-badge" ng-class="{'badge-green': b.status === 'Confirmed', 'badge-php': b.status !== 'Confirmed'}" style="font-size: 11px;">
-                                {{b.status || 'Confirmed'}}
+                            <div style="font-weight: 700; color: #1E293B;">{{b.passengerName || b.passenger_name}}</div>
+                            <div style="font-size: 11px; color: #64748B;">Booked by: {{b.bookedBy || b.booked_by}}</div>
+                        </td>
+                        <td>
+                            <div style="color: #0F172A; font-weight: 600;">{{b.train || b.train_name}}</div>
+                            <div style="font-size: 11px; color: #94A3B8;">Quota: {{b.quota || 'GN'}}</div>
+                        </td>
+                        <td>
+                            <span class="php-badge" style="font-size: 10.5px; font-weight: 700; background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1;">
+                                {{b.systemCode || b.system_code || 'WR-ADI'}}
                             </span>
                         </td>
-                        <td style="white-space: nowrap;">
+                        <td>
+                            <span class="class-badge" style="background: #FEF3C7; color: #92400E; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+                                {{b.travelClass || b.travel_class}}
+                            </span>
+                        </td>
+                        <td style="color: #475569; white-space: nowrap;">
+                            {{b.date || b.journey_date}}
+                        </td>
+                        <td style="font-weight: 700; color: #166534; white-space: nowrap;">
+                            ₹{{b.totalFare || b.total_fare}}
+                        </td>
+                        <td>
+                            <span class="status-pill"
+                                  style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;"
+                                  ng-style="(b.status === 'Confirmed') ? {'background': '#DCFCE7', 'color': '#15803D'} : ((b.status === 'RAC') ? {'background': '#FEF9C3', 'color': '#A16207'} : {'background': '#FEE2E2', 'color': '#B91C1C'})">
+                                {{b.status}}
+                            </span>
+                        </td>
+                        <td style="font-family: monospace; font-weight: 600; color: #334155;">
+                            {{b.coachSeat || b.coach_seat || 'B2-21'}}
+                        </td>
+                        <td style="white-space: nowrap; text-align: center;">
                             <div style="display: inline-flex; gap: 4px; align-items: center;">
                                 <button type="button" ng-click="openQuickView(b)" class="btn-php-action" style="font-size: 11px; padding: 4px 8px; background: var(--navy); color: #FFFFFF;" title="Quick View">
                                     👁️
@@ -216,16 +241,13 @@
             </table>
         </div>
 
-        <!-- Requirement 4: Laravel-Style Pagination Bar (LengthAwarePaginator) -->
+        <!-- Laravel Pagination Bar -->
         <div ng-if="totalFiltered > 0" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <!-- Left Info Text: Showing X to Y of Z entries -->
             <div style="font-size: 13px; color: #475569;">
                 Showing <b>{{fromIndex}}</b> to <b>{{toIndex}}</b> of <b>{{totalFiltered}}</b> results (Page <b>{{currentPage}}</b> of <b>{{totalPages}}</b>)
             </div>
 
-            <!-- Right: Pagination Buttons (Laravel style) -->
             <div style="display: flex; gap: 4px; align-items: center;">
-                <!-- Previous Button -->
                 <button type="button"
                         ng-click="setPage(currentPage - 1)"
                         ng-disabled="currentPage === 1"
@@ -235,7 +257,6 @@
                     &laquo; Previous
                 </button>
 
-                <!-- Page Number Buttons -->
                 <button type="button"
                         ng-repeat="p in pageNumbers"
                         ng-click="setPage(p)"
@@ -245,7 +266,6 @@
                     {{p}}
                 </button>
 
-                <!-- Next Button -->
                 <button type="button"
                         ng-click="setPage(currentPage + 1)"
                         ng-disabled="currentPage === totalPages"
@@ -257,7 +277,7 @@
             </div>
         </div>
 
-        <!-- Quick View Non-Editable Portal Modal (In-Page) -->
+        <!-- Quick View Non-Editable Portal Modal -->
         <div ng-if="showModal && selectedBookingForModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;">
             <div style="background: #FFFFFF; border-radius: 10px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); border: 2px solid var(--navy);">
                 <div style="background: var(--navy); color: #FFFFFF; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
@@ -274,43 +294,43 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13px;">
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Passenger Name:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.passengerName}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.passengerName || selectedBookingForModal.passenger_name}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Division / System:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.systemCode || 'WR-ADI'}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.systemCode || selectedBookingForModal.system_code || 'WR-ADI'}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group" style="grid-column: span 2;">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Train Route:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.train}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.train || selectedBookingForModal.train_name}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Travel Class:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.travelClass}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.travelClass || selectedBookingForModal.travel_class}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Quota:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.quota}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.quota || 'GN'}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Date of Journey:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.date}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.date || selectedBookingForModal.journey_date}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                         <div class="php-form-group">
                             <label style="color: #64748B; font-size: 11.5px; font-weight: 700;">Seat / Coach:</label>
-                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.coachSeat || 'B2-14'}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
+                            <input type="text" class="php-form-control" value="{{selectedBookingForModal.coachSeat || selectedBookingForModal.coach_seat || 'B2-14'}}" disabled style="background: #F1F5F9; color: #334155; cursor: not-allowed;">
                         </div>
                     </div>
 
                     <div style="background: #FFF7ED; border: 1px solid #FFD8A8; border-radius: 6px; padding: 12px 16px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 700; color: #9A3412; font-size: 13px;">Total Ticket Fare:</span>
-                        <span style="font-size: 20px; font-weight: 800; color: var(--saffron);">₹{{selectedBookingForModal.totalFare}}</span>
+                        <span style="font-size: 20px; font-weight: 800; color: var(--saffron);">₹{{selectedBookingForModal.totalFare || selectedBookingForModal.total_fare}}</span>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
                         <button type="button" ng-click="closeQuickView()" class="btn-php-action btn-secondary" style="font-size: 12.5px; padding: 8px 16px;">Close</button>
-                        <button type="button" ng-click="editBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: #D97706;">✏️ Edit in Portal</button>
-                        <button type="button" ng-click="viewBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: var(--navy);">Open Full Portal View →</button>
+                        <button type="button" ng-click="editBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: #D97706; color: #FFFFFF;">✏️ Edit in Portal</button>
+                        <button type="button" ng-click="viewBooking(selectedBookingForModal)" class="btn-php-action" style="font-size: 12.5px; padding: 8px 18px; background: var(--navy); color: #FFFFFF;">Open Full Portal View →</button>
                     </div>
                 </div>
             </div>
@@ -319,13 +339,13 @@
         <!-- Empty State -->
         <div ng-if="totalFiltered === 0" class="empty-data-state">
             <div class="empty-data-icon">📭</div>
-            <div class="empty-data-title">No bookings match the selected filters</div>
+            <div class="empty-data-title">You haven't filled any reservation forms yet</div>
             <div class="empty-data-desc">
-                No reservation entries found for Division: <b>{{selectedSystem || 'All'}}</b> and User: <b>{{selectedUserEnroll || 'All'}}</b>.
+                Just like private call logs, only your personal bookings appear in your dashboard.
             </div>
-            <button type="button" ng-click="filterByUser('ALL'); filterBySystem(''); searchQuery = ''" class="btn-php-action" style="margin-top: 12px; font-size: 13px; padding: 8px 18px; background: var(--navy);">
-                Reset All Filters
-            </button>
+            <a href="#/practical/3" class="btn-php-action" style="margin-top: 12px; font-size: 13px; padding: 8px 18px; background: var(--navy); text-decoration: none; display: inline-block; color: #FFFFFF;">
+                + Book Your First Ticket
+            </a>
         </div>
     </div>
 </div>

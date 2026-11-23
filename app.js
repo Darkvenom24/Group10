@@ -56,8 +56,7 @@
                 controller: 'BookingDataController'
             })
             .when('/laravel', {
-                templateUrl: 'views/laravel.html',
-                controller: 'LaravelController'
+                redirectTo: '/booking-data'
             })
             .when('/php/hub', {
                 templateUrl: 'views/php-hub.html',
@@ -561,7 +560,7 @@ return {
 app.controller('HeaderController', ['$scope', '$rootScope', '$location', 'AuthService', function ($scope, $rootScope, $location, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
 
-    // 5 Primary Users shown in header capsule (Requirements 2 & 5)
+    // Exactly the 3 Project Contributors in header avatar capsule
     $scope.headerMembers = [
         {
             id: 1,
@@ -592,27 +591,6 @@ app.controller('HeaderController', ['$scope', '$rootScope', '$location', 'AuthSe
             role: 'Developer',
             avatar: 'vaibhav.jpeg',
             profileUrl: '#/member/3'
-        },
-        {
-            id: 4,
-            name: 'K. P. Rathod (Station Master)',
-            shortName: 'Station Master',
-            username: 'station_master',
-            enroll: 'SM-ADI-01',
-            role: 'Station Master (Admin)',
-            avatar: 'temp.jpeg',
-            isAdmin: true,
-            profileUrl: '#/booking-data'
-        },
-        {
-            id: 5,
-            name: 'Aarav Patel',
-            shortName: 'Aarav',
-            username: 'aarav05',
-            enroll: '26GMCA05',
-            role: 'Passenger Member',
-            avatar: 'temp.jpeg',
-            profileUrl: '#/booking-data'
         }
     ];
 
@@ -1447,146 +1425,168 @@ app.controller('Practical4Controller', ['$scope', function ($scope) {
 // Booking Data Controller (User-Isolated Personal Railway Records with Laravel Pagination & Multi-Division Support)
 app.controller('BookingDataController', ['$scope', '$location', 'RailwayService', 'AuthService', function ($scope, $location, RailwayService, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
-    $scope.selectedBookingForModal = null;
-    $scope.showModal = false;
+    $scope.isAdminUser = !!($scope.currentUser && $scope.currentUser.isAdmin);
 
     $scope.systems = RailwayService.getSystems();
-    $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5); // 5 primary users: 3 members + station_master + aarav05
+    $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5);
 
-            // Filters state
-            $scope.selectedSystem = '';
-            $scope.selectedUserEnroll = $scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA61';
-            $scope.searchQuery = '';
-            $scope.perPage = 15;
+    $scope.selectedSystem = '';
+    // Normal user sees ONLY their personal records. Station Master sees master dataset.
+    $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA61');
+    $scope.searchQuery = '';
+    $scope.filterClass = '';
+    $scope.perPage = 15;
+    $scope.currentPage = 1;
+
+    $scope.paginatedBookings = [];
+    $scope.totalFiltered = 0;
+    $scope.totalPages = 1;
+    $scope.fromIndex = 0;
+    $scope.toIndex = 0;
+    $scope.pageNumbers = [];
+
+    $scope.switchToAdmin = function () {
+        var admin = AuthService.switchUser('SM-ADI-01');
+        if (admin) {
+            $scope.currentUser = admin;
+            $scope.isAdminUser = true;
+            $scope.selectedUserEnroll = 'ALL';
             $scope.currentPage = 1;
+            applyFilterAndPagination();
+        }
+    };
 
-            $scope.paginatedBookings = [];
-            $scope.totalFiltered = 0;
-            $scope.totalPages = 1;
-            $scope.fromIndex = 0;
-            $scope.toIndex = 0;
-            $scope.pageNumbers = [];
+    $scope.switchToMember = function (enroll) {
+        var user = AuthService.switchUser(enroll || '26GMCA61');
+        if (user) {
+            $scope.currentUser = user;
+            $scope.isAdminUser = false;
+            $scope.selectedUserEnroll = user.enrollment_no;
+            $scope.currentPage = 1;
+            applyFilterAndPagination();
+        }
+    };
 
-            function applyFilterAndPagination() {
-                var all = RailwayService.getAllBookings();
-                var filtered = all;
+    function applyFilterAndPagination() {
+        var all = RailwayService.getAllBookings();
+        var filtered = all;
 
-                // 1. Filter by User Account (if not 'ALL')
-                if ($scope.selectedUserEnroll && $scope.selectedUserEnroll !== 'ALL') {
-                    var normEnroll = $scope.selectedUserEnroll.trim().toUpperCase();
-                    filtered = filtered.filter(function (b) {
-                        return (b.userEnrollment && b.userEnrollment.toUpperCase() === normEnroll) ||
-                            (b.bookedBy && b.bookedBy.toUpperCase().indexOf(normEnroll) !== -1);
-                    });
-                }
+        // 1. Role-based User Filtering
+        if (!$scope.isAdminUser) {
+            var userEnroll = ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA61').toUpperCase();
+            filtered = filtered.filter(function (b) {
+                var enroll = (b.userEnrollment || b.user_enrollment || '').toUpperCase();
+                var booked = (b.bookedBy || b.booked_by || '').toUpperCase();
+                return enroll === userEnroll || booked.indexOf(userEnroll) !== -1;
+            });
+        } else if ($scope.selectedUserEnroll && $scope.selectedUserEnroll !== 'ALL') {
+            var normEnroll = $scope.selectedUserEnroll.trim().toUpperCase();
+            filtered = filtered.filter(function (b) {
+                var enroll = (b.userEnrollment || b.user_enrollment || '').toUpperCase();
+                var booked = (b.bookedBy || b.booked_by || '').toUpperCase();
+                return enroll === normEnroll || booked.indexOf(normEnroll) !== -1;
+            });
+        }
 
-                // 2. Filter by Railway Division / System
-                if ($scope.selectedSystem && $scope.selectedSystem !== '') {
-                    filtered = filtered.filter(function (b) {
-                        return b.systemCode === $scope.selectedSystem;
-                    });
-                }
+        // 2. Division / System Filter
+        if ($scope.selectedSystem && $scope.selectedSystem !== '') {
+            filtered = filtered.filter(function (b) {
+                return (b.systemCode === $scope.selectedSystem || b.system_code === $scope.selectedSystem);
+            });
+        }
 
-                // 3. Search query
-                if ($scope.searchQuery && $scope.searchQuery.trim() !== '') {
-                    var q = $scope.searchQuery.trim().toLowerCase();
-                    filtered = filtered.filter(function (b) {
-                        return (b.pnr && b.pnr.toLowerCase().indexOf(q) !== -1) ||
-                            (b.passengerName && b.passengerName.toLowerCase().indexOf(q) !== -1) ||
-                            (b.train && b.train.toLowerCase().indexOf(q) !== -1) ||
-                            (b.travelClass && b.travelClass.toLowerCase().indexOf(q) !== -1) ||
-                            (b.status && b.status.toLowerCase().indexOf(q) !== -1);
-                    });
-                }
+        // 3. Travel Class Filter
+        if ($scope.filterClass && $scope.filterClass !== '') {
+            filtered = filtered.filter(function (b) {
+                return (b.travelClass === $scope.filterClass || b.travel_class === $scope.filterClass);
+            });
+        }
 
-                $scope.totalFiltered = filtered.length;
-                $scope.totalPages = Math.max(1, Math.ceil($scope.totalFiltered / $scope.perPage));
+        // 4. Keyword Search
+        if ($scope.searchQuery && $scope.searchQuery.trim() !== '') {
+            var q = $scope.searchQuery.trim().toLowerCase();
+            filtered = filtered.filter(function (b) {
+                return ((b.pnr && b.pnr.toLowerCase().indexOf(q) !== -1) ||
+                    (b.passengerName && b.passengerName.toLowerCase().indexOf(q) !== -1) ||
+                    (b.passenger_name && b.passenger_name.toLowerCase().indexOf(q) !== -1) ||
+                    (b.train && b.train.toLowerCase().indexOf(q) !== -1) ||
+                    (b.train_name && b.train_name.toLowerCase().indexOf(q) !== -1));
+            });
+        }
 
-                if ($scope.currentPage > $scope.totalPages) {
-                    $scope.currentPage = $scope.totalPages;
-                }
-                if ($scope.currentPage < 1) {
-                    $scope.currentPage = 1;
-                }
+        $scope.totalFiltered = filtered.length;
+        $scope.totalPages = Math.max(1, Math.ceil($scope.totalFiltered / $scope.perPage));
+        if ($scope.currentPage > $scope.totalPages) $scope.currentPage = $scope.totalPages;
+        if ($scope.currentPage < 1) $scope.currentPage = 1;
 
-                var start = ($scope.currentPage - 1) * $scope.perPage;
-                var end = Math.min(start + $scope.perPage, $scope.totalFiltered);
-                $scope.paginatedBookings = filtered.slice(start, end);
+        var start = ($scope.currentPage - 1) * $scope.perPage;
+        var end = Math.min(start + $scope.perPage, $scope.totalFiltered);
+        $scope.paginatedBookings = filtered.slice(start, end);
+        $scope.fromIndex = $scope.totalFiltered === 0 ? 0 : start + 1;
+        $scope.toIndex = end;
 
-                $scope.fromIndex = $scope.totalFiltered === 0 ? 0 : start + 1;
-                $scope.toIndex = end;
+        // Sliding window of page buttons (up to 7 buttons)
+        var pages = [];
+        var maxWin = 7;
+        var startP = Math.max(1, $scope.currentPage - 3);
+        var endP = Math.min($scope.totalPages, startP + maxWin - 1);
+        if (endP - startP + 1 < maxWin) {
+            startP = Math.max(1, endP - maxWin + 1);
+        }
+        for (var p = startP; p <= endP; p++) pages.push(p);
+        $scope.pageNumbers = pages;
+    }
 
-                // Build page numbers window (Laravel sliding window style)
-                var pages = [];
-                var maxButtons = 7;
-                var startPage = Math.max(1, $scope.currentPage - 3);
-                var endPage = Math.min($scope.totalPages, startPage + maxButtons - 1);
-                if (endPage - startPage < maxButtons - 1) {
-                    startPage = Math.max(1, endPage - maxButtons + 1);
-                }
-                for (var p = startPage; p <= endPage; p++) {
-                    pages.push(p);
-                }
-                $scope.pageNumbers = pages;
-            }
-            loadBookings();
+    applyFilterAndPagination();
 
-            // 1. View Action: Navigates to Railway Portal Form in Non-Editable Mode
-            $scope.setPage = function (page) {
-                if (page >= 1 && page <= $scope.totalPages) {
-                    $scope.currentPage = page;
-                    applyFilterAndPagination();
-                }
-            };
+    $scope.setPage = function (page) {
+        if (page >= 1 && page <= $scope.totalPages) {
+            $scope.currentPage = page;
+            applyFilterAndPagination();
+        }
+    };
 
-            $scope.setPerPage = function (n) {
-                $scope.perPage = parseInt(n, 10);
-                $scope.currentPage = 1;
-                applyFilterAndPagination();
-            };
+    $scope.changePerPage = function () {
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    };
 
-            $scope.filterBySystem = function (sysCode) {
-                $scope.selectedSystem = sysCode;
-                $scope.currentPage = 1;
-                applyFilterAndPagination();
-            };
+    $scope.applyFilter = function () {
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    };
 
-            $scope.filterByUser = function (enroll) {
-                $scope.selectedUserEnroll = enroll;
-                $scope.currentPage = 1;
-                applyFilterAndPagination();
-            };
+    $scope.onSearchChange = function () {
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    };
 
-            $scope.onSearch = function () {
-                $scope.currentPage = 1;
-                applyFilterAndPagination();
-            };
+    $scope.filterBySystem = function (sysCode) {
+        $scope.selectedSystem = sysCode;
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    };
 
-            $scope.quickSwitchUser = function (u) {
-                var logged = AuthService.switchUser(u.username);
-                if (logged) {
-                    $scope.currentUser = logged;
-                    $scope.selectedUserEnroll = logged.enrollment_no;
-                    $scope.currentPage = 1;
-                    applyFilterAndPagination();
-                }
-            };
+    $scope.filterByUser = function (enroll) {
+        $scope.selectedUserEnroll = enroll;
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    };
 
-            $scope.getActiveDivisionObj = function () {
-                if (!$scope.selectedSystem) return null;
-                return $scope.systems.find(function (s) { return s.code === $scope.selectedSystem; }) || null;
-            };
+    $scope.getActiveDivisionObj = function () {
+        if (!$scope.selectedSystem) return null;
+        return $scope.systems.find(function (s) { return s.code === $scope.selectedSystem; }) || null;
+    };
 
-            $scope.viewBooking = function (b) {
-                $location.path('/practical/3').search({ mode: 'view', id: b.id });
-            };
+    $scope.viewBooking = function (b) {
+        $location.path('/practical/3').search({ mode: 'view', id: b.id });
+    };
 
-            // 2. Edit Action: Navigates to Railway Portal Form in Editable Mode with pre-filled details
-            $scope.editBooking = function (b) {
-                $location.path('/practical/3').search({ mode: 'edit', id: b.id });
-            };
+    $scope.editBooking = function (b) {
+        $location.path('/practical/3').search({ mode: 'edit', id: b.id });
+    };
 
-            // In-page quick preview modal
+    // In-page quick preview modal
             $scope.openQuickView = function (b) {
                 $scope.selectedBookingForModal = b;
                 $scope.showModal = true;
