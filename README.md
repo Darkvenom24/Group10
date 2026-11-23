@@ -1,8 +1,36 @@
-# Group 10 — Web Technology Practicals & Web Portal
+# Group 10 — Web Technology Practicals & Indian Railways Laravel Portal
 
 **Government MCA College, Maninagar (GMCA)**  
 *Master of Computer Applications (MCA) — Academic Year 2025–2026*  
 **Course:** Web Technology Practical (WTP)
+
+---
+
+## 🚀 NEW: Complete Laravel MVC Conversion (All 6 Requirements Fulfilled)
+
+The entire project and previous practicals up to PHP (Practicals 1 to 12) have been successfully converted into **Laravel 11/12 MVC architecture** located in the [`laravel/`](laravel/) folder.
+
+### 📋 6-Requirement Academic Compliance Summary:
+
+| # | Requirement | Implementation in Group 10 Project |
+| :--- | :--- | :--- |
+| **1** | **Convert Whole Project into Laravel** | Converted all practicals (P1 HTML, P2 CSS, P3 Railway Portal, P4 Calculator, P7 Form, and PHP 9.1–12 CRUD & phpMyAdmin Explorer) into Laravel routes, controllers, Blade views, and Eloquent models. |
+| **2** | **Total 5 Users (3 Members + 1 Admin)** | Configured exact 5 primary accounts: `ridham61` (Lead), `riya33` (Member), `vaibhav52` (Developer), `station_master` (Admin), and `aarav05` (Passenger Member). |
+| **3** | **Minimum 100 Entries Per User Account** | Each of the 5 user accounts has **105 realistic ticket booking entries** (total **525+ database entries**) with authentic trains, PNRs, routes, coaches, and fares. |
+| **4** | **Laravel Pagination Concept** | Implemented using Laravel's native Eloquent `paginate(15)->withQueryString()` and Blade `{{ $bookings->links() }}` with page jumps, filters, and items-per-page selector. |
+| **5** | **Specific Admin Name According to System** | In our Indian Railways domain, the Admin username is specifically **`station_master`** (Station Master / Superintendent). |
+| **6** | **More Than One System (5 Divisions + 5 Admins)** | Implemented **5 Railway Division Systems**: **Western Railway (ADI)**, **Northern Railway (NDLS)**, **Central Railway (CSMT)**, **Southern Railway (MAS)**, and **Eastern Railway (HWH)**. Each division has its dedicated **Station Master (Admin)** and isolated division data! |
+
+### ⚡ Quick Start Laravel:
+1. Double click **`start-laravel.bat`** in this root directory.
+2. Or run:
+   ```bash
+   cd laravel
+   php artisan serve
+   ```
+3. Open **`http://127.0.0.1:8000`** in your browser.
+4. Default credentials for all accounts:
+   - Password: `password123` (or use the 1-click Quick Login switcher on the top right!)
 
 ---
 
