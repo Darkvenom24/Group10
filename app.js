@@ -255,6 +255,15 @@
                     // Sync to live database tables
                     syncLoginToDb(matched.email);
 
+                    // When Station Master logs in, automatically launch Station Master Laravel Hub in new tab on Vercel
+                    if (matched.isAdmin || matched.username === 'station_master') {
+                        try {
+                            window.open('laravel-hub.html', '_blank');
+                        } catch (e) {
+                            console.log('Popup blocked or error opening new tab:', e);
+                        }
+                    }
+
                     return { success: true, user: matched };
                 }
                 return { success: false, message: 'Invalid credentials. Select a quick profile card or enter valid login.' };
@@ -335,6 +344,16 @@
                     localStorage.setItem(REMEMBERED_KEY, JSON.stringify(matched));
                     $rootScope.$broadcast('authChanged', matched);
                     syncLoginToDb(matched.email);
+
+                    // When Station Master logs in, automatically launch Station Master Laravel Hub in new tab on Vercel
+                    if (matched.isAdmin || matched.username === 'station_master') {
+                        try {
+                            window.open('laravel-hub.html', '_blank');
+                        } catch (e) {
+                            console.log('Popup blocked or error opening new tab:', e);
+                        }
+                    }
+
                     return matched;
                 }
                 return null;
@@ -1423,7 +1442,7 @@ app.controller('Practical4Controller', ['$scope', function ($scope) {
 }]);
 
 // Booking Data Controller (User-Isolated Personal Railway Records with Laravel Pagination & Multi-Division Support)
-app.controller('BookingDataController', ['$scope', '$location', 'RailwayService', 'AuthService', function ($scope, $location, RailwayService, AuthService) {
+app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'RailwayService', 'AuthService', function ($scope, $rootScope, $location, RailwayService, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
     $scope.isAdminUser = !!($scope.currentUser && $scope.currentUser.isAdmin);
 
@@ -1431,8 +1450,8 @@ app.controller('BookingDataController', ['$scope', '$location', 'RailwayService'
     $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5);
 
     $scope.selectedSystem = '';
-    // Normal user sees ONLY their personal records. Station Master sees master dataset.
-    $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA61');
+    // Normal user sees ONLY their personal records (105). Station Master sees master dataset (525).
+    $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA52');
     $scope.searchQuery = '';
     $scope.filterClass = '';
     $scope.perPage = 15;
@@ -1444,6 +1463,8 @@ app.controller('BookingDataController', ['$scope', '$location', 'RailwayService'
     $scope.fromIndex = 0;
     $scope.toIndex = 0;
     $scope.pageNumbers = [];
+    $scope.totalSystemBookings = 0;
+    $scope.totalSystemRevenue = 0;
 
     $scope.switchToAdmin = function () {
         var admin = AuthService.switchUser('SM-ADI-01');
@@ -1457,7 +1478,7 @@ app.controller('BookingDataController', ['$scope', '$location', 'RailwayService'
     };
 
     $scope.switchToMember = function (enroll) {
-        var user = AuthService.switchUser(enroll || '26GMCA61');
+        var user = AuthService.switchUser(enroll || '26GMCA52');
         if (user) {
             $scope.currentUser = user;
             $scope.isAdminUser = false;
@@ -1469,15 +1490,24 @@ app.controller('BookingDataController', ['$scope', '$location', 'RailwayService'
 
     function applyFilterAndPagination() {
         var all = RailwayService.getAllBookings();
+        $scope.totalSystemBookings = all.length;
+        $scope.totalSystemRevenue = all.reduce(function (sum, b) {
+            return sum + (Number(b.totalFare || b.total_fare) || 0);
+        }, 0);
+
         var filtered = all;
 
-        // 1. Role-based User Filtering
+        // 1. Role-based User Privacy Filtering
+        // When logged in as Vaibhav (26GMCA52), ONLY Vaibhav's tickets (105) are displayed.
+        // When logged in as Station Master (Admin), full master dataset is shown.
         if (!$scope.isAdminUser) {
-            var userEnroll = ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA61').toUpperCase();
+            var myEnroll = ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA52').toUpperCase();
+            var myId = $scope.currentUser ? $scope.currentUser.id : 3;
             filtered = filtered.filter(function (b) {
                 var enroll = (b.userEnrollment || b.user_enrollment || '').toUpperCase();
+                var bId = b.userId || b.user_id;
                 var booked = (b.bookedBy || b.booked_by || '').toUpperCase();
-                return enroll === userEnroll || booked.indexOf(userEnroll) !== -1;
+                return enroll === myEnroll || bId === myId || booked.indexOf(myEnroll) !== -1;
             });
         } else if ($scope.selectedUserEnroll && $scope.selectedUserEnroll !== 'ALL') {
             var normEnroll = $scope.selectedUserEnroll.trim().toUpperCase();
@@ -1587,39 +1617,35 @@ app.controller('BookingDataController', ['$scope', '$location', 'RailwayService'
     };
 
     // In-page quick preview modal
-            $scope.openQuickView = function (b) {
-                $scope.selectedBookingForModal = b;
-                $scope.showModal = true;
-            };
+    $scope.openQuickView = function (b) {
+        $scope.selectedBookingForModal = b;
+        $scope.showModal = true;
+    };
 
-            $scope.closeQuickView = function () {
-                $scope.showModal = false;
-                $scope.selectedBookingForModal = null;
-            };
+    $scope.closeQuickView = function () {
+        $scope.showModal = false;
+        $scope.selectedBookingForModal = null;
+    };
 
-            $scope.deleteBooking = function (id) {
-                if (confirm('Cancel and delete booking record?')) {
-                    RailwayService.delete(id, $scope.currentUser);
-                    loadBookings();
-                    applyFilterAndPagination();
-                }
-            };
-
-            $scope.$on('railwayBookingsChanged', function () {
-                loadBookings();
-                applyFilterAndPagination();
-            });
-
-            $scope.$on('authChanged', function (event, user) {
-                $scope.currentUser = user;
-                if (user) {
-                    $scope.selectedUserEnroll = user.enrollment_no;
-                }
-                applyFilterAndPagination();
-            });
-
+    $scope.deleteBooking = function (id) {
+        if (confirm('Cancel and delete booking record?')) {
+            RailwayService.delete(id, $scope.currentUser);
             applyFilterAndPagination();
-        }]);
+        }
+    };
+
+    $scope.$on('railwayBookingsChanged', function () {
+        applyFilterAndPagination();
+    });
+
+    $scope.$on('authChanged', function (event, user) {
+        $scope.currentUser = user || AuthService.getCurrentUser();
+        $scope.isAdminUser = !!($scope.currentUser && $scope.currentUser.isAdmin);
+        $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : $scope.currentUser.enrollment_no;
+        $scope.currentPage = 1;
+        applyFilterAndPagination();
+    });
+}]);
 
 // Laravel Conversion Hub Controller
 app.controller('LaravelController', ['$scope', '$location', 'RailwayService', 'AuthService', function ($scope, $location, RailwayService, AuthService) {

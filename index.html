@@ -243,8 +243,10 @@
                 </div>
             </div>
 
-            <a href="#/booking-data" class="nav-item" ng-class="{active: isActive('/booking-data')}" ng-click="closeMenu()">My Railway Records</a>
-            <a href="#/laravel" class="nav-item" ng-class="{active: isActive('/laravel')}" ng-click="closeMenu()" style="background: linear-gradient(135deg, #DC2626, #991B1B); color: #FFFFFF; font-weight: 700; border-radius: 4px; padding: 6px 12px; margin-left: 6px;" title="Laravel 11 Full Project Conversion Hub"><span style="margin-right: 4px;">🔴</span>Laravel 11</a>
+            <a href="#/booking-data" class="nav-item" ng-class="{active: isActive('/booking-data')}" ng-click="closeMenu()">Railway Records</a>
+            <a href="laravel-hub.html" target="_blank" class="nav-item" style="background: linear-gradient(135deg, #D97706, #B45309); color: #FFFFFF; font-weight: 700; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px;" title="Open Indian Railways Multi-Division Laravel Hub in New Tab on Vercel">
+                <span>👑</span> Laravel Hub ↗
+            </a>
             <a href="#/phpmyadmin" class="nav-item nav-db-explorer" ng-class="{active: isActive('/phpmyadmin') || isActive('/db-explorer')}" ng-click="closeMenu()" title="phpMyAdmin 5.x Cloud Database Explorer">
                 <span style="margin-right: 4px;">🗄️</span>phpMyAdmin
             </a>
@@ -342,25 +344,50 @@
             </div>
         </div>
 
+        <!-- Fast Viva User Quick Switcher Bar -->
+        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 700; color: #1E293B;">👤 Viva Account Switcher:</span>
+                <span style="color: #64748B;">Switch profiles to verify user privacy &amp; minimum 100 entries:</span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <button type="button" ng-click="switchToMember('26GMCA52')" class="btn-php-action" style="font-size: 11.5px; padding: 4px 10px;" ng-class="{'btn-secondary': currentUser.enrollment_no !== '26GMCA52'}" ng-style="currentUser.enrollment_no === '26GMCA52' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}" title="Log in as Vaibhav Senjaliya">
+                    Vaibhav (26GMCA52)
+                </button>
+                <button type="button" ng-click="switchToMember('26GMCA61')" class="btn-php-action" style="font-size: 11.5px; padding: 4px 10px;" ng-class="{'btn-secondary': currentUser.enrollment_no !== '26GMCA61'}" ng-style="currentUser.enrollment_no === '26GMCA61' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}" title="Log in as Ridham Bambhaniya">
+                    Ridham (26GMCA61)
+                </button>
+                <button type="button" ng-click="switchToMember('26GMCA33')" class="btn-php-action" style="font-size: 11.5px; padding: 4px 10px;" ng-class="{'btn-secondary': currentUser.enrollment_no !== '26GMCA33'}" ng-style="currentUser.enrollment_no === '26GMCA33' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}" title="Log in as Riya Thakkar">
+                    Riya (26GMCA33)
+                </button>
+                <button type="button" ng-click="switchToMember('26GMCA05')" class="btn-php-action" style="font-size: 11.5px; padding: 4px 10px;" ng-class="{'btn-secondary': currentUser.enrollment_no !== '26GMCA05'}" ng-style="currentUser.enrollment_no === '26GMCA05' ? {'background': 'var(--navy)', 'color': '#FFFFFF', 'font-weight': '700'} : {}" title="Log in as Aarav Patel">
+                    Aarav (26GMCA05)
+                </button>
+                <button type="button" ng-click="switchToAdmin()" class="btn-php-action" style="font-size: 11.5px; padding: 4px 10px;" ng-class="{'btn-secondary': !isAdminUser}" ng-style="isAdminUser ? {'background': '#DC2626', 'color': '#FFFFFF', 'font-weight': '700'} : {}" title="Log in as Station Master (Admin)">
+                    👑 Station Master (Admin)
+                </button>
+            </div>
+        </div>
+
         <!-- 1. Regular User (Passenger / Student) Dashboard View -->
-        <div ng-if="!isAdminUser" style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div ng-if="!isAdminUser" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 26px;">👤</span>
                 <div>
-                    <div style="font-size: 14.5px; font-weight: 700; color: #1E293B;">
-                        Personal Dashboard: {{currentUser.full_name}}
+                    <div style="font-size: 15px; font-weight: 700; color: #166534;">
+                        Personal Railway Dashboard: {{currentUser.full_name}}
                     </div>
-                    <div style="font-size: 12.5px; color: #64748B; margin-top: 2px;">
-                        Enrollment: <b style="color: var(--navy);">{{currentUser.enrollment_no}}</b> &bull; Account: <b>{{currentUser.username}}</b> &bull; Showing your personal travel records
+                    <div style="font-size: 12.5px; color: #15803D; margin-top: 2px;">
+                        Enrollment: <b style="color: var(--navy);">{{currentUser.enrollment_no}}</b> &bull; Account: <b>{{currentUser.username}}</b> &bull; Showing only your personal reservations
                     </div>
                 </div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <span class="php-badge badge-php" style="background: #166534; color: #FFFFFF; font-size: 12px; padding: 4px 10px;">
-                    {{totalFiltered}} Personal Records
+                <span class="php-badge badge-php" style="background: #166534; color: #FFFFFF; font-size: 12px; padding: 5px 12px; font-weight: 700;">
+                    ✔ {{totalFiltered}} Personal Bookings
                 </span>
                 <button type="button" ng-click="switchToAdmin()" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 12px;" title="Switch to Station Master Admin to view master multi-division dataset">
-                    👑 Station Master View
+                    👑 Switch to Admin Panel
                 </button>
             </div>
         </div>
@@ -371,22 +398,31 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 26px;">👑</span>
                     <div>
-                        <div style="font-size: 15px; font-weight: 800; color: #92400E;">
-                            Station Master Administrative Control Panel
+                        <div style="font-size: 15.5px; font-weight: 800; color: #92400E;">
+                            Station Master Administrative Control Panel (Admin Mode)
                         </div>
                         <div style="font-size: 12px; color: #B45309; margin-top: 2px;">
                             Master Access: <b>{{currentUser.full_name}}</b> (Username: <code>{{currentUser.username}}</code>) &bull; Managing All 5 Railway Divisions & Users
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <span class="php-badge badge-php" style="background: #DC2626; color: #FFFFFF; font-size: 11.5px; padding: 4px 10px;">
-                        Admin Mode Active
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="laravel-hub.html" target="_blank" class="btn-php-action" style="font-size: 11.5px; padding: 5px 12px; background: #D97706; color: #FFFFFF; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);" title="Launch Station Master Laravel Hub in new tab on Vercel">
+                        🚀 Open Laravel Hub ↗
+                    </a>
+                    <span class="php-badge badge-php" style="background: #DC2626; color: #FFFFFF; font-size: 11.5px; padding: 5px 12px; font-weight: 700;">
+                        Master Admin Active ({{totalFiltered}} Tickets)
                     </span>
-                    <button type="button" ng-click="switchToMember('26GMCA61')" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 12px;" title="Switch to regular student view">
-                        👤 Switch to Student View
+                    <button type="button" ng-click="switchToMember('26GMCA52')" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 12px;" title="Switch to Vaibhav's personal view">
+                        👤 Switch to Vaibhav
                     </button>
                 </div>
+            </div>
+
+            <!-- Division Summary Metrics Strip -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 14px; font-size: 12px; color: #78350F; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                <div>Total System Reservations: <b>{{totalSystemBookings}} Tickets</b> Across 5 Divisions</div>
+                <div>Total System Revenue: <b style="color: #B45309;">₹{{totalSystemRevenue | number}}</b> &bull; Min 100 Entries/User Satisfied ✔</div>
             </div>
 
             <!-- Railway Division Filter Tabs (for Station Master) -->
@@ -668,7 +704,7 @@
         </div>
     </div>
 </div>
-</script>
+    </script>
 
         <script type="text/ng-template" id="views/home.html">
 <div class="spa-view-enter">
@@ -3349,7 +3385,7 @@
 
         <script type="text/ng-template" id="views/phpmyadmin.html">
 <div class="pma-master-container">
-    <!-- phpMyAdmin Fixed 240px Left Navigation Sidebar -->
+    <!-- phpMyAdmin Fixed 260px Left Navigation Sidebar -->
     <aside class="pma-sidebar">
         <!-- Brand & Navigation Controls -->
         <div class="pma-sidebar-header">
@@ -4101,7 +4137,6 @@
 
     </main>
 </div>
-
     </script>
 
     <script type="text/ng-template" id="views/db-explorer.html">
