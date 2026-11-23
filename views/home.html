@@ -1,13 +1,16 @@
 <div class="spa-view-enter">
-    <!-- Top Access Denied Banner if user was redirected -->
-    <div class="access-restricted-banner" ng-if="$root.accessDeniedNotice">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 20px;">🔒</span>
-            <div>
-                <b>{{$root.accessDeniedNotice}}</b>
-            </div>
+    <!-- 3-Second Translucent Welcome Overlay (First-Time Visitor Only - Requests #10, #15, #17) -->
+    <div ng-if="showWelcome" class="first-time-welcome-overlay" ng-class="{'welcome-fade-out': welcomeFadeOut}" ng-click="dismissWelcome()">
+        <div class="first-time-welcome-card" ng-click="$event.stopPropagation()">
+            <div style="font-size: 38px; margin-bottom: 8px;">🇮🇳</div>
+            <h2 style="margin: 0 0 6px 0; color: #000080; font-size: 22px; font-weight: 800;">Welcome to Group-10 Web Portal</h2>
+            <p style="margin: 0 0 10px 0; color: #FF9933; font-weight: 700; font-size: 14px;">Government MCA College, Maninagar (GMCA)</p>
+            <p style="margin: 0; color: #64748B; font-size: 13px;">Master of Computer Applications (MCA) — Semester 1 | Academic Year 2025–2026</p>
+            <div style="margin-top: 14px; font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;">Closing in 3 seconds &bull; Click anywhere to dismiss</div>
         </div>
     </div>
+    <!-- Top Access Denied Banner if user was redirected -->
+    
 
     <!-- Laravel Migration Banner (Evaluation Criteria) -->
     <div style="background: #EFF6FF; border: 2px solid #3B82F6; border-radius: 10px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1);">
@@ -212,10 +215,10 @@
                     </div>
                 </div>
 
-                <!-- Logged Out View with 1-Click Profile Selector -->
+                <!-- Account Selector -->
                 <div ng-if="!currentUser">
                     <p style="font-size: 13.5px; color: #475569; margin-top: 0; line-height: 1.6;">
-                        <b>Instructions:</b> Access to practicals and database records is restricted to authenticated users. Please log in with your credentials or register a new student account below.
+                        <b>Account Management:</b> Switch active student or admin profiles below, or log in with custom credentials to view personalized submissions.
                     </p>
 
                     <div class="auth-header-tabs">

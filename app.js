@@ -116,25 +116,11 @@
     }]);
 
     // =========================================================================
-    // 2. ROUTE ACCESS GUARD (Strict Professor Rule: Everyone MUST Login)
+    // 2. APPLICATION INITIALIZATION & ROUTE HANDLING (Open Academic Access)
     // =========================================================================
     app.run(['$rootScope', '$location', 'AuthService', function ($rootScope, $location, AuthService) {
         $rootScope.accessDeniedNotice = '';
-
-        $rootScope.$on('$routeChangeStart', function (event, next) {
-            var currentUser = AuthService.getCurrentUser();
-            var targetPath = next && next.originalPath ? next.originalPath : '';
-
-            // If user is NOT logged in and attempting to visit ANY route other than Home ('/') or DB Explorer
-            if (!currentUser && targetPath && targetPath !== '/' && targetPath !== '/db-explorer' && targetPath !== '/phpmyadmin') {
-                event.preventDefault();
-                $rootScope.accessDeniedNotice = '🔒 Authentication Required: You must be logged in to access practicals, the Railway booking portal, or personal database records. Please log in below.';
-                $location.path('/');
-            } else if (currentUser) {
-                // Clear notice on valid navigation
-                $rootScope.accessDeniedNotice = '';
-            }
-        });
+        // Unrestricted navigation across all practicals, landing page, and tools
     }]);
 
     // =========================================================================
@@ -219,7 +205,11 @@
                         return parsed;
                     }
                 } catch (e) { }
-                return null;
+                // Default to first user (ridham61) so visitors are never blocked
+                var users = getUsers();
+                var def = users[0];
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify(def));
+                return def;
             },
             login: function (usernameOrEnroll, password, rememberMe) {
                 var users = getUsers();
@@ -355,14 +345,8 @@
 
     // Railway Storage Service with Strict Individual User Isolation & Live Database Sync
     app.factory('RailwayService', ['$rootScope', '$http', function ($rootScope, $http) {
-        var BOOKINGS_KEY = 'gmca_railway_bookings_v3';
         var BOOKINGS_KEY = 'gmca_railway_bookings_v4';
 
-        // Seed realistic private bookings for each team member
-        var defaultBookings = [
-            // Ridham Bambhaniya's personal bookings
-            { id: 101, pnr: 'PNR748291', userEnrollment: '26GMCA61', userId: 1, bookedBy: 'Ridham Bambhaniya', passengerName: 'Ridham Bambhaniya', train: '12957 - Ahmedabad Swarna Jayanti Rajdhani', travelClass: '3A', quota: 'GN', passengers: 2, date: '2026-11-15', totalFare: 2400, bookingDate: '2026-10-01 10:15', status: 'Confirmed' },
-            { id: 102, pnr: 'PNR831902', userEnrollment: '26GMCA61', userId: 1, bookedBy: 'Ridham Bambhaniya', passengerName: 'Ridham Bambhaniya', train: '22953 - Gujarat SF Express', travelClass: 'SL', quota: 'GN', passengers: 1, date: '2026-11-22', totalFare: 400, bookingDate: '2026-10-05 14:20', status: 'Confirmed' },
         // 5 Railway Division Systems (Requirement 6)
         var RAILWAY_SYSTEMS = [
             { code: "WR-ADI", name: "Western Railway — Ahmedabad Division (ADI)", zone: "Western Railway", division: "Ahmedabad", admin: "K. P. Rathod", adminUser: "station_master", email: "sm.adi@railways.gov.in", hq: "Ahmedabad Junction", badge: "#1E3A8A" },
@@ -372,8 +356,6 @@
             { code: "ER-HWH", name: "Eastern Railway — Howrah Division (HWH)", zone: "Eastern Railway", division: "Howrah", admin: "Subhashish Roy", adminUser: "station_master_hwh", email: "sm.hwh@railways.gov.in", hq: "Howrah Junction", badge: "#C2410C" }
         ];
 
-        // Riya Thakkar's personal bookings
-        { id: 201, pnr: 'PNR612944', userEnrollment: '26GMCA33', userId: 2, bookedBy: 'Riya Thakkar', passengerName: 'Riya Thakkar', train: '12009 - Mumbai Central Vande Bharat Express', travelClass: '2A', quota: 'GN', passengers: 1, date: '2026-11-18', totalFare: 1800, bookingDate: '2026-10-04 11:30', status: 'Confirmed' },
         // Seed Minimum 100 Entries Per User Account (Requirement 3: Total 525 Bookings)
         function generateFallbackBookings() {
             var users = [
@@ -418,12 +400,7 @@
             var list = [];
             var idCounter = 1000;
 
-            // Vaibhav Senjaliya's personal bookings
-            { id: 301, pnr: 'PNR930182', userEnrollment: '26GMCA52', userId: 3, bookedBy: 'Vaibhav Senjaliya', passengerName: 'Vaibhav Senjaliya', train: '12957 - Ahmedabad Swarna Jayanti Rajdhani', travelClass: '2A', quota: 'GN', passengers: 1, date: '2026-11-25', totalFare: 1800, bookingDate: '2026-10-06 09:40', status: 'Confirmed' },
-        { id: 302, pnr: 'PNR441920', userEnrollment: '26GMCA52', userId: 3, bookedBy: 'Vaibhav Senjaliya', passengerName: 'Vaibhav Senjaliya', train: '19038 - Avadh Express', travelClass: 'SL', quota: 'GN', passengers: 2, date: '2026-11-29', totalFare: 700, bookingDate: '2026-10-08 16:50', status: 'Confirmed' },
-        { id: 401, pnr: 'PNR552199', userEnrollment: '26GMCA05', userId: 4, bookedBy: 'Aarav Patel', passengerName: 'Aarav Patel', train: '12901 - Gujarat Mail', travelClass: '3A', quota: 'GN', passengers: 1, date: '2026-12-05', totalFare: 950, bookingDate: '2026-10-12 13:00', status: 'Confirmed' }
-    ];
-    users.forEach(function (u) {
+            users.forEach(function (u) {
         for (var i = 1; i <= 105; i++) {
             idCounter++;
             var sysCode = (i % 3 === 0) ? systems[(i + u.id) % systems.length] : u.sys;
@@ -464,21 +441,18 @@
 }
 
         function getAllRaw() {
-    try {
-        var s = localStorage.getItem(BOOKINGS_KEY);
-        if (s) {
-            var p = JSON.parse(s);
-            if (Array.isArray(p)) return p;
-            if (Array.isArray(p) && p.length >= 100) return p;
-        }
-    } catch (e) { }
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(defaultBookings));
-    return defaultBookings;
+            try {
+                var s = localStorage.getItem(BOOKINGS_KEY);
+                if (s) {
+                    var p = JSON.parse(s);
+                    if (Array.isArray(p) && p.length >= 100) return p;
+                }
+            } catch (e) { }
 
-    var seeded = generateFallbackBookings();
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(seeded));
-    return seeded;
-}
+            var seeded = generateFallbackBookings();
+            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(seeded));
+            return seeded;
+        }
 
 function saveRaw(list) {
     localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
@@ -583,231 +557,91 @@ return {
 // 4. CONTROLLERS
 // =========================================================================
 
-// Header & Avatar Identity Verification Controller (4-Digit PIN Security & ng-disabled)
-app.controller('HeaderController', ['$scope', '$rootScope', '$location', '$timeout', 'AuthService', function ($scope, $rootScope, $location, $timeout, AuthService) {
+// Header Controller (1-Click Account Switcher across all 5 Users)
+app.controller('HeaderController', ['$scope', '$rootScope', '$location', 'AuthService', function ($scope, $rootScope, $location, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
 
-    // 3 Core Team Members shown in header capsule
+    // 5 Primary Users shown in header capsule (Requirements 2 & 5)
     $scope.headerMembers = [
         {
             id: 1,
             name: 'Ridham Bambhaniya',
             shortName: 'Ridham',
+            username: 'ridham61',
             enroll: '26GMCA61',
             role: 'Team Lead',
-            pin: '0101',
             avatar: 'ridham.jpeg',
-            fallbackAvatar: 'temp.jpeg',
             profileUrl: '#/member/1'
         },
         {
             id: 2,
             name: 'Riya Thakkar',
             shortName: 'Riya',
+            username: 'riya33',
             enroll: '26GMCA33',
             role: 'Student Member',
-            pin: '9898',
             avatar: 'riya.jpeg',
-            fallbackAvatar: 'temp.jpeg',
             profileUrl: '#/member/2'
         },
         {
             id: 3,
             name: 'Vaibhav Senjaliya',
             shortName: 'Vaibhav',
+            username: 'vaibhav52',
             enroll: '26GMCA52',
-            role: 'Student Member',
-            pin: '9543',
+            role: 'Developer',
             avatar: 'vaibhav.jpeg',
-            fallbackAvatar: 'temp.jpeg',
             profileUrl: '#/member/3'
+        },
+        {
+            id: 4,
+            name: 'K. P. Rathod (Station Master)',
+            shortName: 'Station Master',
+            username: 'station_master',
+            enroll: 'SM-ADI-01',
+            role: 'Station Master (Admin)',
+            avatar: 'temp.jpeg',
+            isAdmin: true,
+            profileUrl: '#/booking-data'
+        },
+        {
+            id: 5,
+            name: 'Aarav Patel',
+            shortName: 'Aarav',
+            username: 'aarav05',
+            enroll: '26GMCA05',
+            role: 'Passenger Member',
+            avatar: 'temp.jpeg',
+            profileUrl: '#/booking-data'
         }
     ];
-
-    // Active user popover state
-    $scope.activeUserMenuOpen = false;
-
-    // PIN Verification Modal State
-    $scope.pinModal = {
-        isOpen: false,
-        targetMember: null,
-        digits: ['', '', '', ''],
-        enteredPin: '',
-        errorMsg: '',
-        successMsg: '',
-        isSubmitting: false,
-        shake: false,
-        showDigits: true
-    };
 
     // Global auth state listener
     $rootScope.$on('authChanged', function (event, user) {
         $scope.currentUser = user;
-        $scope.activeUserMenuOpen = false;
     });
 
-    // AngularJS ng-disabled evaluator:
-    // When logged in as Person X, remainings are disabled and unclickable until logout
     $scope.isAvatarDisabled = function (m) {
-        if (!$scope.currentUser) return false;
-        return $scope.currentUser.enrollment_no !== m.enroll;
+        return false;
     };
 
     $scope.getAvatarTooltip = function (m) {
-        if (!$scope.currentUser) {
-            return 'Click to log in as ' + m.name + ' (Protected: 4-digit PIN required)';
+        if ($scope.currentUser && $scope.currentUser.enrollment_no === m.enroll) {
+            return 'Active Account: ' + m.name + ' (' + m.enroll + ')';
         }
-        if ($scope.currentUser.enrollment_no === m.enroll) {
-            return 'Active Session: ' + m.name + ' (' + m.enroll + ') — Click for profile or logout';
-        }
-        return 'Locked: ' + m.name + ' (Disabled via ng-disabled while ' + $scope.currentUser.full_name + ' is logged in. Logout to switch.)';
+        return 'Click to 1-Click Switch Account to ' + m.name + ' (' + m.username + ')';
     };
 
     $scope.handleAvatarClick = function (m) {
-        // Guard disabled state
-        if ($scope.isAvatarDisabled(m)) {
-            return;
+        var u = AuthService.switchUser(m.enroll || m.username);
+        if (u) {
+            $scope.currentUser = u;
         }
-
-        // If already logged in as this person, toggle options or navigate to profile
-        if ($scope.currentUser && $scope.currentUser.enrollment_no === m.enroll) {
-            $scope.activeUserMenuOpen = !$scope.activeUserMenuOpen;
-            return;
-        }
-
-        // Not logged in: open 4-digit PIN verification modal
-        $scope.openPinModal(m);
-    };
-
-    $scope.openPinModal = function (member) {
-        $scope.pinModal.targetMember = member;
-        $scope.pinModal.digits = ['', '', '', ''];
-        $scope.pinModal.enteredPin = '';
-        $scope.pinModal.errorMsg = '';
-        $scope.pinModal.successMsg = '';
-        $scope.pinModal.isSubmitting = false;
-        $scope.pinModal.shake = false;
-        $scope.pinModal.isOpen = true;
-
-        $timeout(function () {
-            var el = document.getElementById('pin-box-0');
-            if (el) el.focus();
-        }, 100);
-    };
-
-    $scope.closePinModal = function () {
-        $scope.pinModal.isOpen = false;
-        $scope.pinModal.errorMsg = '';
-        $scope.pinModal.successMsg = '';
-    };
-
-    $scope.retryPin = function () {
-        $scope.pinModal.digits = ['', '', '', ''];
-        $scope.pinModal.enteredPin = '';
-        $scope.pinModal.errorMsg = '';
-        $scope.pinModal.successMsg = '';
-        $timeout(function () {
-            var el = document.getElementById('pin-box-0');
-            if (el) el.focus();
-        }, 50);
-    };
-
-    $scope.updateEnteredPin = function () {
-        $scope.pinModal.enteredPin = $scope.pinModal.digits.join('');
-        $scope.pinModal.errorMsg = '';
-    };
-
-    // Physical keyboard typing on individual digit boxes
-    $scope.onDigitInput = function (index, event) {
-        var val = $scope.pinModal.digits[index];
-        if (val && val.length > 1) {
-            $scope.pinModal.digits[index] = val.slice(-1);
-        }
-        $scope.updateEnteredPin();
-
-        // Auto-advance to next box
-        if ($scope.pinModal.digits[index] && index < 3) {
-            var nextEl = document.getElementById('pin-box-' + (index + 1));
-            if (nextEl) nextEl.focus();
-        }
-
-        // Auto submit if all 4 digits entered
-        if ($scope.pinModal.digits.every(function (d) { return d !== ''; })) {
-            $scope.submitPin();
-        }
-    };
-
-    $scope.onDigitKeydown = function (index, event) {
-        if (event.key === 'Backspace' && !$scope.pinModal.digits[index] && index > 0) {
-            var prevEl = document.getElementById('pin-box-' + (index - 1));
-            if (prevEl) {
-                prevEl.focus();
-                $scope.pinModal.digits[index - 1] = '';
-                $scope.updateEnteredPin();
-            }
-        } else if (event.key === 'Enter') {
-            $scope.submitPin();
-        }
-    };
-
-    $scope.onPinPaste = function (event) {
-        var clipData = (event.clipboardData || window.clipboardData).getData('text');
-        if (clipData) {
-            var clean = clipData.replace(/\D/g, '');
-            if (clean.length >= 4) {
-                event.preventDefault();
-                for (var i = 0; i < 4; i++) {
-                    $scope.pinModal.digits[i] = clean.charAt(i);
-                }
-                $scope.updateEnteredPin();
-                $scope.submitPin();
-            }
-        }
-    };
-
-    // Verify PIN and complete authentication
-    $scope.submitPin = function () {
-        var pin = $scope.pinModal.digits.join('');
-        if (pin.length !== 4) {
-            $scope.pinModal.errorMsg = 'Please enter all 4 digits of the security PIN.';
-            return;
-        }
-
-        $scope.pinModal.isSubmitting = true;
-        var target = $scope.pinModal.targetMember;
-        var res = AuthService.verifyAndLoginPin(target.enroll, pin);
-
-        if (res.success) {
-            $scope.pinModal.successMsg = '✅ PIN Verified! Logging in as ' + target.name + '...';
-            $scope.pinModal.errorMsg = '';
-            $timeout(function () {
-                $scope.closePinModal();
-                $scope.pinModal.isSubmitting = false;
-            }, 400);
-        } else {
-            $scope.pinModal.isSubmitting = false;
-            $scope.pinModal.errorMsg = res.message;
-            $scope.pinModal.shake = true;
-            $timeout(function () {
-                $scope.pinModal.shake = false;
-            }, 450);
-        }
-    };
-
-    // Public security fallback: register or standard login
-    $scope.goToStandardLogin = function () {
-        $scope.closePinModal();
-        $location.path('/');
-        $timeout(function () {
-            var el = document.getElementById('login-section');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 200);
     };
 
     $scope.logout = function () {
         AuthService.logout();
-        $scope.currentUser = null;
-        $scope.activeUserMenuOpen = false;
+        $scope.currentUser = AuthService.getCurrentUser();
         $location.path('/');
     };
 }]);
@@ -835,15 +669,8 @@ app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthServi
         $scope.activeDropdown = null;
     };
 
-    // Guard link clicks in nav if not logged in
+    // Free natural navigation without blocking or redirects
     $scope.guardNav = function (targetUrl, $event) {
-        if (!$scope.currentUser && targetUrl !== '#/' && targetUrl !== '/') {
-            if ($event) $event.preventDefault();
-            $rootScope.accessDeniedNotice = '🔒 Authentication Required: Please log in first to access practicals and portal tools.';
-            $location.path('/');
-            $scope.closeMenu();
-            return false;
-        }
         $scope.closeMenu();
         return true;
     };
@@ -865,13 +692,13 @@ app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthServi
 
     $scope.logout = function () {
         AuthService.logout();
-        $scope.currentUser = null;
+        $scope.currentUser = AuthService.getCurrentUser();
         $location.path('/');
     };
 
     $rootScope.$on('$routeChangeSuccess', function () {
         $scope.activeDropdown = null;
-        $scope.mobileMenuOpen = false;
+        $scope.closeMenu();
     });
 
     $rootScope.$on('authChanged', function (event, user) {
@@ -884,6 +711,28 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
     var visits = parseInt(localStorage.getItem('gmca_visits') || '0', 10) + 1;
     localStorage.setItem('gmca_visits', visits);
     $scope.visitCount = visits;
+
+    // 3-Second Translucent Welcome Overlay (First-Time Visitor Only - Requests #10, #15, #17)
+    var hasSeen = localStorage.getItem('hasSeenGroup10Welcome');
+    $scope.showWelcome = !hasSeen;
+    $scope.welcomeFadeOut = false;
+    if ($scope.showWelcome) {
+        $timeout(function () {
+            $scope.welcomeFadeOut = true;
+            $timeout(function () {
+                $scope.showWelcome = false;
+                localStorage.setItem('hasSeenGroup10Welcome', 'true');
+            }, 600);
+        }, 3000);
+    }
+
+    $scope.dismissWelcome = function () {
+        $scope.welcomeFadeOut = true;
+        $timeout(function () {
+            $scope.showWelcome = false;
+            localStorage.setItem('hasSeenGroup10Welcome', 'true');
+        }, 300);
+    };
 
     $scope.currentUser = AuthService.getCurrentUser();
     $scope.teamMembers = AuthService.getDefaultTeamMembers();
@@ -1595,20 +1444,14 @@ app.controller('Practical4Controller', ['$scope', function ($scope) {
     };
 }]);
 
-// Booking Data Controller (User-Isolated Personal Railway Records)
 // Booking Data Controller (User-Isolated Personal Railway Records with Laravel Pagination & Multi-Division Support)
 app.controller('BookingDataController', ['$scope', '$location', 'RailwayService', 'AuthService', function ($scope, $location, RailwayService, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
     $scope.selectedBookingForModal = null;
     $scope.showModal = false;
 
-    function loadBookings() {
-        if ($scope.currentUser) {
-            $scope.bookings = RailwayService.getBookingsForUser($scope.currentUser.enrollment_no);
-        } else {
-            $scope.bookings = [];
-            $scope.systems = RailwayService.getSystems();
-            $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5); // 5 primary users: 3 members + station_master + aarav05
+    $scope.systems = RailwayService.getSystems();
+    $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5); // 5 primary users: 3 members + station_master + aarav05
 
             // Filters state
             $scope.selectedSystem = '';

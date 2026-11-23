@@ -4615,3 +4615,46 @@ button.pin-key-btn {
     color: #FFFFFF !important;
     box-shadow: 0 0 10px rgba(254, 240, 138, 0.4);
 }
+
+/* 3-Second Translucent Welcome Overlay (First-Time Visitor Only - Requests #10, #15, #17) */
+.first-time-welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 80, 0.42);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    transition: opacity 0.6s ease;
+    padding: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.first-time-welcome-overlay.welcome-fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.first-time-welcome-card {
+    background: #FFFFFF;
+    border: 3px solid #FF9933;
+    border-radius: 14px;
+    padding: 28px 36px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0, 0, 128, 0.35);
+    max-width: 490px;
+    width: 100%;
+    cursor: default;
+    animation: welcomeCardPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes welcomeCardPop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
