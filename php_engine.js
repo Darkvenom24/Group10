@@ -743,22 +743,47 @@
 
             const newRow = Object.assign({}, rowData);
             if (t === 'railway_bookings') {
+                // Prevent duplicate PNR insertion in local cache
+                if (newRow.pnr) {
+                    const pnrNorm = String(newRow.pnr).trim().toUpperCase();
+                    const existingIdx = rows.findIndex(r => r.pnr && String(r.pnr).trim().toUpperCase() === pnrNorm);
+                    if (existingIdx !== -1) {
+                        rows[existingIdx] = Object.assign({}, rows[existingIdx], newRow);
+                        setTableRows(t, rows);
+                        return {
+                            success: true,
+                            message: "Existing booking updated (deduplicated).",
+                            inserted_id: rows[existingIdx].id,
+                            affected_rows: 1
+                        };
+                    }
+                }
+                const usersList = getTableRows('users');
+                const enrollNorm = String(newRow.userEnrollment || newRow.user_enrollment || '').trim().toUpperCase();
+                const ownerUser = usersList.find(u => (u.enrollment_no || '').toUpperCase() === enrollNorm);
+                const resolvedBooker = newRow.bookedBy || newRow.booked_by || (ownerUser ? (ownerUser.full_name + ' (' + ownerUser.enrollment_no + ')') : (newRow.passengerName || newRow.passenger_name || 'Member'));
+
+                let rawDate = newRow.date || newRow.journey_date || new Date().toISOString().split('T')[0];
+                if (typeof rawDate === 'string' && rawDate.indexOf('T') !== -1) {
+                    rawDate = rawDate.substring(0, 10);
+                }
+
                 newRow.passengerName = newRow.passengerName || newRow.passenger_name;
                 newRow.passenger_name = newRow.passenger_name || newRow.passengerName;
                 newRow.train = newRow.train || newRow.train_name;
                 newRow.train_name = newRow.train_name || newRow.train;
                 newRow.travelClass = newRow.travelClass || newRow.travel_class || 'SL';
                 newRow.travel_class = newRow.travel_class || newRow.travelClass;
-                newRow.systemCode = newRow.systemCode || newRow.system_code || 'WR-ADI';
+                newRow.systemCode = newRow.systemCode || newRow.system_code || (ownerUser ? ownerUser.division : 'WR-ADI');
                 newRow.system_code = newRow.system_code || newRow.systemCode;
                 newRow.totalFare = newRow.totalFare || newRow.total_fare || 850;
                 newRow.total_fare = newRow.total_fare || newRow.totalFare;
-                newRow.date = newRow.date || newRow.journey_date || new Date().toISOString().split('T')[0];
-                newRow.journey_date = newRow.journey_date || newRow.date;
-                newRow.bookedBy = newRow.bookedBy || newRow.booked_by || 'Passenger';
-                newRow.booked_by = newRow.booked_by || newRow.bookedBy;
-                newRow.userEnrollment = newRow.userEnrollment || newRow.user_enrollment || '26GMCA61';
-                newRow.user_enrollment = newRow.user_enrollment || newRow.userEnrollment;
+                newRow.date = rawDate;
+                newRow.journey_date = rawDate;
+                newRow.bookedBy = resolvedBooker;
+                newRow.booked_by = resolvedBooker;
+                newRow.userEnrollment = enrollNorm || (ownerUser ? ownerUser.enrollment_no : '26GMCA61');
+                newRow.user_enrollment = newRow.userEnrollment;
                 newRow.status = newRow.status || 'Confirmed';
                 newRow.coachSeat = newRow.coachSeat || newRow.coach_seat || 'B2-21';
                 newRow.coach_seat = newRow.coach_seat || newRow.coachSeat;
@@ -859,6 +884,10 @@
                 success: true,
                 message: "All 6 database tables have been reset to default realistic Indian seed records."
             };
+        },
+
+        resetDatabase: function () {
+            return this.resetSeed();
         },
 
         // Live App Form Integration Hooks

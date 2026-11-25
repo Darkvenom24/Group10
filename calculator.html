@@ -260,26 +260,35 @@
             }
         }
 
-        // Computer Keyboard Control
+        function normalizeCalcKey(event) {
+            const codeMap = {
+                Numpad0: "0", Numpad1: "1", Numpad2: "2", Numpad3: "3", Numpad4: "4",
+                Numpad5: "5", Numpad6: "6", Numpad7: "7", Numpad8: "8", Numpad9: "9",
+                NumpadAdd: "+", NumpadSubtract: "-", NumpadMultiply: "*",
+                NumpadDivide: "/", NumpadDecimal: ".", NumpadEnter: "Enter"
+            };
+            return codeMap[event.code] || event.key;
+        }
+
+        // Computer Keyboard & Numpad Control
         document.addEventListener("keydown", function(event) {
-            const key = event.key;
+            if (event.ctrlKey || event.metaKey || event.altKey) return;
+            const key = normalizeCalcKey(event);
 
             if ((key >= "0" && key <= "9") || key === "." || key === "(" || key === ")") {
-                appendValue(key);
-            } else if (key === "+") {
-                appendValue("+");
-            } else if (key === "-") {
-                appendValue("-");
-            } else if (key === "*") {
-                appendValue("*");
-            } else if (key === "/") {
                 event.preventDefault();
-                appendValue("/");
+                appendValue(key);
+            } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+                event.preventDefault();
+                appendValue(key);
             } else if (key === "Enter" || key === "=") {
+                event.preventDefault();
                 calculate();
             } else if (key === "Backspace") {
+                event.preventDefault();
                 display.value = display.value.slice(0, -1);
-            } else if (key === "Escape" || key.toLowerCase() === "c") {
+            } else if (key === "Escape" || key === "Delete" || key.toLowerCase() === "c") {
+                event.preventDefault();
                 clearDisplay();
             }
         });

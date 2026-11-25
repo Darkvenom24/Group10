@@ -14,6 +14,16 @@
                 </div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <span class="php-badge"
+                      ng-style="syncStatus.isCloudPersistent ? {'background': '#DCFCE7', 'color': '#15803D', 'border': '1px solid #86EFAC'} : {'background': '#FEF3C7', 'color': '#92400E', 'border': '1px solid #FCD34D'}"
+                      style="font-size: 11px; padding: 5px 10px; font-weight: 700;"
+                      title="{{syncStatus.label}}">
+                    {{syncStatus.isCloudPersistent ? '🟢 Unified DB Live' : '🟡 ' + (syncStatus.mode === 'ephemeral' ? 'Server Ephemeral' : 'Local Cache')}}
+                    <span ng-if="syncStatus.lastSyncAt"> &bull; {{syncStatus.lastSyncAt}}</span>
+                </span>
+                <button type="button" ng-click="syncNow()" class="btn-php-action btn-secondary" style="font-size: 11.5px; padding: 5px 10px;" title="Sync records across all devices now">
+                    {{isSyncing ? '⏳ Syncing...' : '🔄 Sync Now'}}
+                </button>
                 <a href="#/practical/3" class="btn-php-action" style="font-size: 12px; text-decoration: none; background: var(--navy); color: #FFFFFF;">
                     + Book New Ticket
                 </a>

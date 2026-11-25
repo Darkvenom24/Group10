@@ -367,8 +367,8 @@
             <a href="index.html#/phpmyadmin" class="hub-nav-btn" style="background: #0284C7; border-color: #38BDF8;" title="Open Unified Database in phpMyAdmin">
                 <span>🗄️</span> phpMyAdmin (Unified DB)
             </a>
-            <span class="hub-badge badge-saffron" style="font-size: 12px; padding: 6px 12px;">
-                🔴 Running Live on Vercel
+            <span id="hubSyncBadge" class="hub-badge badge-saffron" style="font-size: 12px; padding: 6px 12px;">
+                🔄 Connecting Unified DB...
             </span>
         </div>
     </header>
@@ -742,8 +742,9 @@
         let filterClass = '';
         let currentPage = 1;
         let perPage = 15;
+        let currentDataVersion = 0;
 
-        const USERS = [
+        let USERS = [
             { id: 1, name: "Ridham Bambhaniya", username: "ridham61", enroll: "26GMCA61", role: "Team Lead", avatar: "ridham.jpeg", division: "WR-ADI", isAdmin: false },
             { id: 2, name: "Riya Thakkar", username: "riya33", enroll: "26GMCA33", role: "Student Member", avatar: "riya.jpeg", division: "CR-CSMT", isAdmin: false },
             { id: 3, name: "Vaibhav Senjaliya", username: "vaibhav52", enroll: "26GMCA52", role: "Developer", avatar: "vaibhav.jpeg", division: "WR-ADI", isAdmin: false },
@@ -759,28 +760,104 @@
             'ER-HWH': { name: 'Eastern Railway', division: 'Howrah Kolkata', hq: 'Kolkata, West Bengal', admin: 'Subhashish Roy', adminUser: 'station_master_hwh', badge: '#7C3AED' }
         };
 
-        // Initialize from Unified Storage (shared with phpMyAdmin)
-        function initData() {
-            try {
-                const raw = localStorage.getItem('gmca_railway_bookings_v4');
-                if (raw) {
-                    allBookings = JSON.parse(raw);
+        function deduplicateBookings(list) {
+            const seen = {};
+            const out = [];
+            (list || []).forEach(b => {
+                if (!b) return;
+                const key = String(b.pnr || b.id || '').toUpperCase();
+                if (!key || seen[key]) return;
+                seen[key] = true;
+                if (typeof b.date === 'string' && b.date.includes('T')) b.date = b.date.substring(0, 10);
+                if (typeof b.journey_date === 'string' && b.journey_date.includes('T')) b.journey_date = b.journey_date.substring(0, 10);
+                out.push(b);
+            });
+            return out;
+        }
+
+        function updateSyncBadge(label, isCloud) {
+            const badge = document.getElementById('hubSyncBadge');
+            if (!badge) return;
+            badge.textContent = (isCloud ? '🟢 ' : '🟡 ') + label;
+            badge.className = 'hub-badge ' + (isCloud ? 'badge-green' : 'badge-saffron');
+        }
+
+        async function fetchFromUnifiedServer() {
+            const endpoints = ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php'];
+            for (const base of endpoints) {
+                try {
+                    const res = await fetch(base + '?action=bootstrap&_t=' + Date.now(), { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data && data.success && Array.isArray(data.bookings)) {
+                        allBookings = deduplicateBookings(data.bookings);
+                        localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
+                        currentDataVersion = data.data_version || 1;
+                        if (Array.isArray(data.users) && data.users.length > 0) {
+                            USERS = data.users.slice(0, 5).map(u => ({
+                                id: u.id,
+                                name: u.full_name,
+                                username: u.username,
+                                enroll: u.enrollment_no,
+                                role: u.role,
+                                avatar: u.avatar || 'temp.jpeg',
+                                division: u.systemCode || 'WR-ADI',
+                                isAdmin: !!u.isAdmin
+                            }));
+                        }
+                        updateSyncBadge(data.is_cloud_persistent ? 'Unified DB Live (Real-Time)' : 'Server Connected (Ephemeral)', !!data.is_cloud_persistent);
+                        renderUserCards();
+                        updateMetrics();
+                        applyFilters();
+                        return true;
+                    }
+                } catch (e) { }
+            }
+            return false;
+        }
+
+        async function pollUnifiedVersion() {
+            if (document.visibilityState === 'hidden') return;
+            for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
+                try {
+                    const res = await fetch(base + '?action=sync_version&_t=' + Date.now(), { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data && data.success) {
+                        if (data.data_version && data.data_version !== currentDataVersion) {
+                            await fetchFromUnifiedServer();
+                        }
+                        return;
+                    }
+                } catch (e) { }
+            }
+        }
+
+        // Initialize from Unified Server (fallback to local cache)
+        async function initData() {
+            const ok = await fetchFromUnifiedServer();
+            if (!ok) {
+                try {
+                    const raw = localStorage.getItem('gmca_railway_bookings_v4');
+                    if (raw) {
+                        allBookings = deduplicateBookings(JSON.parse(raw));
+                    }
+                } catch (e) { }
+
+                if (!allBookings || allBookings.length < 100) {
+                    if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
+                        window.PhpEngine.PhpMyAdmin.resetSeed();
+                        allBookings = deduplicateBookings(JSON.parse(localStorage.getItem('gmca_railway_bookings_v4') || '[]'));
+                    }
                 }
-            } catch (e) {
-                console.error("Storage read error", e);
+                updateSyncBadge('Local Cache Mode', false);
+                renderUserCards();
+                updateMetrics();
+                applyFilters();
             }
 
-            // Fallback: If not yet seeded, trigger php_engine seeding
-            if (!allBookings || allBookings.length < 100) {
-                if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-                    window.PhpEngine.PhpMyAdmin.resetDatabase();
-                    allBookings = JSON.parse(localStorage.getItem('gmca_railway_bookings_v4') || '[]');
-                }
-            }
-
-            renderUserCards();
-            updateMetrics();
-            applyFilters();
+            setInterval(pollUnifiedVersion, 4000);
+            window.addEventListener('focus', pollUnifiedVersion);
         }
 
         // Render User Showcase Cards (Requirement 2 & 3)

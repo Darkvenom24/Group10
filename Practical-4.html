@@ -228,18 +228,29 @@
         }
 
 
+        function normalizeCalcKey(event) {
+            const codeMap = {
+                Numpad0: "0", Numpad1: "1", Numpad2: "2", Numpad3: "3", Numpad4: "4",
+                Numpad5: "5", Numpad6: "6", Numpad7: "7", Numpad8: "8", Numpad9: "9",
+                NumpadAdd: "+", NumpadSubtract: "-", NumpadMultiply: "*",
+                NumpadDivide: "/", NumpadDecimal: ".", NumpadEnter: "Enter"
+            };
+            return codeMap[event.code] || event.key;
+        }
+
         // =====================================
-        // COMPUTER KEYBOARD CONTROL
+        // COMPUTER KEYBOARD & NUMPAD CONTROL
         // =====================================
 
         document.addEventListener("keydown", function(event) {
+            if (event.ctrlKey || event.metaKey || event.altKey) return;
 
-            let key = event.key;
+            let key = normalizeCalcKey(event);
 
 
             // Numbers
             if (key >= "0" && key <= "9") {
-
+                event.preventDefault();
                 appendValue(key);
 
             }
@@ -247,7 +258,7 @@
 
             // Decimal
             else if (key === ".") {
-
+                event.preventDefault();
                 appendValue(".");
 
             }
@@ -255,7 +266,7 @@
 
             // Addition
             else if (key === "+") {
-
+                event.preventDefault();
                 appendValue("+");
 
             }
@@ -263,7 +274,7 @@
 
             // Subtraction
             else if (key === "-") {
-
+                event.preventDefault();
                 appendValue("-");
 
             }
@@ -271,7 +282,7 @@
 
             // Multiplication
             else if (key === "*") {
-
+                event.preventDefault();
                 appendValue("*");
 
             }
@@ -279,7 +290,7 @@
 
             // Division
             else if (key === "/") {
-
+                event.preventDefault();
                 appendValue("/");
 
             }
@@ -287,7 +298,7 @@
 
             // Opening bracket
             else if (key === "(") {
-
+                event.preventDefault();
                 appendValue("(");
 
             }
@@ -295,7 +306,7 @@
 
             // Closing bracket
             else if (key === ")") {
-
+                event.preventDefault();
                 appendValue(")");
 
             }
@@ -303,7 +314,7 @@
 
             // Enter = Calculate
             else if (key === "Enter" || key === "=") {
-
+                event.preventDefault();
                 calculate();
 
             }
@@ -311,15 +322,15 @@
 
             // Backspace = Delete last character
             else if (key === "Backspace") {
-
+                event.preventDefault();
                 deleteLast();
 
             }
 
 
-            // Escape or Delete = Clear
-            else if (key === "Escape" || key === "Delete") {
-
+            // Escape, Delete, or C = Clear
+            else if (key === "Escape" || key === "Delete" || key.toLowerCase() === "c") {
+                event.preventDefault();
                 clearDisplay();
 
             }

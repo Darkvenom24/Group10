@@ -115,25 +115,73 @@
     }]);
 
     // =========================================================================
-    // 2. APPLICATION INITIALIZATION & ROUTE HANDLING (Open Academic Access)
+    // 2. APPLICATION INITIALIZATION & REAL-TIME UNIFIED DB SYNC
     // =========================================================================
-    app.run(['$rootScope', '$location', 'AuthService', function ($rootScope, $location, AuthService) {
+    app.run(['$rootScope', '$location', 'AuthService', 'RailwayService', function ($rootScope, $location, AuthService, RailwayService) {
         $rootScope.accessDeniedNotice = '';
-        // Unrestricted navigation across all practicals, landing page, and tools
+        RailwayService.startRealtimeSync();
     }]);
 
     // =========================================================================
-    // 3. SERVICES & AUTHENTICATION
+    // 3. SERVICES & AUTHENTICATION (UNIFIED REAL-TIME DATABASE + AUTH)
     // =========================================================================
 
-    // Authentication Service with Multi-User Profiles & Live MySQL Database Integration
-    app.factory('AuthService', ['$rootScope', '$http', function ($rootScope, $http) {
+    // Shared API endpoint helper
+    app.factory('UnifiedApi', ['$http', '$q', function ($http, $q) {
+        var CANDIDATES = ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php'];
+        var resolvedUrl = null;
+
+        function request(method, action, params, data) {
+            var tryUrls = resolvedUrl ? [resolvedUrl] : CANDIDATES.slice();
+
+            function attempt(idx) {
+                if (idx >= tryUrls.length) {
+                    return $q.reject({ offline: true, message: 'Server API unreachable' });
+                }
+                var baseUrl = tryUrls[idx];
+                var qs = 'action=' + encodeURIComponent(action);
+                if (params) {
+                    Object.keys(params).forEach(function (k) {
+                        if (params[k] !== undefined && params[k] !== null) {
+                            qs += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+                        }
+                    });
+                }
+                var cfg = {
+                    method: method,
+                    url: baseUrl + '?' + qs,
+                    timeout: 8000,
+                    headers: { 'Cache-Control': 'no-cache' }
+                };
+                if (data !== undefined) {
+                    cfg.data = data;
+                }
+                return $http(cfg).then(function (res) {
+                    if (res && res.data && typeof res.data === 'object') {
+                        resolvedUrl = baseUrl;
+                        return res.data;
+                    }
+                    return attempt(idx + 1);
+                }, function () {
+                    return attempt(idx + 1);
+                });
+            }
+
+            return attempt(0);
+        }
+
+        return {
+            get: function (action, params) { return request('GET', action, params); },
+            post: function (action, data, params) { return request('POST', action, params, data); }
+        };
+    }]);
+
+    // Authentication Service with Unified Database Sync & Real-Time Activity Audit
+    app.factory('AuthService', ['$rootScope', '$q', 'UnifiedApi', function ($rootScope, $q, UnifiedApi) {
         var USERS_KEY = 'gmca_users_v4';
         var SESSION_KEY = 'gmca_current_session_v2';
         var REMEMBERED_KEY = 'gmca_remembered_session_v2';
 
-        // Secure 4-Digit PIN Mapping for Team Leads & Station Masters
-        // Vaibhav: 9543 | Ridham: 0101 | Riya: 9898 | Station Master: 0000 | Aarav: 1234
         var MEMBER_PINS = {
             '26GMCA61': '0101', // Ridham Bambhaniya
             '26GMCA33': '9898', // Riya Thakkar
@@ -142,14 +190,12 @@
             '26GMCA05': '1234'  // Aarav Patel
         };
 
-        // Total 5 Users: 3 Members + 1 Admin (Station Master) + 1 Passenger (Requirements 2 & 5)
         var defaultUsers = [
             { id: 1, username: 'ridham61', full_name: 'Ridham Bambhaniya', email: 'ridham.26gmca61@gmca.ac.in', enrollment_no: '26GMCA61', password: 'password123', pin: '0101', role: 'Team Lead', avatar: 'ridham.jpeg', systemCode: 'WR-ADI', isAdmin: false },
             { id: 2, username: 'riya33', full_name: 'Riya Thakkar', email: 'riya.26gmca33@gmca.ac.in', enrollment_no: '26GMCA33', password: 'password123', pin: '9898', role: 'Student Member', avatar: 'riya.jpeg', systemCode: 'CR-CSMT', isAdmin: false },
             { id: 3, username: 'vaibhav52', full_name: 'Vaibhav Senjaliya', email: 'vaibhav.26gmca52@gmca.ac.in', enrollment_no: '26GMCA52', password: 'password123', pin: '9543', role: 'Developer', avatar: 'vaibhav.jpeg', systemCode: 'WR-ADI', isAdmin: false },
             { id: 4, username: 'station_master', full_name: 'K. P. Rathod (Station Master)', email: 'station_master@railways.gov.in', enrollment_no: 'SM-ADI-01', password: 'password123', pin: '0000', role: 'Station Master (Admin)', avatar: 'temp.jpeg', systemCode: 'WR-ADI', isAdmin: true },
             { id: 5, username: 'aarav05', full_name: 'Aarav Patel', email: 'aarav.patel@gmca.ac.in', enrollment_no: '26GMCA05', password: 'password123', pin: '1234', role: 'Passenger Member', avatar: 'temp.jpeg', systemCode: 'NR-NDLS', isAdmin: false },
-            // Additional Station Masters for Requirement 6 (5 Railway Divisions)
             { id: 6, username: 'station_master_ndls', full_name: 'Rajesh Sharma (Station Master NDLS)', email: 'sm.ndls@railways.gov.in', enrollment_no: 'SM-NDLS-02', password: 'password123', pin: '0000', role: 'Station Master (Admin)', avatar: 'temp.jpeg', systemCode: 'NR-NDLS', isAdmin: true },
             { id: 7, username: 'station_master_csmt', full_name: 'Sanjay Deshmukh (Station Master CSMT)', email: 'sm.csmt@railways.gov.in', enrollment_no: 'SM-CSMT-03', password: 'password123', pin: '0000', role: 'Station Master (Admin)', avatar: 'temp.jpeg', systemCode: 'CR-CSMT', isAdmin: true },
             { id: 8, username: 'station_master_mas', full_name: 'M. S. Ramanathan (Station Master MAS)', email: 'sm.mas@railways.gov.in', enrollment_no: 'SM-MAS-04', password: 'password123', pin: '0000', role: 'Station Master (Admin)', avatar: 'temp.jpeg', systemCode: 'SR-MAS', isAdmin: true },
@@ -175,126 +221,167 @@
             return defaultUsers;
         }
 
-        function syncLoginToDb(userEmail) {
-            if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-                window.PhpEngine.PhpMyAdmin.recordLogin(userEmail, 'SUCCESS');
+        function setUsersCache(serverUsers) {
+            if (!Array.isArray(serverUsers) || serverUsers.length === 0) return;
+            var normalized = serverUsers.map(function (u) {
+                return {
+                    id: u.id,
+                    username: u.username,
+                    full_name: u.full_name,
+                    email: u.email,
+                    enrollment_no: u.enrollment_no,
+                    password: u.password || 'password123',
+                    pin: MEMBER_PINS[u.enrollment_no] || u.pin || '1234',
+                    role: u.role,
+                    avatar: u.avatar || 'temp.jpeg',
+                    systemCode: u.systemCode || u.system_code || 'WR-ADI',
+                    isAdmin: !!(u.isAdmin || u.is_admin === 1 || u.is_admin === true),
+                    last_login: u.last_login || null
+                };
+            });
+            localStorage.setItem(USERS_KEY, JSON.stringify(normalized));
+
+            // Keep active session user details refreshed from unified server
+            var cur = getCurrentUserInternal();
+            if (cur) {
+                var fresh = normalized.find(function (u) {
+                    return u.enrollment_no && cur.enrollment_no && u.enrollment_no.toUpperCase() === cur.enrollment_no.toUpperCase();
+                });
+                if (fresh) {
+                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(fresh));
+                    if (localStorage.getItem(REMEMBERED_KEY)) {
+                        localStorage.setItem(REMEMBERED_KEY, JSON.stringify(fresh));
+                    }
+                }
             }
-            $http.post('api/phpmyadmin_api.php?action=form_login', {
-                email: userEmail,
-                user_agent: navigator.userAgent
-            }).catch(function () { });
+            $rootScope.$broadcast('usersChanged', normalized);
+        }
+
+        function getCurrentUserInternal() {
+            try {
+                var sessionStr = sessionStorage.getItem(SESSION_KEY);
+                if (sessionStr) return JSON.parse(sessionStr);
+
+                var rememberedStr = localStorage.getItem(REMEMBERED_KEY);
+                if (rememberedStr) {
+                    var parsed = JSON.parse(rememberedStr);
+                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(parsed));
+                    return parsed;
+                }
+            } catch (e) { }
+            return null;
+        }
+
+        function persistSession(user, rememberMe) {
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+            if (rememberMe !== false) {
+                localStorage.setItem(REMEMBERED_KEY, JSON.stringify(user));
+            } else {
+                localStorage.removeItem(REMEMBERED_KEY);
+            }
+            $rootScope.$broadcast('authChanged', user);
+
+            if (user && (user.isAdmin || user.username === 'station_master')) {
+                try {
+                    window.open('laravel-hub.html', '_blank');
+                } catch (e) { }
+            }
         }
 
         return {
             getDefaultTeamMembers: function () {
-                return defaultUsers;
+                return getUsers();
+            },
+            syncUsersFromServer: function (serverUsers) {
+                setUsersCache(serverUsers);
             },
             getMemberPin: function (enrollmentNo) {
                 return MEMBER_PINS[enrollmentNo] || null;
             },
             getCurrentUser: function () {
-                try {
-                    var sessionStr = sessionStorage.getItem(SESSION_KEY);
-                    if (sessionStr) return JSON.parse(sessionStr);
-
-                    var rememberedStr = localStorage.getItem(REMEMBERED_KEY);
-                    if (rememberedStr) {
-                        var parsed = JSON.parse(rememberedStr);
-                        sessionStorage.setItem(SESSION_KEY, JSON.stringify(parsed));
-                        return parsed;
-                    }
-                } catch (e) { }
-                // Default to first user (ridham61) so visitors are never blocked
+                var cur = getCurrentUserInternal();
+                if (cur) return cur;
                 var users = getUsers();
                 var def = users[0];
                 sessionStorage.setItem(SESSION_KEY, JSON.stringify(def));
                 return def;
             },
+            loginAsync: function (usernameOrEnroll, password, rememberMe) {
+                var norm = (usernameOrEnroll || '').trim();
+                if (!norm || !password) {
+                    return $q.resolve({ success: false, message: 'Please enter username/enrollment and password.' });
+                }
+                return UnifiedApi.post('auth_login', {
+                    usernameOrEnroll: norm,
+                    password: password
+                }).then(function (res) {
+                    if (res && res.success && res.user) {
+                        persistSession(res.user, rememberMe);
+                        return { success: true, user: res.user };
+                    }
+                    return { success: false, message: (res && res.message) || 'Invalid username/enrollment or password.' };
+                }, function () {
+                    // Offline fallback: strict local check (no fake auto-registration)
+                    var users = getUsers();
+                    var lower = norm.toLowerCase();
+                    var matched = users.find(function (u) {
+                        return (u.username.toLowerCase() === lower ||
+                            u.enrollment_no.toLowerCase() === lower ||
+                            (u.email && u.email.toLowerCase() === lower)) && u.password === password;
+                    });
+                    if (matched) {
+                        persistSession(matched, rememberMe);
+                        return { success: true, user: matched };
+                    }
+                    return { success: false, message: 'Invalid credentials. Please check your username/enrollment and password.' };
+                });
+            },
             login: function (usernameOrEnroll, password, rememberMe) {
                 var users = getUsers();
                 var norm = (usernameOrEnroll || '').trim().toLowerCase();
-                var matched = null;
-                for (var i = 0; i < users.length; i++) {
-                    var u = users[i];
-                    if ((u.username.toLowerCase() === norm || u.enrollment_no.toLowerCase() === norm || (u.email && u.email.toLowerCase() === norm)) && u.password === password) {
-                        matched = u;
-                        break;
-                    }
-                }
-
-                // Live demo safety: auto-register new demo user so login test never fails
-                if (!matched && norm && password) {
-                    var nextId = users.length + 1;
-                    var cleanNorm = norm.replace(/[^a-zA-Z0-9@.]/g, '');
-                    var email = cleanNorm.indexOf('@') !== -1 ? cleanNorm : (cleanNorm + '@gmca.ac.in');
-                    var enroll = norm.indexOf('gmca') !== -1 ? norm.toUpperCase() : ('26GMCA' + Math.floor(10 + Math.random() * 89));
-                    matched = {
-                        id: nextId,
-                        username: cleanNorm.split('@')[0],
-                        full_name: (cleanNorm.charAt(0).toUpperCase() + cleanNorm.slice(1).split('@')[0]) + ' (Evaluator)',
-                        email: email,
-                        enrollment_no: enroll,
-                        password: password,
-                        pin: '1234',
-                        role: 'Student Member',
-                        avatar: 'temp.jpeg'
-                    };
-                    users.push(matched);
-                    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-                }
-
+                var matched = users.find(function (u) {
+                    return (u.username.toLowerCase() === norm ||
+                        u.enrollment_no.toLowerCase() === norm ||
+                        (u.email && u.email.toLowerCase() === norm)) && u.password === password;
+                });
                 if (matched) {
-                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(matched));
-                    if (rememberMe) {
-                        localStorage.setItem(REMEMBERED_KEY, JSON.stringify(matched));
-                    } else {
-                        localStorage.removeItem(REMEMBERED_KEY);
-                    }
-                    $rootScope.$broadcast('authChanged', matched);
-
-                    // Sync to live database tables
-                    syncLoginToDb(matched.email);
-
-                    // When Station Master logs in, automatically launch Station Master Laravel Hub in new tab on Vercel
-                    if (matched.isAdmin || matched.username === 'station_master') {
-                        try {
-                            window.open('laravel-hub.html', '_blank');
-                        } catch (e) {
-                            console.log('Popup blocked or error opening new tab:', e);
-                        }
-                    }
-
+                    persistSession(matched, rememberMe);
+                    UnifiedApi.post('form_login', { usernameOrEnroll: matched.enrollment_no }).catch(function () { });
                     return { success: true, user: matched };
                 }
                 return { success: false, message: 'Invalid credentials. Select a quick profile card or enter valid login.' };
             },
-            // 4-Digit Security PIN Verification & Instant Login
             verifyAndLoginPin: function (enrollmentOrId, enteredPin) {
                 var users = getUsers();
                 var norm = String(enrollmentOrId || '').trim().toUpperCase();
-                var matchedUser = null;
-                for (var i = 0; i < users.length; i++) {
-                    var u = users[i];
-                    if (u.enrollment_no.toUpperCase() === norm || String(u.id) === norm || u.username.toUpperCase() === norm) {
-                        matchedUser = u;
-                        break;
-                    }
-                }
+                var matchedUser = users.find(function (u) {
+                    return u.enrollment_no.toUpperCase() === norm || String(u.id) === norm || u.username.toUpperCase() === norm;
+                });
                 if (!matchedUser) {
-                    return { success: false, message: 'Profile not found. Please log in with your credentials or register.' };
+                    return { success: false, message: 'Profile not found.' };
                 }
                 var expectedPin = MEMBER_PINS[matchedUser.enrollment_no.toUpperCase()] || matchedUser.pin;
                 if (String(enteredPin).trim() === String(expectedPin).trim()) {
-                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(matchedUser));
-                    localStorage.setItem(REMEMBERED_KEY, JSON.stringify(matchedUser));
-                    $rootScope.$broadcast('authChanged', matchedUser);
-
-                    // Sync to live database tables
-                    syncLoginToDb(matchedUser.email);
-
+                    persistSession(matchedUser, true);
+                    UnifiedApi.post('auth_pin', { enrollmentOrId: matchedUser.enrollment_no, pin: enteredPin }).catch(function () { });
                     return { success: true, user: matchedUser };
                 }
                 return { success: false, message: 'Incorrect 4-digit PIN! Please try again.' };
+            },
+            registerAsync: function (userObj, rememberMe) {
+                return UnifiedApi.post('auth_register', userObj).then(function (res) {
+                    if (res && res.success && res.user) {
+                        var users = getUsers();
+                        users.push(res.user);
+                        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                        persistSession(res.user, rememberMe);
+                        $rootScope.$broadcast('usersChanged', users);
+                        return { success: true, user: res.user };
+                    }
+                    return { success: false, message: (res && res.message) || 'Registration failed.' };
+                }, function () {
+                    return { success: false, message: 'Unable to reach server for registration.' };
+                });
             },
             register: function (userObj, rememberMe) {
                 var users = getUsers();
@@ -305,19 +392,8 @@
                 if (!userObj.email) userObj.email = (userObj.username || 'user' + nextId) + '@gmca.ac.in';
                 users.push(userObj);
                 localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify(userObj));
-                if (rememberMe) {
-                    localStorage.setItem(REMEMBERED_KEY, JSON.stringify(userObj));
-                }
-                $rootScope.$broadcast('authChanged', userObj);
-
-                // Sync live insertion to MySQL users and login_activity tables
-                if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-                    window.PhpEngine.PhpMyAdmin.recordSignup(userObj);
-                }
-                $http.post('api/phpmyadmin_api.php?action=form_signup', userObj).catch(function () { });
-
+                persistSession(userObj, rememberMe);
+                UnifiedApi.post('auth_register', userObj).catch(function () { });
                 return { success: true, user: userObj };
             },
             logout: function () {
@@ -331,29 +407,19 @@
             switchUser: function (usernameOrEnroll) {
                 var users = getUsers();
                 var norm = String(usernameOrEnroll || '').trim().toLowerCase();
-                var matched = null;
-                for (var i = 0; i < users.length; i++) {
-                    var u = users[i];
-                    if (u.username.toLowerCase() === norm || u.enrollment_no.toLowerCase() === norm || (u.email && u.email.toLowerCase() === norm)) {
-                        matched = u;
-                        break;
-                    }
-                }
+                var matched = users.find(function (u) {
+                    return u.username.toLowerCase() === norm ||
+                        u.enrollment_no.toLowerCase() === norm ||
+                        (u.email && u.email.toLowerCase() === norm);
+                });
                 if (matched) {
-                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(matched));
-                    localStorage.setItem(REMEMBERED_KEY, JSON.stringify(matched));
-                    $rootScope.$broadcast('authChanged', matched);
-                    syncLoginToDb(matched.email);
-
-                    // When Station Master logs in, automatically launch Station Master Laravel Hub in new tab on Vercel
-                    if (matched.isAdmin || matched.username === 'station_master') {
-                        try {
-                            window.open('laravel-hub.html', '_blank');
-                        } catch (e) {
-                            console.log('Popup blocked or error opening new tab:', e);
+                    persistSession(matched, true);
+                    UnifiedApi.post('auth_quick_switch', { identifier: matched.enrollment_no }).then(function (res) {
+                        if (res && res.success && res.user) {
+                            sessionStorage.setItem(SESSION_KEY, JSON.stringify(res.user));
+                            localStorage.setItem(REMEMBERED_KEY, JSON.stringify(res.user));
                         }
-                    }
-
+                    }).catch(function () { });
                     return matched;
                 }
                 return null;
@@ -361,11 +427,21 @@
         };
     }]);
 
-    // Railway Storage Service with Strict Individual User Isolation & Live Database Sync
-    app.factory('RailwayService', ['$rootScope', '$http', function ($rootScope, $http) {
+    // Railway Storage Service with Deduplicated Unified Real-Time Server Sync & Role Isolation
+    app.factory('RailwayService', ['$rootScope', '$interval', '$q', 'UnifiedApi', 'AuthService', function ($rootScope, $interval, $q, UnifiedApi, AuthService) {
         var BOOKINGS_KEY = 'gmca_railway_bookings_v4';
+        var syncTimer = null;
+        var currentDataVersion = 0;
+        var syncInFlight = false;
+        var syncStatus = {
+            mode: 'checking',
+            label: 'Connecting to Unified Database...',
+            isCloudPersistent: false,
+            driver: 'checking',
+            dataVersion: 0,
+            lastSyncAt: ''
+        };
 
-        // 5 Railway Division Systems (Requirement 6)
         var RAILWAY_SYSTEMS = [
             { code: "WR-ADI", name: "Western Railway — Ahmedabad Division (ADI)", zone: "Western Railway", division: "Ahmedabad", admin: "K. P. Rathod", adminUser: "station_master", email: "sm.adi@railways.gov.in", hq: "Ahmedabad Junction", badge: "#1E3A8A" },
             { code: "NR-NDLS", name: "Northern Railway — New Delhi Division (NDLS)", zone: "Northern Railway", division: "New Delhi", admin: "Rajesh Sharma", adminUser: "station_master_ndls", email: "sm.ndls@railways.gov.in", hq: "New Delhi Railway Station", badge: "#0F766E" },
@@ -374,7 +450,62 @@
             { code: "ER-HWH", name: "Eastern Railway — Howrah Division (HWH)", zone: "Eastern Railway", division: "Howrah", admin: "Subhashish Roy", adminUser: "station_master_hwh", email: "sm.hwh@railways.gov.in", hq: "Howrah Junction", badge: "#C2410C" }
         ];
 
-        // Seed Minimum 100 Entries Per User Account (Requirement 3: Total 525 Bookings)
+        function normalizeDateStr(val) {
+            if (!val) return new Date().toISOString().split('T')[0];
+            if (val instanceof Date && !isNaN(val.getTime())) {
+                var y = val.getFullYear();
+                var m = String(val.getMonth() + 1).padStart(2, '0');
+                var d = String(val.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + d;
+            }
+            var s = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+            if (s.indexOf('T') !== -1) {
+                var parsed = new Date(s);
+                if (!isNaN(parsed.getTime())) {
+                    var py = parsed.getFullYear();
+                    var pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                    var pd = String(parsed.getDate()).padStart(2, '0');
+                    return py + '-' + pm + '-' + pd;
+                }
+                return s.substring(0, 10);
+            }
+            return s;
+        }
+
+        function deduplicateBookings(list) {
+            if (!Array.isArray(list)) return [];
+            var byPnr = {};
+            var order = [];
+            list.forEach(function (b) {
+                if (!b) return;
+                var pnrKey = String(b.pnr || b.id || '').trim().toUpperCase();
+                if (!pnrKey) return;
+                var copy = angular.extend({}, b);
+                copy.date = normalizeDateStr(copy.date || copy.journey_date);
+                copy.journey_date = copy.date;
+                copy.passengerName = copy.passengerName || copy.passenger_name || '';
+                copy.train = copy.train || copy.train_name || '';
+                copy.travelClass = copy.travelClass || copy.travel_class || 'SL';
+                copy.systemCode = copy.systemCode || copy.system_code || 'WR-ADI';
+                copy.totalFare = Number(copy.totalFare || copy.total_fare || 0);
+                copy.bookedBy = copy.bookedBy || copy.booked_by || 'Member';
+                copy.userEnrollment = String(copy.userEnrollment || copy.user_enrollment || '').toUpperCase();
+
+                if (!byPnr[pnrKey]) {
+                    byPnr[pnrKey] = copy;
+                    order.push(pnrKey);
+                } else {
+                    // Prefer the entry that does NOT have generic "Passenger" as bookedBy
+                    var prev = byPnr[pnrKey];
+                    if (prev.bookedBy === 'Passenger' && copy.bookedBy !== 'Passenger') {
+                        byPnr[pnrKey] = copy;
+                    }
+                }
+            });
+            return order.map(function (k) { return byPnr[k]; });
+        }
+
         function generateFallbackBookings() {
             var users = [
                 { id: 1, name: "Ridham Bambhaniya", enroll: "26GMCA61", sys: "WR-ADI" },
@@ -416,54 +547,60 @@
             var quotas = ['GN', 'TQ', 'LD', 'SS', 'PT'];
             var statuses = ['Confirmed', 'Confirmed', 'Confirmed', 'RAC', 'Waiting List'];
             var list = [];
-            var idCounter = 1000;
+            var idCounter = 1;
 
             users.forEach(function (u) {
-        for (var i = 1; i <= 105; i++) {
-            idCounter++;
-            var sysCode = (i % 3 === 0) ? systems[(i + u.id) % systems.length] : u.sys;
-            var sysTrains = trains[sysCode] || trains['WR-ADI'];
-            var tr = sysTrains[(i - 1) % sysTrains.length];
-            var cls = classes[i % classes.length];
-            var qta = quotas[i % quotas.length];
-            var pax = (i % 4) + 1;
-            var st = statuses[i % statuses.length];
-            var mult = (cls === '1A') ? 2.5 : ((cls === '2A') ? 1.8 : ((cls === '3A') ? 1.2 : ((cls === 'SL') ? 0.6 : 1.0)));
-            var fare = Math.round(tr.base * mult * pax);
-            if (qta === 'TQ' || qta === 'PT') fare += (pax * 250);
-            var coach = (cls === '1A') ? 'H1' : ((cls === '2A') ? 'A1' : ((cls === '3A') ? 'B2' : 'S4'));
-            var seat = ((i * 7) % 72) + 1;
-            var pnr = 'PNR' + (100000 + ((u.id * 1000 + i * 37) % 900000));
-            list.push({
-                id: idCounter,
-                pnr: pnr,
-                passengerName: (i % 4 === 0) ? 'Passenger ' + i : u.name,
-                phone: '98' + String(10000000 + (idCounter * 73) % 90000000),
-                train: tr.name,
-                travelClass: cls,
-                quota: qta,
-                passengers: pax,
-                date: '2026-11-' + String(1 + (i % 28)).padStart(2, '0'),
-                totalFare: fare,
-                status: st,
-                coachSeat: coach + '-' + seat,
-                systemCode: sysCode,
-                userEnrollment: u.enroll,
-                userId: u.id,
-                bookedBy: u.name,
-                bookingDate: '2026-10-15 12:00:00'
+                for (var i = 1; i <= 105; i++) {
+                    var sysCode = (i % 3 === 0) ? systems[(i + u.id) % systems.length] : u.sys;
+                    var sysTrains = trains[sysCode] || trains['WR-ADI'];
+                    var tr = sysTrains[(i - 1) % sysTrains.length];
+                    var cls = classes[i % classes.length];
+                    var qta = quotas[i % quotas.length];
+                    var pax = (i % 4) + 1;
+                    var st = statuses[i % statuses.length];
+                    var mult = (cls === '1A') ? 2.5 : ((cls === '2A') ? 1.8 : ((cls === '3A') ? 1.2 : ((cls === 'SL') ? 0.6 : 1.0)));
+                    var fare = Math.round(tr.base * mult * pax);
+                    if (qta === 'TQ' || qta === 'PT') fare += (pax * 250);
+                    var coach = (cls === '1A') ? 'H1' : ((cls === '2A') ? 'A1' : ((cls === '3A') ? 'B2' : 'S4'));
+                    var seat = ((i * 7) % 72) + 1;
+                    var pnr = 'PNR' + (100000 + idCounter);
+                    list.push({
+                        id: idCounter,
+                        pnr: pnr,
+                        passengerName: (i % 4 === 0) ? 'Passenger ' + i : u.name,
+                        phone: '98' + String(10000000 + (idCounter * 73) % 90000000),
+                        train: tr.name,
+                        travelClass: cls,
+                        quota: qta,
+                        passengers: pax,
+                        date: '2026-11-' + String(1 + (i % 28)).padStart(2, '0'),
+                        totalFare: fare,
+                        status: st,
+                        coachSeat: coach + '-' + seat,
+                        systemCode: sysCode,
+                        userEnrollment: u.enroll,
+                        userId: u.id,
+                        bookedBy: u.name + ' (' + u.enroll + ')',
+                        bookingDate: '2026-10-15 12:00:00'
+                    });
+                    idCounter++;
+                }
             });
+            return list;
         }
-    });
-    return list;
-}
 
         function getAllRaw() {
             try {
                 var s = localStorage.getItem(BOOKINGS_KEY);
                 if (s) {
                     var p = JSON.parse(s);
-                    if (Array.isArray(p) && p.length >= 100) return p;
+                    if (Array.isArray(p) && p.length > 0) {
+                        var deduped = deduplicateBookings(p);
+                        if (deduped.length !== p.length) {
+                            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(deduped));
+                        }
+                        return deduped;
+                    }
                 }
             } catch (e) { }
 
@@ -472,103 +609,230 @@
             return seeded;
         }
 
-function saveRaw(list) {
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
-}
-
-return {
-    getSystems: function () {
-        return RAILWAY_SYSTEMS;
-    },
-    getAllBookings: function () {
-        return getAllRaw();
-    },
-    getBookingsBySystem: function (sysCode) {
-        var all = getAllRaw();
-        if (!sysCode) return all;
-        return all.filter(function (b) { return b.systemCode === sysCode; });
-    },
-    // Returns ONLY the records belonging to the authenticated user
-    getBookingsForUser: function (enrollmentOrId) {
-        if (!enrollmentOrId) return [];
-        var all = getAllRaw();
-        var norm = String(enrollmentOrId).trim().toUpperCase();
-        return all.filter(function (b) {
-            return (b.userEnrollment && b.userEnrollment.toUpperCase() === norm) ||
-                (b.userId && String(b.userId) === norm);
-        });
-    },
-    save: function (booking, currentUser) {
-        var list = getAllRaw();
-        booking.id = Date.now();
-        if (!booking.pnr) booking.pnr = 'PNR' + Math.floor(100000 + Math.random() * 900000);
-        booking.userEnrollment = currentUser ? currentUser.enrollment_no : 'GUEST';
-        booking.userId = currentUser ? currentUser.id : null;
-        booking.bookedBy = currentUser ? currentUser.full_name : booking.passengerName;
-        booking.bookingDate = new Date().toISOString().replace('T', ' ').substring(0, 19);
-        booking.status = 'Confirmed';
-        list.unshift(booking);
-        saveRaw(list);
-        $rootScope.$broadcast('railwayBookingsChanged');
-
-        // Sync to live MySQL database and client engine
-        if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-            window.PhpEngine.PhpMyAdmin.recordBooking(booking);
+        function saveRaw(list) {
+            var deduped = deduplicateBookings(list);
+            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(deduped));
+            return deduped;
         }
-        $http.post('api/phpmyadmin_api.php?action=form_booking', booking).catch(function () { });
 
-        return booking;
-    },
-    delete: function (id, currentUser) {
-        var list = getAllRaw();
-        var userEnroll = currentUser ? currentUser.enrollment_no.toUpperCase() : '';
-        var filtered = list.filter(function (b) {
-            if (b.id === id) {
-                return b.userEnrollment && b.userEnrollment.toUpperCase() !== userEnroll;
+        function updateSyncStatus(res) {
+            if (!res) return;
+            syncStatus.driver = res.driver || 'unified';
+            syncStatus.isCloudPersistent = !!res.is_cloud_persistent;
+            syncStatus.dataVersion = res.data_version || currentDataVersion;
+            syncStatus.lastSyncAt = new Date().toLocaleTimeString();
+            if (res.is_cloud_persistent) {
+                syncStatus.mode = 'unified';
+                syncStatus.label = res.persistence_label || 'Unified Cloud DB Live (Real-Time Sync)';
+            } else {
+                syncStatus.mode = 'ephemeral';
+                syncStatus.label = res.persistence_label || 'Server Ephemeral Mode (Configure Cloud DB env var for cross-PC sync)';
             }
-            return true;
-        });
-        saveRaw(filtered);
-        $rootScope.$broadcast('railwayBookingsChanged');
+            $rootScope.$broadcast('syncStatusChanged', syncStatus);
+        }
 
-        // Sync delete to live MySQL database and client engine
-        if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-            window.PhpEngine.PhpMyAdmin.deleteRow('railway_bookings', id);
+        function bootstrapFromServer() {
+            if (syncInFlight) return $q.resolve();
+            syncInFlight = true;
+            return UnifiedApi.get('bootstrap').then(function (res) {
+                syncInFlight = false;
+                if (res && res.success) {
+                    if (Array.isArray(res.users) && res.users.length > 0) {
+                        AuthService.syncUsersFromServer(res.users);
+                    }
+                    if (Array.isArray(res.bookings)) {
+                        saveRaw(res.bookings);
+                    }
+                    currentDataVersion = res.data_version || 1;
+                    updateSyncStatus(res);
+                    $rootScope.$broadcast('railwayBookingsChanged');
+                }
+            }, function () {
+                syncInFlight = false;
+                syncStatus.mode = 'offline';
+                syncStatus.isCloudPersistent = false;
+                syncStatus.label = 'Offline Local Mode (Backend API unreachable)';
+                $rootScope.$broadcast('syncStatusChanged', syncStatus);
+            });
         }
-        $http.post('api/phpmyadmin_api.php?action=delete_row&table=railway_bookings&id=' + id).catch(function () { });
-    },
-    getBookingById: function (id) {
-        if (!id) return null;
-        var all = getAllRaw();
-        var search = String(id).trim().toUpperCase();
-        return all.find(function (b) {
-            return String(b.id) === search || (b.pnr && b.pnr.toUpperCase() === search);
-        }) || null;
-    },
-    update: function (booking, currentUser) {
-        var list = getAllRaw();
-        var foundIndex = -1;
-        for (var i = 0; i < list.length; i++) {
-            if (String(list[i].id) === String(booking.id) || (list[i].pnr && list[i].pnr === booking.pnr)) {
-                foundIndex = i;
-                break;
+
+        function pollVersion() {
+            if (document.visibilityState === 'hidden' || syncInFlight) return;
+            UnifiedApi.get('sync_version').then(function (res) {
+                if (res && res.success) {
+                    updateSyncStatus(res);
+                    if (res.data_version && res.data_version !== currentDataVersion) {
+                        bootstrapFromServer();
+                    }
+                }
+            }).catch(function () { });
+        }
+
+        return {
+            getSystems: function () {
+                return RAILWAY_SYSTEMS;
+            },
+            getSyncStatus: function () {
+                return syncStatus;
+            },
+            syncNow: function (force) {
+                if (force) return bootstrapFromServer();
+                pollVersion();
+                return $q.resolve();
+            },
+            startRealtimeSync: function () {
+                bootstrapFromServer();
+                if (!syncTimer) {
+                    syncTimer = $interval(pollVersion, 4000);
+                    window.addEventListener('focus', pollVersion);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'visible') {
+                            pollVersion();
+                        }
+                    });
+                }
+            },
+            getAllBookings: function () {
+                return getAllRaw();
+            },
+            getBookingsBySystem: function (sysCode) {
+                var all = getAllRaw();
+                if (!sysCode) return all;
+                return all.filter(function (b) { return b.systemCode === sysCode; });
+            },
+            getBookingsForUser: function (enrollmentOrId) {
+                if (!enrollmentOrId) return [];
+                var all = getAllRaw();
+                var norm = String(enrollmentOrId).trim().toUpperCase();
+                return all.filter(function (b) {
+                    return (b.userEnrollment && b.userEnrollment.toUpperCase() === norm) ||
+                        (b.userId && String(b.userId) === norm);
+                });
+            },
+            save: function (booking, currentUser) {
+                var list = getAllRaw();
+                var cleanDate = normalizeDateStr(booking.date);
+                var pnr = String(booking.pnr || ('PNR' + Math.floor(100000 + Math.random() * 900000))).toUpperCase();
+                var userEnroll = currentUser ? currentUser.enrollment_no : 'GUEST';
+                var bookedByLabel = currentUser
+                    ? (currentUser.full_name + ' (' + userEnroll + ')')
+                    : booking.passengerName;
+                var sysCode = booking.systemCode || (currentUser && currentUser.systemCode) || 'WR-ADI';
+                var coachPrefix = (booking.travelClass === '1A') ? 'H1' : ((booking.travelClass === '2A') ? 'A1' : ((booking.travelClass === '3A') ? 'B2' : 'S4'));
+                var coachSeat = booking.coachSeat || (coachPrefix + '-' + (Math.floor(Math.random() * 60) + 1));
+
+                var record = angular.extend({}, booking, {
+                    id: Date.now(),
+                    pnr: pnr,
+                    date: cleanDate,
+                    journey_date: cleanDate,
+                    userEnrollment: userEnroll,
+                    userId: currentUser ? currentUser.id : null,
+                    bookedBy: bookedByLabel,
+                    systemCode: sysCode,
+                    coachSeat: coachSeat,
+                    bookingDate: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    status: 'Confirmed'
+                });
+
+                list.unshift(record);
+                saveRaw(list);
+                $rootScope.$broadcast('railwayBookingsChanged');
+
+                // Persist to unified server database (NO duplicate client-side PhpMyAdmin.recordBooking!)
+                UnifiedApi.post('save_booking', angular.extend({}, record, {
+                    actorEnrollment: userEnroll
+                })).then(function (res) {
+                    if (res && res.success && res.booking) {
+                        var current = getAllRaw();
+                        var idx = current.findIndex(function (x) { return String(x.pnr).toUpperCase() === pnr; });
+                        if (idx !== -1) {
+                            current[idx] = res.booking;
+                        } else {
+                            current.unshift(res.booking);
+                        }
+                        saveRaw(current);
+                        if (res.data_version) currentDataVersion = res.data_version;
+                        $rootScope.$broadcast('railwayBookingsChanged');
+                    }
+                }).catch(function () { });
+
+                return record;
+            },
+            delete: function (id, currentUser) {
+                var list = getAllRaw();
+                var isAdmin = !!(currentUser && currentUser.isAdmin);
+                var userEnroll = currentUser ? String(currentUser.enrollment_no || '').toUpperCase() : '';
+
+                var filtered = list.filter(function (b) {
+                    if (String(b.id) === String(id)) {
+                        if (isAdmin) return false; // Station Master can delete any record
+                        return b.userEnrollment && b.userEnrollment.toUpperCase() !== userEnroll;
+                    }
+                    return true;
+                });
+                saveRaw(filtered);
+                $rootScope.$broadcast('railwayBookingsChanged');
+
+                UnifiedApi.post('delete_booking', {
+                    id: id,
+                    actorEnrollment: userEnroll
+                }).then(function (res) {
+                    if (res && res.data_version) {
+                        currentDataVersion = res.data_version;
+                    }
+                }).catch(function () { });
+            },
+            getBookingById: function (id) {
+                if (!id) return null;
+                var all = getAllRaw();
+                var search = String(id).trim().toUpperCase();
+                return all.find(function (b) {
+                    return String(b.id) === search || (b.pnr && b.pnr.toUpperCase() === search);
+                }) || null;
+            },
+            update: function (booking, currentUser) {
+                var list = getAllRaw();
+                var foundIndex = -1;
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) === String(booking.id) || (list[i].pnr && booking.pnr && list[i].pnr.toUpperCase() === String(booking.pnr).toUpperCase())) {
+                        foundIndex = i;
+                        break;
+                    }
+                }
+                if (foundIndex !== -1) {
+                    var original = list[foundIndex];
+                    var updated = angular.extend({}, original, booking);
+                    updated.date = normalizeDateStr(updated.date);
+                    updated.journey_date = updated.date;
+                    updated.updatedAt = new Date().toLocaleString();
+                    if (currentUser) {
+                        updated.lastModifiedBy = currentUser.full_name;
+                    }
+                    list[foundIndex] = updated;
+                    saveRaw(list);
+                    $rootScope.$broadcast('railwayBookingsChanged');
+
+                    UnifiedApi.post('update_booking', angular.extend({}, updated, {
+                        actorEnrollment: currentUser ? currentUser.enrollment_no : ''
+                    })).then(function (res) {
+                        if (res && res.success && res.booking) {
+                            var cur = getAllRaw();
+                            var idx = cur.findIndex(function (x) { return String(x.id) === String(res.booking.id) || String(x.pnr).toUpperCase() === String(res.booking.pnr).toUpperCase(); });
+                            if (idx !== -1) {
+                                cur[idx] = res.booking;
+                                saveRaw(cur);
+                            }
+                            if (res.data_version) currentDataVersion = res.data_version;
+                            $rootScope.$broadcast('railwayBookingsChanged');
+                        }
+                    }).catch(function () { });
+
+                    return updated;
+                }
+                return null;
             }
-        }
-        if (foundIndex !== -1) {
-            var original = list[foundIndex];
-            var updated = angular.extend({}, original, booking);
-            updated.updatedAt = new Date().toLocaleString();
-            if (currentUser) {
-                updated.lastModifiedBy = currentUser.full_name;
-            }
-            list[foundIndex] = updated;
-            saveRaw(list);
-            $rootScope.$broadcast('railwayBookingsChanged');
-            return updated;
-        }
-        return null;
-    }
-};
+        };
     }]);
 
 // =========================================================================
@@ -894,14 +1158,18 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
             $scope.loginError = 'Please select a profile or enter your username/enrollment and password.';
             return;
         }
-        var res = AuthService.login($scope.loginModel.usernameOrEnroll, $scope.loginModel.password, $scope.loginModel.rememberMe);
-        if (res.success) {
-            $scope.currentUser = res.user;
-            $rootScope.accessDeniedNotice = '';
-            loadUserBookings();
-        } else {
-            $scope.loginError = res.message;
-        }
+        $scope.isAuthLoading = true;
+        AuthService.loginAsync($scope.loginModel.usernameOrEnroll, $scope.loginModel.password, $scope.loginModel.rememberMe)
+            .then(function (res) {
+                $scope.isAuthLoading = false;
+                if (res.success) {
+                    $scope.currentUser = res.user;
+                    $rootScope.accessDeniedNotice = '';
+                    loadUserBookings();
+                } else {
+                    $scope.loginError = res.message;
+                }
+            });
     };
 
     $scope.submitRegister = function () {
@@ -910,12 +1178,19 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
             return;
         }
         $scope.regModel.avatar = 'temp.jpeg';
-        var res = AuthService.register($scope.regModel, $scope.regModel.rememberMe);
-        if (res.success) {
-            $scope.currentUser = res.user;
-            $rootScope.accessDeniedNotice = '';
-            loadUserBookings();
-        }
+        $scope.loginError = '';
+        $scope.isAuthLoading = true;
+        AuthService.registerAsync($scope.regModel, $scope.regModel.rememberMe)
+            .then(function (res) {
+                $scope.isAuthLoading = false;
+                if (res.success) {
+                    $scope.currentUser = res.user;
+                    $rootScope.accessDeniedNotice = '';
+                    loadUserBookings();
+                } else {
+                    alert(res.message || 'Registration failed.');
+                }
+            });
     };
 
     $scope.logout = function () {
@@ -929,6 +1204,12 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
 
     $scope.$on('railwayBookingsChanged', function () {
         loadUserBookings();
+    });
+
+    $rootScope.$on('usersChanged', function (event, users) {
+        if (Array.isArray(users) && users.length > 0) {
+            $scope.teamMembers = users;
+        }
     });
 }]);
 
@@ -1008,21 +1289,61 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
     $scope.confirmedTicket = null;
 
     // If targetId is provided, load the existing booking for View or Edit
+    function toDateInputValue(dStr) {
+        if (!dStr) return '';
+        var clean = String(dStr).substring(0, 10);
+        var parts = clean.split('-');
+        if (parts.length === 3) {
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        return dStr;
+    }
+
+    function toIsoDateString(val) {
+        if (!val) return '';
+        if (val instanceof Date && !isNaN(val.getTime())) {
+            var y = val.getFullYear();
+            var m = String(val.getMonth() + 1).padStart(2, '0');
+            var d = String(val.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+        var s = String(val).trim();
+        if (s.indexOf('T') !== -1) {
+            var parsed = new Date(s);
+            if (!isNaN(parsed.getTime())) {
+                var py = parsed.getFullYear();
+                var pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                var pd = String(parsed.getDate()).padStart(2, '0');
+                return py + '-' + pm + '-' + pd;
+            }
+            return s.substring(0, 10);
+        }
+        return s;
+    }
+
     if (targetId) {
         var loadedBooking = RailwayService.getBookingById(targetId);
         if (loadedBooking) {
             $scope.editingBooking = loadedBooking;
+            var loadedTrain = loadedBooking.train || loadedBooking.train_name || '';
+            if (loadedTrain && !$scope.trains.some(function (t) { return t.name === loadedTrain; })) {
+                $scope.trains.unshift({ code: loadedTrain.split(' ')[0], name: loadedTrain });
+            }
             $scope.booking = {
-                passengerName: loadedBooking.passengerName || '',
-                phone: loadedBooking.phone || '',
-                train: loadedBooking.train || '',
-                travelClass: loadedBooking.travelClass || 'SL',
+                passengerName: loadedBooking.passengerName || loadedBooking.passenger_name || '',
+                phone: loadedBooking.phone || '9876543210',
+                train: loadedTrain,
+                travelClass: loadedBooking.travelClass || loadedBooking.travel_class || 'SL',
                 quota: loadedBooking.quota || 'GN',
-                date: loadedBooking.date || '',
+                date: toDateInputValue(loadedBooking.date || loadedBooking.journey_date),
                 passengers: loadedBooking.passengers || 1
             };
         }
     }
+
+    $scope.$on('authChanged', function (event, user) {
+        $scope.currentUser = user || AuthService.getCurrentUser();
+    });
 
     // Trigger CSS shake animation on field
     $scope.triggerShake = function (fieldName) {
@@ -1345,6 +1666,7 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
         }
 
         // If in Edit Mode, update existing booking in database!
+        var formattedDate = toIsoDateString($scope.booking.date);
         if ($scope.isEditMode && $scope.editingBooking) {
             var totalFare = $scope.calculateFare();
             var updatedRecord = angular.extend({}, $scope.editingBooking, {
@@ -1354,7 +1676,7 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
                 travelClass: $scope.booking.travelClass,
                 quota: $scope.booking.quota,
                 passengers: Math.max(1, parseInt($scope.booking.passengers, 10)),
-                date: $scope.booking.date,
+                date: formattedDate,
                 totalFare: totalFare,
                 status: 'Confirmed'
             });
@@ -1362,13 +1684,13 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
             var saved = RailwayService.update(updatedRecord, $scope.currentUser);
             $scope.confirmedTicket = saved;
             $scope.editingBooking = saved;
-            $scope.updateSuccessNotice = "✅ Reservation (PNR: " + saved.pnr + ") successfully updated and saved in database!";
+            $scope.updateSuccessNotice = "✅ Reservation (PNR: " + saved.pnr + ") successfully updated and saved in unified database!";
             return true;
         }
 
         // Valid! Create new booking record
         var totalFare = $scope.calculateFare();
-        var pnrNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        var pnrNumber = 'PNR' + Math.floor(100000 + Math.random() * 900000).toString();
 
         var bookingRecord = {
             pnr: pnrNumber,
@@ -1378,7 +1700,7 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
             travelClass: $scope.booking.travelClass,
             quota: $scope.booking.quota,
             passengers: Math.max(1, parseInt($scope.booking.passengers, 10)),
-            date: $scope.booking.date,
+            date: formattedDate,
             totalFare: totalFare,
             status: 'Confirmed'
         };
@@ -1403,13 +1725,34 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
     };
 }]);
 
-// Practical 4 Controller (Calculator)
-app.controller('Practical4Controller', ['$scope', function ($scope) {
+// Practical 4 Controller (Calculator with Full Keyboard & Numpad Control)
+app.controller('Practical4Controller', ['$scope', '$document', '$timeout', function ($scope, $document, $timeout) {
     $scope.display = '0';
+    $scope.lastExpression = '';
+    $scope.activeKey = '';
     $scope.history = [];
 
+    function flashKey(keyName) {
+        $scope.activeKey = keyName;
+        $timeout(function () {
+            if ($scope.activeKey === keyName) {
+                $scope.activeKey = '';
+            }
+        }, 140);
+    }
+
+    function blurFocusedButton() {
+        if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+            document.activeElement.blur();
+        }
+    }
+
     $scope.pressKey = function (val) {
-        if ($scope.display === '0' || $scope.display === 'Error') {
+        blurFocusedButton();
+        flashKey(val);
+        if ($scope.display === '0' && val !== '.') {
+            $scope.display = val;
+        } else if ($scope.display === 'Error') {
             $scope.display = val;
         } else {
             $scope.display += val;
@@ -1417,10 +1760,19 @@ app.controller('Practical4Controller', ['$scope', function ($scope) {
     };
 
     $scope.clear = function () {
+        blurFocusedButton();
+        flashKey('C');
         $scope.display = '0';
+        $scope.lastExpression = '';
     };
 
     $scope.backspace = function () {
+        blurFocusedButton();
+        flashKey('Backspace');
+        if ($scope.display === 'Error') {
+            $scope.display = '0';
+            return;
+        }
         if ($scope.display.length > 1) {
             $scope.display = $scope.display.slice(0, -1);
         } else {
@@ -1429,25 +1781,83 @@ app.controller('Practical4Controller', ['$scope', function ($scope) {
     };
 
     $scope.evaluate = function () {
+        blurFocusedButton();
+        flashKey('=');
         try {
-            var sanitized = $scope.display.replace(/[^0-9+\-*/().]/g, '');
+            var sanitized = String($scope.display).replace(/[^0-9+\-*/().]/g, '');
+            if (!sanitized) return;
             var res = Function('"use strict";return (' + sanitized + ')')();
-            $scope.history.unshift($scope.display + ' = ' + res);
+            if (typeof res !== 'number' || !isFinite(res)) {
+                $scope.display = 'Error';
+                return;
+            }
+            var rounded = Number(res.toFixed(8));
+            $scope.lastExpression = $scope.display + ' =';
+            $scope.history.unshift($scope.display + ' = ' + rounded);
             if ($scope.history.length > 5) $scope.history.pop();
-            $scope.display = String(res);
+            $scope.display = String(rounded);
         } catch (e) {
             $scope.display = 'Error';
         }
     };
+
+    var NUMPAD_MAP = {
+        Numpad0: '0', Numpad1: '1', Numpad2: '2', Numpad3: '3', Numpad4: '4',
+        Numpad5: '5', Numpad6: '6', Numpad7: '7', Numpad8: '8', Numpad9: '9',
+        NumpadAdd: '+', NumpadSubtract: '-', NumpadMultiply: '*',
+        NumpadDivide: '/', NumpadDecimal: '.', NumpadEnter: 'Enter'
+    };
+
+    function handleKeyDown(event) {
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        var tag = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+        var key = NUMPAD_MAP[event.code] || event.key;
+        var handled = true;
+
+        if ((key >= '0' && key <= '9') || key === '.' || key === '(' || key === ')' ||
+            key === '+' || key === '-' || key === '*' || key === '/') {
+            $scope.$applyAsync(function () { $scope.pressKey(key); });
+        } else if (key === 'Enter' || key === '=') {
+            $scope.$applyAsync(function () { $scope.evaluate(); });
+        } else if (key === 'Backspace') {
+            $scope.$applyAsync(function () { $scope.backspace(); });
+        } else if (key === 'Escape' || key === 'Delete' || String(key).toLowerCase() === 'c') {
+            $scope.$applyAsync(function () { $scope.clear(); });
+        } else {
+            handled = false;
+        }
+
+        if (handled) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
+    $document.on('keydown', handleKeyDown);
+    $scope.$on('$destroy', function () {
+        $document.off('keydown', handleKeyDown);
+    });
 }]);
 
-// Booking Data Controller (User-Isolated Personal Railway Records with Laravel Pagination & Multi-Division Support)
+// Booking Data Controller (User-Isolated Personal Railway Records with Real-Time Unified DB Sync & Pagination)
 app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'RailwayService', 'AuthService', function ($scope, $rootScope, $location, RailwayService, AuthService) {
     $scope.currentUser = AuthService.getCurrentUser();
     $scope.isAdminUser = !!($scope.currentUser && $scope.currentUser.isAdmin);
+    $scope.syncStatus = RailwayService.getSyncStatus();
+    $scope.isSyncing = false;
 
     $scope.systems = RailwayService.getSystems();
     $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5);
+
+    $scope.syncNow = function () {
+        $scope.isSyncing = true;
+        RailwayService.syncNow(true).finally(function () {
+            $scope.isSyncing = false;
+            applyFilterAndPagination();
+        });
+    };
 
     $scope.selectedSystem = '';
     // Normal user sees ONLY their personal records (105). Station Master sees master dataset (525).
@@ -1636,6 +2046,16 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
 
     $scope.$on('railwayBookingsChanged', function () {
         applyFilterAndPagination();
+    });
+
+    $scope.$on('syncStatusChanged', function (event, st) {
+        $scope.syncStatus = st;
+    });
+
+    $scope.$on('usersChanged', function (event, users) {
+        if (Array.isArray(users) && users.length > 0) {
+            $scope.primaryUsers = users.slice(0, 5);
+        }
     });
 
     $scope.$on('authChanged', function (event, user) {
@@ -2221,7 +2641,7 @@ app.controller('PhpHubController', ['$scope', function ($scope) {
 // =========================================================================
 // 13. Authentic phpMyAdmin 5.x Full-Stack Controller
 // =========================================================================
-app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window', function ($scope, $http, $timeout, $window) {
+app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window', 'RailwayService', function ($scope, $http, $timeout, $window, RailwayService) {
     $scope.isLoading = true;
     $scope.isQueryRunning = false;
     $scope.connectionMode = 'checking'; // 'live_mysql' | 'client_engine' | 'checking'
@@ -2323,8 +2743,8 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     if (res.data && res.data.success) {
                         activeApiUrl = url;
                         $scope.connectionMode = 'live_mysql';
-                        $scope.serverStatusText = 'Cloud MySQL Connected';
-                        var d = res.data.data;
+                        $scope.serverStatusText = res.data.persistence_label || 'Unified Database Connected';
+                        var d = res.data.data || {};
                         $scope.serverInfo = {
                             server: d.server || 'Cloud MySQL 8.0',
                             version: d.version || '8.0.35-InnoDB',
@@ -2615,6 +3035,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     $scope.actionMessage = "✓ 1 row deleted from `" + $scope.activeTable + "`.";
                     loadTableBrowse();
                     loadDbStructure();
+                    RailwayService.syncNow(true);
                 })
                 .catch(function () {
                     fallbackDelete(row.id);
@@ -2667,6 +3088,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     $scope.editingRow = null;
                     $scope.actionMessage = "✓ 1 row updated in `" + $scope.activeTable + "`.";
                     loadTableBrowse();
+                    RailwayService.syncNow(true);
                 })
                 .catch(function () {
                     fallbackUpdate(id, $scope.editingRow);
@@ -2762,6 +3184,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     $scope.activeTableTab = 'browse';
                     loadTableBrowse();
                     loadDbStructure();
+                    RailwayService.syncNow(true);
                 })
                 .catch(function () {
                     fallbackInsert(payload);
@@ -2804,6 +3227,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                         $scope.sqlResult = res.data;
                         loadDbStructure();
                         if ($scope.activeTable) loadTableBrowse();
+                        RailwayService.syncNow(true);
                     } else {
                         $scope.sqlResult = { success: false, error: 'Unexpected response from server.' };
                     }
@@ -2853,6 +3277,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     $scope.activeTableTab = 'browse';
                     loadTableBrowse();
                     loadDbStructure();
+                    RailwayService.syncNow(true);
                 })
                 .catch(function () {
                     fallbackEmpty();
@@ -2891,6 +3316,7 @@ app.controller('PhpMyAdminController', ['$scope', '$http', '$timeout', '$window'
                     loadDbStructure(function () {
                         if ($scope.activeTable) loadTableBrowse();
                     });
+                    RailwayService.syncNow(true);
                 })
                 .catch(function () {
                     fallbackResetSeed();

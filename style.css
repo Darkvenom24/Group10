@@ -3061,6 +3061,16 @@ button.pin-key-btn {
     margin: 0 auto;
 }
 
+.calculator-card button {
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+}
+
+.calculator-card button.calc-key-active {
+    transform: scale(0.93);
+    filter: brightness(1.25);
+    box-shadow: 0 0 0 2px #38BDF8;
+}
+
 /* ==========================================================================
    Multi-Breakpoint Responsive Design System
    ========================================================================== */
