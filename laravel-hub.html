@@ -541,9 +541,9 @@
         <section class="hub-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                 <h3 style="font-size: 17px; font-weight: 800; color: var(--navy); margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <span>👥</span> Total 5 User Accounts (Requirements 2 &amp; 3)
+                    <span>👥</span> Total <span id="userAccountsHeadingCount">5</span> User Accounts (Requirements 2 &amp; 3)
                 </h3>
-                <span class="hub-badge badge-green">105 Entries Seeded In Each Account (525 Total)</span>
+                <span id="userTotalBadge" class="hub-badge badge-green">Live Unified Database Entries</span>
             </div>
 
             <div class="user-grid" id="userCardsContainer">
@@ -564,6 +564,9 @@
                 </div>
 
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn-hub" onclick="syncNow()" style="background: #15803D; color: #FFFFFF; font-size: 12px; padding: 6px 14px;" title="Sync live records now">
+                        🔄 Sync Now
+                    </button>
                     <a href="index.html#/phpmyadmin" class="btn-hub" style="background: #0284C7; color: #FFFFFF; font-size: 12px; padding: 6px 14px;" title="Manage rows in phpMyAdmin">
                         🗄️ Manage in phpMyAdmin
                     </a>
@@ -782,6 +785,43 @@
             badge.className = 'hub-badge ' + (isCloud ? 'badge-green' : 'badge-saffron');
         }
 
+        let isCloudPersistentMode = false;
+
+        function loadFromLocalStore() {
+            try {
+                const raw = localStorage.getItem('gmca_railway_bookings_v4');
+                if (raw) {
+                    allBookings = deduplicateBookings(JSON.parse(raw));
+                }
+            } catch (e) { }
+
+            if (!allBookings || allBookings.length < 1) {
+                if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
+                    window.PhpEngine.PhpMyAdmin.resetSeed();
+                    allBookings = deduplicateBookings(JSON.parse(localStorage.getItem('gmca_railway_bookings_v4') || '[]'));
+                }
+            }
+
+            try {
+                const rawUsers = localStorage.getItem('gmca_users_v4');
+                if (rawUsers) {
+                    const parsedUsers = JSON.parse(rawUsers);
+                    if (Array.isArray(parsedUsers) && parsedUsers.length > 0) {
+                        USERS = parsedUsers.slice(0, 5).map(u => ({
+                            id: u.id,
+                            name: u.full_name,
+                            username: u.username,
+                            enroll: u.enrollment_no,
+                            role: u.role,
+                            avatar: u.avatar || 'temp.jpeg',
+                            division: u.systemCode || 'WR-ADI',
+                            isAdmin: !!u.isAdmin
+                        }));
+                    }
+                }
+            } catch (e) { }
+        }
+
         async function fetchFromUnifiedServer() {
             const endpoints = ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php'];
             for (const base of endpoints) {
@@ -790,22 +830,30 @@
                     if (!res.ok) continue;
                     const data = await res.json();
                     if (data && data.success && Array.isArray(data.bookings)) {
-                        allBookings = deduplicateBookings(data.bookings);
-                        localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
+                        isCloudPersistentMode = !!data.is_cloud_persistent;
                         currentDataVersion = data.data_version || 1;
-                        if (Array.isArray(data.users) && data.users.length > 0) {
-                            USERS = data.users.slice(0, 5).map(u => ({
-                                id: u.id,
-                                name: u.full_name,
-                                username: u.username,
-                                enroll: u.enrollment_no,
-                                role: u.role,
-                                avatar: u.avatar || 'temp.jpeg',
-                                division: u.systemCode || 'WR-ADI',
-                                isAdmin: !!u.isAdmin
-                            }));
+                        if (isCloudPersistentMode) {
+                            allBookings = deduplicateBookings(data.bookings);
+                            localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
+                            if (Array.isArray(data.users) && data.users.length > 0) {
+                                USERS = data.users.slice(0, 5).map(u => ({
+                                    id: u.id,
+                                    name: u.full_name,
+                                    username: u.username,
+                                    enroll: u.enrollment_no,
+                                    role: u.role,
+                                    avatar: u.avatar || 'temp.jpeg',
+                                    division: u.systemCode || 'WR-ADI',
+                                    isAdmin: !!u.isAdmin
+                                }));
+                            }
+                            updateSyncBadge('Unified DB Live (Real-Time)', true);
+                        } else {
+                            // Ephemeral Vercel serverless without Cloud DB env var:
+                            // Do NOT overwrite localStorage with fresh /tmp 525 rows!
+                            loadFromLocalStore();
+                            updateSyncBadge('Synced with Local Unified DB', false);
                         }
-                        updateSyncBadge(data.is_cloud_persistent ? 'Unified DB Live (Real-Time)' : 'Server Connected (Ephemeral)', !!data.is_cloud_persistent);
                         renderUserCards();
                         updateMetrics();
                         applyFilters();
@@ -818,6 +866,13 @@
 
         async function pollUnifiedVersion() {
             if (document.visibilityState === 'hidden') return;
+            if (!isCloudPersistentMode) {
+                loadFromLocalStore();
+                renderUserCards();
+                updateMetrics();
+                applyFilters();
+                return;
+            }
             for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
                 try {
                     const res = await fetch(base + '?action=sync_version&_t=' + Date.now(), { cache: 'no-store' });
@@ -833,31 +888,34 @@
             }
         }
 
-        // Initialize from Unified Server (fallback to local cache)
+        async function syncNow() {
+            await fetchFromUnifiedServer();
+        }
+
+        // Initialize from Unified Server (preserving local store if server is ephemeral)
         async function initData() {
             const ok = await fetchFromUnifiedServer();
             if (!ok) {
-                try {
-                    const raw = localStorage.getItem('gmca_railway_bookings_v4');
-                    if (raw) {
-                        allBookings = deduplicateBookings(JSON.parse(raw));
-                    }
-                } catch (e) { }
-
-                if (!allBookings || allBookings.length < 100) {
-                    if (window.PhpEngine && window.PhpEngine.PhpMyAdmin) {
-                        window.PhpEngine.PhpMyAdmin.resetSeed();
-                        allBookings = deduplicateBookings(JSON.parse(localStorage.getItem('gmca_railway_bookings_v4') || '[]'));
-                    }
-                }
+                loadFromLocalStore();
                 updateSyncBadge('Local Cache Mode', false);
                 renderUserCards();
                 updateMetrics();
                 applyFilters();
             }
 
-            setInterval(pollUnifiedVersion, 4000);
+            setInterval(pollUnifiedVersion, 3000);
             window.addEventListener('focus', pollUnifiedVersion);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') pollUnifiedVersion();
+            });
+            window.addEventListener('storage', (e) => {
+                if (!e.key || e.key === 'gmca_railway_bookings_v4' || e.key === 'gmca_users_v4') {
+                    loadFromLocalStore();
+                    renderUserCards();
+                    updateMetrics();
+                    applyFilters();
+                }
+            });
         }
 
         // Render User Showcase Cards (Requirement 2 & 3)
@@ -893,7 +951,7 @@
                         </div>
 
                         <button type="button" onclick="setUserFilter('${u.enroll}')" class="btn-hub ${isSelected ? 'btn-navy' : 'btn-saffron'}" style="width: 100%; justify-content: center; font-size: 11.5px; padding: 6px 10px;">
-                            ${isSelected ? '✔ Showing These 105 Tickets' : 'Filter by this User (' + count + ')'}
+                            ${isSelected ? '✔ Showing These ' + count + ' Tickets' : 'Filter by this User (' + count + ')'}
                         </button>
                     </div>
                 `;
@@ -905,6 +963,11 @@
             document.getElementById('statTotalUsers').textContent = USERS.length + ' Accounts';
             document.getElementById('statTotalDivisions').textContent = Object.keys(DIVISIONS).length + ' Divisions';
             document.getElementById('statTotalBookings').textContent = allBookings.length + ' Entries';
+
+            const userBadge = document.getElementById('userTotalBadge');
+            if (userBadge) {
+                userBadge.textContent = allBookings.length + ' Total Live Database Records';
+            }
 
             const totalRev = allBookings.reduce((sum, b) => sum + (Number(b.totalFare || b.total_fare) || 0), 0);
             document.getElementById('statTotalRevenue').textContent = '₹' + totalRev.toLocaleString('en-IN');
@@ -952,7 +1015,7 @@
             let summary = `Showing ${filteredBookings.length} matching reservations`;
             if (selectedUserEnroll) {
                 const u = USERS.find(x => x.enroll === selectedUserEnroll);
-                summary += ` booked by ${u ? u.name : selectedUserEnroll} (105 entries)`;
+                summary += ` booked by ${u ? u.name : selectedUserEnroll} (${filteredBookings.length} entries)`;
             }
             if (selectedDivision) {
                 summary += ` in ${selectedDivision} Division`;
@@ -1016,9 +1079,17 @@
                             <td>${statusBadge}</td>
                             <td style="font-family: monospace; font-weight: 600;">${seat}</td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <button type="button" onclick="openModal('${pnr}')" class="btn-hub btn-navy" style="font-size: 11px; padding: 3px 8px;" title="View E-Ticket Slip">
-                                    👁️ E-Ticket
-                                </button>
+                                <div style="display: inline-flex; gap: 4px; align-items: center;">
+                                    <button type="button" onclick="openModal('${pnr}')" class="btn-hub btn-navy" style="font-size: 11px; padding: 3px 8px;" title="View E-Ticket Slip">
+                                        👁️
+                                    </button>
+                                    <a href="index.html#/practical/3?mode=edit&id=${encodeURIComponent(b.id || pnr)}" class="btn-hub" style="background: #D97706; color: #FFFFFF; font-size: 11px; padding: 3px 8px;" title="Edit Reservation">
+                                        ✏️
+                                    </a>
+                                    <button type="button" onclick="deleteHubBooking('${b.id}', '${pnr}')" class="btn-hub" style="background: #DC2626; color: #FFFFFF; font-size: 11px; padding: 3px 8px;" title="Cancel Reservation">
+                                        ✕
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -1184,6 +1255,32 @@
 
         function closeModal() {
             document.getElementById('eTicketModal').style.display = 'none';
+        }
+
+        async function deleteHubBooking(id, pnr) {
+            if (!confirm('Cancel and delete booking PNR ' + pnr + '?')) return;
+            allBookings = allBookings.filter(b => String(b.id) !== String(id) && String(b.pnr).toUpperCase() !== String(pnr).toUpperCase());
+            localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
+            renderUserCards();
+            updateMetrics();
+            applyFilters();
+
+            if (isCloudPersistentMode) {
+                for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
+                    try {
+                        const res = await fetch(base + '?action=delete_booking', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: id, actorEnrollment: 'SM-ADI-01' })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data && data.data_version) currentDataVersion = data.data_version;
+                            break;
+                        }
+                    } catch (e) { }
+                }
+            }
         }
 
         // Initialize on page load
