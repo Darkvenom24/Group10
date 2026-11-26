@@ -104,9 +104,6 @@
                 <button type="button" ng-if="!currentUser" ng-click="openAuthModal('login', $event)" style="background: #16A34A; color: #FFFFFF; border: none; border-radius: 6px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer;">
                     Login
                 </button>
-                <button type="button" ng-if="!currentUser" ng-click="openAuthModal('register', $event)" style="background: #0284C7; color: #FFFFFF; border: none; border-radius: 6px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                    Sign Up
-                </button>
             </div>
         </div>
 
@@ -282,9 +279,6 @@
             </button>
             <button type="button" ng-if="!currentUser" ng-click="openAuthModal('login', $event); closeMenu()" class="nav-item" style="background: #16A34A; color: #FFFFFF; font-weight: 700; border: none; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Login to your account">
                 <span>🔑</span> Sign In
-            </button>
-            <button type="button" ng-if="!currentUser" ng-click="openAuthModal('register', $event); closeMenu()" class="nav-item" style="background: #0284C7; color: #FFFFFF; font-weight: 700; border: none; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Register a new student account">
-                <span>📝</span> Sign Up
             </button>
         </div>
     </nav>
