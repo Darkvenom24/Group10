@@ -631,24 +631,66 @@
             $rootScope.$broadcast('syncStatusChanged', syncStatus);
         }
 
+        function isSeedPnr(pnr) {
+            return /^PNR100\d{3}$/i.test(String(pnr || '').trim());
+        }
+
+        function rehydrateUnsyncedBookings(serverList, localList, currentUser) {
+            if (!Array.isArray(localList) || localList.length === 0) return false;
+            var serverPnrMap = {};
+            (serverList || []).forEach(function (b) {
+                if (b && b.pnr) serverPnrMap[String(b.pnr).toUpperCase()] = true;
+            });
+            var missingCustom = localList.filter(function (b) {
+                var pnr = String(b && b.pnr ? b.pnr : '').toUpperCase();
+                return pnr && !isSeedPnr(pnr) && !serverPnrMap[pnr];
+            });
+            if (missingCustom.length === 0) return false;
+
+            missingCustom.forEach(function (rec) {
+                UnifiedApi.post('save_booking', angular.extend({}, rec, {
+                    actorEnrollment: rec.userEnrollment || (currentUser ? currentUser.enrollment_no : '26GMCA52')
+                })).then(function (r) {
+                    if (r && r.data_version) {
+                        currentDataVersion = Math.max(currentDataVersion, r.data_version);
+                    }
+                }).catch(function () { });
+            });
+            return true;
+        }
+
         function bootstrapFromServer() {
             if (syncInFlight) return $q.resolve();
             syncInFlight = true;
             return UnifiedApi.get('bootstrap').then(function (res) {
                 syncInFlight = false;
                 if (res && res.success) {
-                    // Only overwrite localStorage with server data when backend has real shared persistence!
-                    // On Vercel without Cloud DB env vars (is_cloud_persistent === false), keep localStorage
-                    // as the shared browser store across Railway Portal, phpMyAdmin, and Laravel Hub.
-                    if (res.is_cloud_persistent) {
+                    var serverBookings = Array.isArray(res.bookings) ? res.bookings : [];
+                    var serverVersion = Number(res.data_version || 1);
+                    var shouldAcceptServer = !!res.is_cloud_persistent || serverVersion > 1;
+
+                    if (shouldAcceptServer) {
                         if (Array.isArray(res.users) && res.users.length > 0) {
                             AuthService.syncUsersFromServer(res.users);
                         }
                         if (Array.isArray(res.bookings)) {
-                            saveRaw(res.bookings);
+                            saveRaw(serverBookings);
+                        }
+                    } else {
+                        // Ephemeral server cold-started at v1 (525 rows): keep & re-hydrate any custom local bookings,
+                        // otherwise sync cleanly from server so all tabs/browsers share the same baseline.
+                        var rehydrated = rehydrateUnsyncedBookings(serverBookings, getAllRaw(), AuthService.getCurrentUser());
+                        if (!rehydrated) {
+                            if (Array.isArray(res.users) && res.users.length > 0) {
+                                AuthService.syncUsersFromServer(res.users);
+                            }
+                            if (Array.isArray(res.bookings)) {
+                                saveRaw(serverBookings);
+                            }
                         }
                     }
-                    currentDataVersion = res.data_version || 1;
+
+                    currentDataVersion = Math.max(currentDataVersion, serverVersion);
                     updateSyncStatus(res);
                     $rootScope.$broadcast('railwayBookingsChanged');
                 }
@@ -663,11 +705,13 @@
 
         function pollVersion() {
             if (document.visibilityState === 'hidden' || syncInFlight) return;
-            if (!syncStatus.isCloudPersistent && syncStatus.mode !== 'checking') return;
+            if (syncStatus.mode === 'offline') return;
             UnifiedApi.get('sync_version').then(function (res) {
                 if (res && res.success) {
                     updateSyncStatus(res);
-                    if (res.is_cloud_persistent && res.data_version && res.data_version !== currentDataVersion) {
+                    var srvVer = Number(res.data_version || 1);
+                    var srvCount = typeof res.total_bookings === 'number' ? res.total_bookings : null;
+                    if (srvVer !== currentDataVersion || (srvCount !== null && srvCount !== getAllRaw().length && srvVer > 1)) {
                         bootstrapFromServer();
                     }
                 }
@@ -779,6 +823,8 @@
                 var list = getAllRaw();
                 var isAdmin = !!(currentUser && currentUser.isAdmin);
                 var userEnroll = currentUser ? String(currentUser.enrollment_no || '').toUpperCase() : '';
+                var targetBooking = list.find(function (b) { return String(b.id) === String(id); });
+                var targetPnr = targetBooking ? targetBooking.pnr : '';
 
                 var filtered = list.filter(function (b) {
                     if (String(b.id) === String(id)) {
@@ -792,6 +838,7 @@
 
                 UnifiedApi.post('delete_booking', {
                     id: id,
+                    pnr: targetPnr,
                     actorEnrollment: userEnroll
                 }).then(function (res) {
                     if (res && res.data_version) {
@@ -2756,7 +2803,7 @@ app.controller('PhpMyAdminController', ['$scope', '$rootScope', '$http', '$timeo
             var url = API_CANDIDATES[idx];
             $http.get(url + '?action=server_overview', { timeout: 3500 })
                 .then(function (res) {
-                    if (res.data && res.data.success && res.data.is_cloud_persistent) {
+                    if (res.data && res.data.success) {
                         activeApiUrl = url;
                         $scope.connectionMode = 'live_mysql';
                         $scope.serverStatusText = res.data.persistence_label || 'Unified Database Connected';
@@ -2774,10 +2821,6 @@ app.controller('PhpMyAdminController', ['$scope', '$rootScope', '$http', '$timeo
                             total_size_kib: d.total_size_kib || '0.0'
                         };
                         loadDbStructure();
-                    } else if (res.data && res.data.success && !res.data.is_cloud_persistent) {
-                        // Ephemeral Vercel serverless without Cloud DB env var:
-                        // Use unified client engine so phpMyAdmin, Railway Records, and Laravel Hub stay 100% in sync!
-                        switchToClientEngine();
                     } else {
                         testCandidate(idx + 1);
                     }
@@ -3446,6 +3489,16 @@ app.controller('PhpMyAdminController', ['$scope', '$rootScope', '$http', '$timeo
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
+
+    $scope.$on('railwayBookingsChanged', function () {
+        if ($scope.connectionMode === 'live_mysql' && activeApiUrl) {
+            loadDbStructure(function () {
+                if ($scope.activeTable === 'railway_bookings' || $scope.activeTable === 'users') {
+                    loadTableBrowse();
+                }
+            });
+        }
+    });
 
     // Initialize connection on load
     initConnection();

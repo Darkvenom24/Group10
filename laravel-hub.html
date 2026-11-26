@@ -822,6 +822,40 @@
             } catch (e) { }
         }
 
+        function isSeedPnr(pnr) {
+            return /^PNR100\d{3}$/i.test(String(pnr || '').trim());
+        }
+
+        async function rehydrateMissingHubBookings(serverBookings, localBookings) {
+            if (!Array.isArray(localBookings) || localBookings.length === 0) return false;
+            const serverPnrs = new Set((serverBookings || []).map(b => String(b.pnr || '').toUpperCase()));
+            const missing = localBookings.filter(b => {
+                const pnr = String(b && b.pnr ? b.pnr : '').toUpperCase();
+                return pnr && !isSeedPnr(pnr) && !serverPnrs.has(pnr);
+            });
+            if (missing.length === 0) return false;
+
+            for (const rec of missing) {
+                for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
+                    try {
+                        const res = await fetch(base + '?action=save_booking', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(Object.assign({}, rec, {
+                                actorEnrollment: rec.userEnrollment || '26GMCA52'
+                            }))
+                        });
+                        if (res.ok) {
+                            const r = await res.json();
+                            if (r && r.data_version) currentDataVersion = Math.max(currentDataVersion, r.data_version);
+                            break;
+                        }
+                    } catch (e) { }
+                }
+            }
+            return true;
+        }
+
         async function fetchFromUnifiedServer() {
             const endpoints = ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php'];
             for (const base of endpoints) {
@@ -831,8 +865,16 @@
                     const data = await res.json();
                     if (data && data.success && Array.isArray(data.bookings)) {
                         isCloudPersistentMode = !!data.is_cloud_persistent;
-                        currentDataVersion = data.data_version || 1;
-                        if (isCloudPersistentMode) {
+                        const serverVersion = Number(data.data_version || 1);
+                        let shouldAcceptServer = isCloudPersistentMode || serverVersion > 1;
+
+                        if (!shouldAcceptServer) {
+                            loadFromLocalStore();
+                            const rehydrated = await rehydrateMissingHubBookings(data.bookings, allBookings);
+                            if (!rehydrated) shouldAcceptServer = true;
+                        }
+
+                        if (shouldAcceptServer) {
                             allBookings = deduplicateBookings(data.bookings);
                             localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
                             if (Array.isArray(data.users) && data.users.length > 0) {
@@ -847,13 +889,13 @@
                                     isAdmin: !!u.isAdmin
                                 }));
                             }
-                            updateSyncBadge('Unified DB Live (Real-Time)', true);
-                        } else {
-                            // Ephemeral Vercel serverless without Cloud DB env var:
-                            // Do NOT overwrite localStorage with fresh /tmp 525 rows!
-                            loadFromLocalStore();
-                            updateSyncBadge('Synced with Local Unified DB', false);
                         }
+
+                        currentDataVersion = Math.max(currentDataVersion, serverVersion);
+                        updateSyncBadge(
+                            isCloudPersistentMode ? 'Unified DB Live (Real-Time)' : 'Live Server Sync (Ephemeral)',
+                            isCloudPersistentMode
+                        );
                         renderUserCards();
                         updateMetrics();
                         applyFilters();
@@ -866,26 +908,26 @@
 
         async function pollUnifiedVersion() {
             if (document.visibilityState === 'hidden') return;
-            if (!isCloudPersistentMode) {
-                loadFromLocalStore();
-                renderUserCards();
-                updateMetrics();
-                applyFilters();
-                return;
-            }
             for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
                 try {
                     const res = await fetch(base + '?action=sync_version&_t=' + Date.now(), { cache: 'no-store' });
                     if (!res.ok) continue;
                     const data = await res.json();
                     if (data && data.success) {
-                        if (data.data_version && data.data_version !== currentDataVersion) {
+                        isCloudPersistentMode = !!data.is_cloud_persistent;
+                        const srvVer = Number(data.data_version || 1);
+                        const srvCount = typeof data.total_bookings === 'number' ? data.total_bookings : null;
+                        if (srvVer !== currentDataVersion || (srvCount !== null && srvCount !== allBookings.length && srvVer > 1)) {
                             await fetchFromUnifiedServer();
                         }
                         return;
                     }
                 } catch (e) { }
             }
+            loadFromLocalStore();
+            renderUserCards();
+            updateMetrics();
+            applyFilters();
         }
 
         async function syncNow() {
@@ -1265,21 +1307,19 @@
             updateMetrics();
             applyFilters();
 
-            if (isCloudPersistentMode) {
-                for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
-                    try {
-                        const res = await fetch(base + '?action=delete_booking', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: id, actorEnrollment: 'SM-ADI-01' })
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data && data.data_version) currentDataVersion = data.data_version;
-                            break;
-                        }
-                    } catch (e) { }
-                }
+            for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
+                try {
+                    const res = await fetch(base + '?action=delete_booking', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: id, pnr: pnr, actorEnrollment: 'SM-ADI-01' })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.data_version) currentDataVersion = Math.max(currentDataVersion, data.data_version);
+                        break;
+                    }
+                } catch (e) { }
             }
         }
 

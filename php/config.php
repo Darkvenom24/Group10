@@ -48,6 +48,12 @@ $kvToken = getenv('KV_REST_API_TOKEN') ?: (getenv('UPSTASH_REDIS_REST_TOKEN') ?:
 if (!defined('KV_REST_URL'))   define('KV_REST_URL', rtrim($kvUrl, '/'));
 if (!defined('KV_REST_TOKEN')) define('KV_REST_TOKEN', $kvToken);
 
+// 2b. Resolve Firebase Realtime Database REST Credentials (optional 1-variable Vercel cloud persistence)
+$fbUrl  = getenv('FIREBASE_DB_URL') ?: (getenv('FIREBASE_DATABASE_URL') ?: '');
+$fbAuth = getenv('FIREBASE_AUTH_SECRET') ?: (getenv('FIREBASE_DB_SECRET') ?: '');
+if (!defined('FIREBASE_DB_URL'))     define('FIREBASE_DB_URL', rtrim($fbUrl, '/'));
+if (!defined('FIREBASE_AUTH_SECRET')) define('FIREBASE_AUTH_SECRET', $fbAuth);
+
 function is_vercel_env() {
     return !empty(getenv('VERCEL')) || !empty(getenv('VERCEL_ENV')) || !empty(getenv('NOW_REGION'));
 }

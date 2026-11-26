@@ -378,6 +378,7 @@ if ($action === 'save_booking' || $action === 'form_booking') {
         'message' => 'Booking saved to unified database.',
         'booking' => $store->formatBookingForClient($record),
         'data_version' => $store->getDataVersion(),
+        'is_cloud_persistent' => $store->isCloudPersistent,
     ]);
     exit;
 }
@@ -437,13 +438,14 @@ if ($action === 'update_booking') {
 
 if ($action === 'delete_booking') {
     $id = param_get('id');
+    $pnr = strtoupper(trim((string)param_get('pnr', '')));
     $actorEnroll = strtoupper(trim((string)param_get('actorEnrollment', '')));
     $actor = $actorEnroll ? find_user_by_identifier($store, $actorEnroll) : null;
     $isAdmin = $actor && !empty($actor['is_admin']) && (int)$actor['is_admin'] === 1;
 
     $target = null;
     foreach ($store->getAllRows('railway_bookings') as $row) {
-        if ((string)$row['id'] === (string)$id) {
+        if (($id !== null && (string)$row['id'] === (string)$id) || ($pnr !== '' && strtoupper((string)$row['pnr']) === $pnr)) {
             $target = $row;
             break;
         }
@@ -462,6 +464,7 @@ if ($action === 'delete_booking') {
         'success' => true,
         'deleted_id' => $target['id'],
         'data_version' => $store->getDataVersion(),
+        'is_cloud_persistent' => $store->isCloudPersistent,
     ]);
     exit;
 }
@@ -481,7 +484,7 @@ if ($action === 'server_overview') {
     $sizeKib = number_format($totalBytes / 1024, 1, '.', '');
     $hostLabel = ($store->driver === 'mysql')
         ? DB_HOST . ':' . DB_PORT
-        : (($store->driver === 'kv_rest') ? 'Cloud KV Cluster (REST)' : 'Unified Server Storage');
+        : ($store->isJsonRestDriver() ? 'Cloud REST Database Cluster' : 'Unified Server Storage');
 
     $data = [
         'server' => ($store->driver === 'mysql') ? 'Cloud MySQL 8.0' : 'Unified Cloud Relational Engine',
@@ -698,7 +701,7 @@ if ($action === 'run_sql') {
     $start = microtime(true);
     $store->logSql($sql, 'SQL_RUN');
 
-    if ($store->driver !== 'kv_rest' && $store->pdo) {
+    if (!$store->isJsonRestDriver() && $store->pdo) {
         try {
             $firstWord = strtoupper(strtok(ltrim($sql), " \t\n\r;"));
             // Normalize MySQL SHOW TABLES / DESCRIBE for SQLite

@@ -60,7 +60,16 @@ class UnifiedDbStore {
             $this->driver = 'kv_rest';
             $this->isCloudPersistent = true;
             $this->persistenceLabel = 'Cloud KV Database Connected (Real-Time Sync)';
-            $this->ensureKvSeed();
+            $this->ensureJsonStoreSeed();
+            return;
+        }
+
+        // 2b. Try Firebase Realtime Database REST API (Shared Cloud Persistence for Vercel)
+        if (!empty(FIREBASE_DB_URL) && function_exists('curl_init')) {
+            $this->driver = 'firebase_rest';
+            $this->isCloudPersistent = true;
+            $this->persistenceLabel = 'Cloud Firebase RTDB Connected (Real-Time Sync)';
+            $this->ensureJsonStoreSeed();
             return;
         }
 
@@ -80,7 +89,7 @@ class UnifiedDbStore {
             if ($isVercel) {
                 $this->driver = 'ephemeral_sqlite';
                 $this->isCloudPersistent = false;
-                $this->persistenceLabel = 'Ephemeral Server Mode (Set DATABASE_URL or KV_REST_API_URL on Vercel for cross-device sync)';
+                $this->persistenceLabel = 'Ephemeral Server Sync (Add KV_REST_API_URL, FIREBASE_DB_URL, or DATABASE_URL on Vercel for permanent survival)';
             } else {
                 $this->driver = 'sqlite';
                 $this->isCloudPersistent = true;
@@ -474,8 +483,12 @@ class UnifiedDbStore {
     }
 
     // =========================================================================
-    // UPSTASH / VERCEL KV REST ADAPTER
+    // JSON REST ADAPTER (UPSTASH / VERCEL KV & FIREBASE RTDB)
     // =========================================================================
+    public function isJsonRestDriver() {
+        return $this->driver === 'kv_rest' || $this->driver === 'firebase_rest';
+    }
+
     private function kvRequest($commandArgs) {
         $ch = curl_init(KV_REST_URL);
         curl_setopt_array($ch, [
@@ -498,7 +511,37 @@ class UnifiedDbStore {
         return $decoded['result'] ?? null;
     }
 
+    private function firebaseRequest($path, $method = 'GET', $body = null) {
+        $url = FIREBASE_DB_URL . '/' . ltrim($path, '/') . '.json';
+        if (!empty(FIREBASE_AUTH_SECRET)) {
+            $url .= '?auth=' . urlencode(FIREBASE_AUTH_SECRET);
+        }
+        $ch = curl_init($url);
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_TIMEOUT => 6,
+        ];
+        if ($body !== null) {
+            $opts[CURLOPT_POSTFIELDS] = json_encode($body);
+        }
+        curl_setopt_array($ch, $opts);
+        $resp = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($resp === false || $code >= 400) {
+            throw new Exception('Firebase REST error (' . $code . '): ' . $err);
+        }
+        return json_decode($resp, true);
+    }
+
     private function kvGetTable($table) {
+        if ($this->driver === 'firebase_rest') {
+            $data = $this->firebaseRequest('gmca_db/tbl/' . $table, 'GET');
+            return is_array($data) ? array_values($data) : [];
+        }
         $raw = $this->kvRequest(['GET', 'gmca_db:tbl:' . $table]);
         if (!$raw) return [];
         $arr = json_decode($raw, true);
@@ -506,12 +549,19 @@ class UnifiedDbStore {
     }
 
     private function kvSetTable($table, $rows) {
+        if ($this->driver === 'firebase_rest') {
+            $this->firebaseRequest('gmca_db/tbl/' . $table, 'PUT', array_values($rows));
+            return;
+        }
         $this->kvRequest(['SET', 'gmca_db:tbl:' . $table, json_encode(array_values($rows))]);
     }
 
-    private function ensureKvSeed() {
-        $seeded = $this->kvRequest(['GET', 'gmca_db:seeded_v2']);
-        if ($seeded === '1') return;
+    private function ensureJsonStoreSeed() {
+        $seeded = ($this->driver === 'firebase_rest')
+            ? $this->firebaseRequest('gmca_db/seeded_v2', 'GET')
+            : $this->kvRequest(['GET', 'gmca_db:seeded_v2']);
+        if ((string)$seeded === '1') return;
+
         $this->kvSetTable('users', self::getSeedUsers());
         $this->kvSetTable('railway_systems', self::getSeedSystems());
         $this->kvSetTable('railway_bookings', self::getSeedBookings());
@@ -519,8 +569,14 @@ class UnifiedDbStore {
         $this->kvSetTable('practical7_students', self::getSeedStudents());
         $this->kvSetTable('user_profiles', self::getSeedProfiles());
         $this->kvSetTable('sql_query_logs', self::getSeedSqlLogs());
-        $this->kvRequest(['SET', 'gmca_db:version', '1']);
-        $this->kvRequest(['SET', 'gmca_db:seeded_v2', '1']);
+
+        if ($this->driver === 'firebase_rest') {
+            $this->firebaseRequest('gmca_db/version', 'PUT', 1);
+            $this->firebaseRequest('gmca_db/seeded_v2', 'PUT', '1');
+        } else {
+            $this->kvRequest(['SET', 'gmca_db:version', '1']);
+            $this->kvRequest(['SET', 'gmca_db:seeded_v2', '1']);
+        }
     }
 
     // =========================================================================
@@ -546,6 +602,10 @@ class UnifiedDbStore {
     }
 
     public function getDataVersion() {
+        if ($this->driver === 'firebase_rest') {
+            $v = $this->firebaseRequest('gmca_db/version', 'GET');
+            return (int)($v ?: 1);
+        }
         if ($this->driver === 'kv_rest') {
             $v = $this->kvRequest(['GET', 'gmca_db:version']);
             return (int)($v ?: 1);
@@ -554,6 +614,11 @@ class UnifiedDbStore {
     }
 
     public function bumpDataVersion() {
+        if ($this->driver === 'firebase_rest') {
+            $next = $this->getDataVersion() + 1;
+            $this->firebaseRequest('gmca_db/version', 'PUT', $next);
+            return $next;
+        }
         if ($this->driver === 'kv_rest') {
             return (int)$this->kvRequest(['INCR', 'gmca_db:version']);
         }
@@ -567,7 +632,7 @@ class UnifiedDbStore {
     // =========================================================================
     public function getAllRows($table) {
         if (!$this->isValidTable($table)) return [];
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             return $this->kvGetTable($table);
         }
         $order = ($table === 'railway_bookings') ? 'ORDER BY `id` DESC' : 'ORDER BY `id` ASC';
@@ -593,7 +658,7 @@ class UnifiedDbStore {
                 ];
             }, $rows);
         }
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $rows = $this->kvGetTable($table);
             $sample = $rows[0] ?? [];
             $cols = [];
@@ -630,7 +695,7 @@ class UnifiedDbStore {
 
     public function insertRowInternal($table, $data, $skipVersionBump = false) {
         if (!$this->isValidTable($table)) return ['success' => false, 'error' => 'Invalid table.'];
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $rows = $this->kvGetTable($table);
             $maxId = 0;
             foreach ($rows as $r) {
@@ -672,7 +737,7 @@ class UnifiedDbStore {
 
     public function updateRowInternal($table, $id, $data, $pk = 'id') {
         if (!$this->isValidTable($table)) return ['success' => false, 'error' => 'Invalid table.'];
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $rows = $this->kvGetTable($table);
             $updated = null;
             foreach ($rows as &$r) {
@@ -709,7 +774,7 @@ class UnifiedDbStore {
 
     public function deleteRowInternal($table, $id, $pk = 'id') {
         if (!$this->isValidTable($table)) return ['success' => false, 'error' => 'Invalid table.'];
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $rows = $this->kvGetTable($table);
             $before = count($rows);
             $rows = array_values(array_filter($rows, function($r) use ($pk, $id) {
@@ -729,7 +794,7 @@ class UnifiedDbStore {
 
     public function emptyTableInternal($table) {
         if (!$this->isValidTable($table)) return ['success' => false, 'error' => 'Invalid table.'];
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $this->kvSetTable($table, []);
             $this->bumpDataVersion();
             return ['success' => true, 'message' => "Table `{$table}` has been emptied."];
@@ -740,7 +805,7 @@ class UnifiedDbStore {
     }
 
     public function resetSeedAll() {
-        if ($this->driver === 'kv_rest') {
+        if ($this->isJsonRestDriver()) {
             $this->kvSetTable('users', self::getSeedUsers());
             $this->kvSetTable('railway_systems', self::getSeedSystems());
             $this->kvSetTable('railway_bookings', self::getSeedBookings());
