@@ -243,9 +243,18 @@
                                     <input type="email" ng-model="regModel.email" class="php-form-control" placeholder="student@gmca.ac.in" required>
                                 </div>
                                 <div class="php-form-group">
+                                    <label>Username (Optional):</label>
+                                    <input type="text" ng-model="regModel.username" class="php-form-control" placeholder="e.g. karan99 (auto-created if blank)">
+                                </div>
+                            </div>
+                            <div class="input-group-row">
+                                <div class="php-form-group" style="grid-column: 1 / -1;">
                                     <label>Password:</label>
                                     <input type="password" ng-model="regModel.password" class="php-form-control" placeholder="Choose a password" required>
                                 </div>
+                            </div>
+                            <div ng-if="regError" style="color: #DC2626; font-size: 13px; margin-bottom: 8px; font-weight: 600;">
+                                ⚠️ {{regError}}
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
                                 <label style="font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">

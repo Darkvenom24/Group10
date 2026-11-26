@@ -370,10 +370,54 @@
             <span id="hubSyncBadge" class="hub-badge badge-saffron" style="font-size: 12px; padding: 6px 12px;">
                 🔄 Connecting Unified DB...
             </span>
+            <div id="hubAdminChip" style="display: none; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.35); border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 4px 10px;">
+                <span id="hubAdminLabel" style="font-size: 12px; font-weight: 700; color: #FEF08A;">👑 Station Master</span>
+                <button type="button" onclick="adminLogout()" style="background: #DC2626; color: #FFFFFF; border: none; border-radius: 5px; padding: 5px 11px; font-size: 12px; font-weight: 700; cursor: pointer;" title="Logout from Admin Panel">
+                    🚪 Logout
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="hub-main-wrap">
+    <!-- Strict Station Master Admin Gate (Blocks non-admin & logged-out users) -->
+    <section id="adminAuthGate" style="max-width: 460px; margin: 48px auto; padding: 0 16px; display: none;">
+        <div class="hub-card" style="border-top: 5px solid #DC2626; padding: 26px;">
+            <div style="text-align: center; margin-bottom: 18px;">
+                <div style="font-size: 40px; margin-bottom: 6px;">🛡️</div>
+                <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--navy);">
+                    Station Master Authentication Required
+                </h2>
+                <p id="adminGateReason" style="font-size: 13px; color: #475569; margin: 8px 0 0; line-height: 1.5;">
+                    Only an authenticated <b>Station Master (Admin)</b> can access the Laravel Hub Admin Panel.
+                </p>
+            </div>
+
+            <form onsubmit="submitHubAdminLogin(event)">
+                <div style="margin-bottom: 12px;">
+                    <label for="hubAdminUser" style="display: block; font-size: 12.5px; font-weight: 700; color: #1E293B; margin-bottom: 5px;">Admin Username or Enrollment:</label>
+                    <input id="hubAdminUser" type="text" placeholder="e.g. station_master" required style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13.5px;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label for="hubAdminPass" style="display: block; font-size: 12.5px; font-weight: 700; color: #1E293B; margin-bottom: 5px;">Password:</label>
+                    <input id="hubAdminPass" type="password" placeholder="Enter admin password" required style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13.5px;">
+                </div>
+
+                <div id="hubAdminError" style="display: none; color: #DC2626; font-size: 12.5px; font-weight: 600; margin-bottom: 12px;"></div>
+
+                <button type="submit" id="hubAdminSubmitBtn" class="btn-hub btn-navy" style="width: 100%; justify-content: center; padding: 10px 16px; font-size: 14px;">
+                    🔓 Sign In as Station Master
+                </button>
+            </form>
+
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #E2E8F0; text-align: center;">
+                <a href="index.html" style="font-size: 12.5px; color: var(--navy); font-weight: 700; text-decoration: none;">
+                    ← Return to College Portal
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <main id="hubMainContent" class="hub-main-wrap" style="display: none;">
 
         <!-- Hero Welcome Banner -->
         <section class="hub-hero">
@@ -787,6 +831,21 @@
 
         let isCloudPersistentMode = false;
 
+        function normalizeDisplayUsers(rawUsers) {
+            return (rawUsers || [])
+                .filter(u => !/^SM-(NDLS|CSMT|MAS|HWH)-/i.test(String(u.enrollment_no || '')))
+                .map(u => ({
+                    id: u.id,
+                    name: u.full_name,
+                    username: u.username,
+                    enroll: u.enrollment_no,
+                    role: u.role,
+                    avatar: u.avatar || 'temp.jpeg',
+                    division: u.systemCode || u.system_code || 'WR-ADI',
+                    isAdmin: !!(u.isAdmin || u.is_admin === 1)
+                }));
+        }
+
         function loadFromLocalStore() {
             try {
                 const raw = localStorage.getItem('gmca_railway_bookings_v4');
@@ -807,16 +866,7 @@
                 if (rawUsers) {
                     const parsedUsers = JSON.parse(rawUsers);
                     if (Array.isArray(parsedUsers) && parsedUsers.length > 0) {
-                        USERS = parsedUsers.slice(0, 5).map(u => ({
-                            id: u.id,
-                            name: u.full_name,
-                            username: u.username,
-                            enroll: u.enrollment_no,
-                            role: u.role,
-                            avatar: u.avatar || 'temp.jpeg',
-                            division: u.systemCode || 'WR-ADI',
-                            isAdmin: !!u.isAdmin
-                        }));
+                        USERS = normalizeDisplayUsers(parsedUsers);
                     }
                 }
             } catch (e) { }
@@ -878,16 +928,7 @@
                             allBookings = deduplicateBookings(data.bookings);
                             localStorage.setItem('gmca_railway_bookings_v4', JSON.stringify(allBookings));
                             if (Array.isArray(data.users) && data.users.length > 0) {
-                                USERS = data.users.slice(0, 5).map(u => ({
-                                    id: u.id,
-                                    name: u.full_name,
-                                    username: u.username,
-                                    enroll: u.enrollment_no,
-                                    role: u.role,
-                                    avatar: u.avatar || 'temp.jpeg',
-                                    division: u.systemCode || 'WR-ADI',
-                                    isAdmin: !!u.isAdmin
-                                }));
+                                USERS = normalizeDisplayUsers(data.users);
                             }
                         }
 
@@ -945,7 +986,8 @@
                 applyFilters();
             }
 
-            setInterval(pollUnifiedVersion, 3000);
+            if (hubPollInterval) clearInterval(hubPollInterval);
+            hubPollInterval = setInterval(pollUnifiedVersion, 3000);
             window.addEventListener('focus', pollUnifiedVersion);
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') pollUnifiedVersion();
@@ -1323,8 +1365,146 @@
             }
         }
 
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', initData);
+        // =====================================================================
+        // STRICT STATION MASTER ADMIN AUTHENTICATION GATE & LOGOUT
+        // =====================================================================
+        let hubPollInterval = null;
+        let hubInitialized = false;
+
+        function getActiveSessionUser() {
+            try {
+                const s1 = sessionStorage.getItem('gmca_current_session_v2');
+                if (s1) return JSON.parse(s1);
+                const s2 = localStorage.getItem('gmca_remembered_session_v2');
+                if (s2) return JSON.parse(s2);
+            } catch (e) { }
+            return null;
+        }
+
+        function isAuthorizedAdmin(user) {
+            return !!(user && (user.isAdmin === true || user.is_admin === 1 || /^station_master/i.test(String(user.username || ''))));
+        }
+
+        function enforceAdminGate() {
+            const user = getActiveSessionUser();
+            const gate = document.getElementById('adminAuthGate');
+            const main = document.getElementById('hubMainContent');
+            const chip = document.getElementById('hubAdminChip');
+            const label = document.getElementById('hubAdminLabel');
+            const reason = document.getElementById('adminGateReason');
+
+            if (isAuthorizedAdmin(user)) {
+                gate.style.display = 'none';
+                main.style.display = 'block';
+                chip.style.display = 'inline-flex';
+                label.textContent = '👑 ' + (user.full_name || 'Station Master');
+                if (!hubInitialized) {
+                    hubInitialized = true;
+                    initData();
+                }
+                return true;
+            }
+
+            main.style.display = 'none';
+            chip.style.display = 'none';
+            gate.style.display = 'block';
+            if (user) {
+                reason.innerHTML = 'Access Denied for <b>' + (user.full_name || user.username) + '</b> (<code>' + (user.enrollment_no || '') + '</code>). Please login as <b>station_master</b> to access the Admin Panel.';
+            } else {
+                reason.innerHTML = 'Only an authenticated <b>Station Master (Admin)</b> can access the Laravel Hub Admin Panel.';
+            }
+            return false;
+        }
+
+        async function submitHubAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('hubAdminUser').value.trim();
+            const p = document.getElementById('hubAdminPass').value;
+            const errEl = document.getElementById('hubAdminError');
+            const btn = document.getElementById('hubAdminSubmitBtn');
+
+            errEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            let loggedUser = null;
+            let errorMsg = 'Invalid Station Master credentials.';
+            let apiResponded = false;
+
+            for (const base of ['api/phpmyadmin_api.php', 'php/phpmyadmin_api.php']) {
+                try {
+                    const res = await fetch(base + '?action=auth_login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usernameOrEnroll: u, password: p })
+                    });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    apiResponded = true;
+                    if (data && data.success && data.user) {
+                        loggedUser = data.user;
+                    } else if (data && data.message) {
+                        errorMsg = data.message;
+                    }
+                    break;
+                } catch (err) { }
+            }
+
+            if (!apiResponded) {
+                try {
+                    const localUsers = JSON.parse(localStorage.getItem('gmca_users_v4') || '[]');
+                    const lower = u.toLowerCase();
+                    const found = localUsers.find(x =>
+                        (String(x.username || '').toLowerCase() === lower ||
+                         String(x.enrollment_no || '').toLowerCase() === lower ||
+                         String(x.email || '').toLowerCase() === lower) && x.password === p
+                    );
+                    if (found) loggedUser = found;
+                } catch (err) { }
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🔓 Sign In as Station Master';
+
+            if (!loggedUser) {
+                errEl.textContent = '⚠️ ' + errorMsg;
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (!isAuthorizedAdmin(loggedUser)) {
+                errEl.textContent = '⚠️ Access Denied: "' + (loggedUser.full_name || loggedUser.username) + '" is not a Station Master (Admin) account.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            sessionStorage.setItem('gmca_current_session_v2', JSON.stringify(loggedUser));
+            localStorage.setItem('gmca_remembered_session_v2', JSON.stringify(loggedUser));
+            document.getElementById('hubAdminPass').value = '';
+            enforceAdminGate();
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('gmca_current_session_v2');
+            localStorage.removeItem('gmca_remembered_session_v2');
+            localStorage.removeItem('gmca_auth_session');
+            if (hubPollInterval) {
+                clearInterval(hubPollInterval);
+                hubPollInterval = null;
+            }
+            hubInitialized = false;
+            enforceAdminGate();
+        }
+
+        // Initialize on page load with Admin Auth Gate
+        window.addEventListener('DOMContentLoaded', () => {
+            enforceAdminGate();
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'gmca_remembered_session_v2') {
+                    enforceAdminGate();
+                }
+            });
+        });
     </script>
 </body>
 </html>

@@ -117,8 +117,82 @@
     // =========================================================================
     // 2. APPLICATION INITIALIZATION & REAL-TIME UNIFIED DB SYNC
     // =========================================================================
-    app.run(['$rootScope', '$location', 'AuthService', 'RailwayService', function ($rootScope, $location, AuthService, RailwayService) {
+    app.run(['$rootScope', '$location', '$window', 'AuthService', 'RailwayService', function ($rootScope, $location, $window, AuthService, RailwayService) {
         $rootScope.accessDeniedNotice = '';
+        $rootScope.currentUser = AuthService.getCurrentUser();
+
+        $rootScope.adminModal = {
+            open: false,
+            username: '',
+            password: '',
+            error: '',
+            loading: false,
+            openHubOnSuccess: true
+        };
+
+        $rootScope.openAdminLoginGate = function (openHubAfter) {
+            $rootScope.adminModal.open = true;
+            $rootScope.adminModal.username = '';
+            $rootScope.adminModal.password = '';
+            $rootScope.adminModal.error = '';
+            $rootScope.adminModal.loading = false;
+            $rootScope.adminModal.openHubOnSuccess = (openHubAfter !== false);
+        };
+
+        $rootScope.closeAdminModal = function () {
+            $rootScope.adminModal.open = false;
+            $rootScope.adminModal.error = '';
+        };
+
+        $rootScope.openAdminPanel = function ($event) {
+            if ($event) $event.preventDefault();
+            var cur = AuthService.getCurrentUser();
+            if (cur && cur.isAdmin) {
+                var win = $window.open('laravel-hub.html', '_blank');
+                if (!win) {
+                    $window.location.href = 'laravel-hub.html';
+                }
+                return;
+            }
+            $rootScope.openAdminLoginGate(true);
+        };
+
+        $rootScope.submitAdminModalLogin = function () {
+            $rootScope.adminModal.error = '';
+            var u = ($rootScope.adminModal.username || '').trim();
+            var p = $rootScope.adminModal.password || '';
+            if (!u || !p) {
+                $rootScope.adminModal.error = 'Please enter Station Master username (e.g. station_master) and password.';
+                return;
+            }
+            $rootScope.adminModal.loading = true;
+            AuthService.verifyAdminLogin(u, p).then(function (res) {
+                $rootScope.adminModal.loading = false;
+                if (res && res.success && res.user) {
+                    var shouldOpenHub = $rootScope.adminModal.openHubOnSuccess;
+                    $rootScope.adminModal.open = false;
+                    if (shouldOpenHub) {
+                        var win = $window.open('laravel-hub.html', '_blank');
+                        if (!win) {
+                            $window.location.href = 'laravel-hub.html';
+                        }
+                    }
+                } else {
+                    $rootScope.adminModal.error = (res && res.message) || 'Station Master authentication failed.';
+                }
+            });
+        };
+
+        $rootScope.logout = function () {
+            AuthService.logout();
+            $rootScope.currentUser = null;
+            $location.path('/');
+        };
+
+        $rootScope.$on('authChanged', function (event, user) {
+            $rootScope.currentUser = user || null;
+        });
+
         RailwayService.startRealtimeSync();
     }]);
 
@@ -280,12 +354,24 @@
                 localStorage.removeItem(REMEMBERED_KEY);
             }
             $rootScope.$broadcast('authChanged', user);
+        }
 
-            if (user && (user.isAdmin || user.username === 'station_master')) {
-                try {
-                    window.open('laravel-hub.html', '_blank');
-                } catch (e) { }
+        function upsertLocalUser(user) {
+            var users = getUsers().slice();
+            var normEnroll = String(user.enrollment_no || '').toUpperCase();
+            var normUn = String(user.username || '').toLowerCase();
+            var idx = users.findIndex(function (u) {
+                return (normEnroll && String(u.enrollment_no || '').toUpperCase() === normEnroll) ||
+                    (normUn && String(u.username || '').toLowerCase() === normUn);
+            });
+            if (idx !== -1) {
+                users[idx] = angular.extend({}, users[idx], user);
+            } else {
+                users.push(user);
             }
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            $rootScope.$broadcast('usersChanged', users);
+            return users;
         }
 
         return {
@@ -299,12 +385,7 @@
                 return MEMBER_PINS[enrollmentNo] || null;
             },
             getCurrentUser: function () {
-                var cur = getCurrentUserInternal();
-                if (cur) return cur;
-                var users = getUsers();
-                var def = users[0];
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify(def));
-                return def;
+                return getCurrentUserInternal();
             },
             loginAsync: function (usernameOrEnroll, password, rememberMe) {
                 var norm = (usernameOrEnroll || '').trim();
@@ -368,15 +449,52 @@
                 }
                 return { success: false, message: 'Incorrect 4-digit PIN! Please try again.' };
             },
+            verifyAdminLogin: function (usernameOrEnroll, password) {
+                var norm = (usernameOrEnroll || '').trim();
+                if (!norm || !password) {
+                    return $q.resolve({ success: false, message: 'Please enter Station Master username and password.' });
+                }
+                return UnifiedApi.post('auth_login', {
+                    usernameOrEnroll: norm,
+                    password: password
+                }).then(function (res) {
+                    if (res && res.success && res.user) {
+                        if (!res.user.isAdmin) {
+                            return { success: false, message: 'Access Denied: Only Station Master (Admin) accounts can open the Admin Panel.' };
+                        }
+                        persistSession(res.user, true);
+                        return { success: true, user: res.user };
+                    }
+                    return { success: false, message: (res && res.message) || 'Invalid Station Master credentials.' };
+                }, function () {
+                    var users = getUsers();
+                    var lower = norm.toLowerCase();
+                    var matched = users.find(function (u) {
+                        return (u.username.toLowerCase() === lower ||
+                            u.enrollment_no.toLowerCase() === lower ||
+                            (u.email && u.email.toLowerCase() === lower)) && u.password === password;
+                    });
+                    if (!matched) {
+                        return { success: false, message: 'Invalid Station Master credentials.' };
+                    }
+                    if (!matched.isAdmin) {
+                        return { success: false, message: 'Access Denied: Only Station Master (Admin) accounts can open the Admin Panel.' };
+                    }
+                    persistSession(matched, true);
+                    return { success: true, user: matched };
+                });
+            },
             registerAsync: function (userObj, rememberMe) {
                 return UnifiedApi.post('auth_register', userObj).then(function (res) {
                     if (res && res.success && res.user) {
-                        var users = getUsers();
-                        users.push(res.user);
-                        localStorage.setItem(USERS_KEY, JSON.stringify(users));
-                        persistSession(res.user, rememberMe);
-                        $rootScope.$broadcast('usersChanged', users);
-                        return { success: true, user: res.user };
+                        var normalized = angular.extend({}, res.user, {
+                            password: userObj.password,
+                            isAdmin: !!res.user.isAdmin
+                        });
+                        upsertLocalUser(normalized);
+                        persistSession(normalized, rememberMe);
+                        $rootScope.$broadcast('userRegisteredOnServer', normalized);
+                        return { success: true, user: normalized };
                     }
                     return { success: false, message: (res && res.message) || 'Registration failed.' };
                 }, function () {
@@ -390,8 +508,7 @@
                 userObj.id = nextId;
                 if (!userObj.avatar) userObj.avatar = 'temp.jpeg';
                 if (!userObj.email) userObj.email = (userObj.username || 'user' + nextId) + '@gmca.ac.in';
-                users.push(userObj);
-                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                upsertLocalUser(userObj);
                 persistSession(userObj, rememberMe);
                 UnifiedApi.post('auth_register', userObj).catch(function () { });
                 return { success: true, user: userObj };
@@ -399,6 +516,7 @@
             logout: function () {
                 sessionStorage.removeItem(SESSION_KEY);
                 localStorage.removeItem(REMEMBERED_KEY);
+                localStorage.removeItem('gmca_auth_session');
                 $rootScope.$broadcast('authChanged', null);
             },
             getAllUsers: function () {
@@ -965,7 +1083,7 @@ app.controller('HeaderController', ['$scope', '$rootScope', '$location', 'AuthSe
 
     $scope.logout = function () {
         AuthService.logout();
-        $scope.currentUser = AuthService.getCurrentUser();
+        $scope.currentUser = null;
         $location.path('/');
     };
 }]);
@@ -1016,7 +1134,7 @@ app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthServi
 
     $scope.logout = function () {
         AuthService.logout();
-        $scope.currentUser = AuthService.getCurrentUser();
+        $scope.currentUser = null;
         $location.path('/');
     };
 
@@ -1236,8 +1354,9 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
     };
 
     $scope.submitRegister = function () {
+        $scope.regError = '';
         if (!$scope.regModel.full_name || !$scope.regModel.enrollment_no || !$scope.regModel.password) {
-            alert('Please complete all registration fields.');
+            $scope.regError = 'Please complete Full Name, Enrollment No, Email, and Password.';
             return;
         }
         $scope.regModel.avatar = 'temp.jpeg';
@@ -1249,9 +1368,11 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
                 if (res.success) {
                     $scope.currentUser = res.user;
                     $rootScope.accessDeniedNotice = '';
+                    $scope.regModel = { role: 'Student Member', rememberMe: true };
+                    RailwayService.syncNow(true);
                     loadUserBookings();
                 } else {
-                    alert(res.message || 'Registration failed.');
+                    $scope.regError = res.message || 'Registration failed.';
                 }
             });
     };
@@ -1405,7 +1526,7 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
     }
 
     $scope.$on('authChanged', function (event, user) {
-        $scope.currentUser = user || AuthService.getCurrentUser();
+        $scope.currentUser = user || null;
     });
 
     // Trigger CSS shake animation on field
@@ -1686,6 +1807,11 @@ app.controller('Practical3Controller', ['$scope', '$timeout', '$location', 'Rail
         $scope.confirmedTicket = null;
         $scope.updateSuccessNotice = '';
 
+        if (!$scope.currentUser) {
+            $scope.submitErrorBanner = "🔒 Login Required: Please sign in or register on Home first so your booking is linked to your account.";
+            return false;
+        }
+
         // Touch all fields
         $scope.touched.passengerName = true;
         $scope.touched.phone = true;
@@ -1911,8 +2037,14 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
     $scope.syncStatus = RailwayService.getSyncStatus();
     $scope.isSyncing = false;
 
+    function filterDisplayUsers(list) {
+        return (list || []).filter(function (u) {
+            return !/^SM-(NDLS|CSMT|MAS|HWH)-/i.test(String(u.enrollment_no || ''));
+        });
+    }
+
     $scope.systems = RailwayService.getSystems();
-    $scope.primaryUsers = AuthService.getDefaultTeamMembers().slice(0, 5);
+    $scope.primaryUsers = filterDisplayUsers(AuthService.getDefaultTeamMembers());
 
     $scope.syncNow = function () {
         $scope.isSyncing = true;
@@ -1923,8 +2055,8 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
     };
 
     $scope.selectedSystem = '';
-    // Normal user sees ONLY their personal records (105). Station Master sees master dataset (525).
-    $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA52');
+    // Normal user sees ONLY their personal records. Station Master sees master dataset (525+).
+    $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '');
     $scope.searchQuery = '';
     $scope.filterClass = '';
     $scope.perPage = 15;
@@ -1940,14 +2072,16 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
     $scope.totalSystemRevenue = 0;
 
     $scope.switchToAdmin = function () {
-        var admin = AuthService.switchUser('SM-ADI-01');
-        if (admin) {
-            $scope.currentUser = admin;
+        var cur = AuthService.getCurrentUser();
+        if (cur && cur.isAdmin) {
+            $scope.currentUser = cur;
             $scope.isAdminUser = true;
             $scope.selectedUserEnroll = 'ALL';
             $scope.currentPage = 1;
             applyFilterAndPagination();
+            return;
         }
+        $rootScope.openAdminLoginGate(false);
     };
 
     $scope.switchToMember = function (enroll) {
@@ -1971,16 +2105,18 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
         var filtered = all;
 
         // 1. Role-based User Privacy Filtering
-        // When logged in as Vaibhav (26GMCA52), ONLY Vaibhav's tickets (105) are displayed.
-        // When logged in as Station Master (Admin), full master dataset is shown.
-        if (!$scope.isAdminUser) {
-            var myEnroll = ($scope.currentUser ? $scope.currentUser.enrollment_no : '26GMCA52').toUpperCase();
-            var myId = $scope.currentUser ? $scope.currentUser.id : 3;
+        // Logged out guests see no personal records.
+        // Normal users see ONLY their own reservations. Station Master (Admin) sees full dataset.
+        if (!$scope.currentUser) {
+            filtered = [];
+        } else if (!$scope.isAdminUser) {
+            var myEnroll = ($scope.currentUser.enrollment_no || '').toUpperCase();
+            var myId = $scope.currentUser.id;
             filtered = filtered.filter(function (b) {
                 var enroll = (b.userEnrollment || b.user_enrollment || '').toUpperCase();
                 var bId = b.userId || b.user_id;
                 var booked = (b.bookedBy || b.booked_by || '').toUpperCase();
-                return enroll === myEnroll || bId === myId || booked.indexOf(myEnroll) !== -1;
+                return (myEnroll && enroll === myEnroll) || (myId && bId === myId) || (myEnroll && booked.indexOf(myEnroll) !== -1);
             });
         } else if ($scope.selectedUserEnroll && $scope.selectedUserEnroll !== 'ALL') {
             var normEnroll = $scope.selectedUserEnroll.trim().toUpperCase();
@@ -2117,14 +2253,14 @@ app.controller('BookingDataController', ['$scope', '$rootScope', '$location', 'R
 
     $scope.$on('usersChanged', function (event, users) {
         if (Array.isArray(users) && users.length > 0) {
-            $scope.primaryUsers = users.slice(0, 5);
+            $scope.primaryUsers = filterDisplayUsers(users);
         }
     });
 
     $scope.$on('authChanged', function (event, user) {
-        $scope.currentUser = user || AuthService.getCurrentUser();
+        $scope.currentUser = user || null;
         $scope.isAdminUser = !!($scope.currentUser && $scope.currentUser.isAdmin);
-        $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : $scope.currentUser.enrollment_no;
+        $scope.selectedUserEnroll = $scope.isAdminUser ? 'ALL' : ($scope.currentUser ? $scope.currentUser.enrollment_no : '');
         $scope.currentPage = 1;
         applyFilterAndPagination();
     });

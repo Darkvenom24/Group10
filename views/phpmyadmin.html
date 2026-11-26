@@ -91,6 +91,15 @@
             </span>
 
             <div class="pma-top-actions">
+                <button type="button" class="pma-top-btn" ng-click="openAdminPanel($event)" style="background: #D97706; color: #FFFFFF; border-color: #B45309; font-weight: 700;" title="Open Station Master Admin Panel (Laravel Hub)">
+                    👑 Admin Panel
+                </button>
+                <button type="button" class="pma-top-btn" ng-if="currentUser" ng-click="logout()" style="background: #DC2626; color: #FFFFFF; border-color: #B91C1C; font-weight: 700;" title="Logout current user ({{currentUser.enrollment_no}})">
+                    🚪 Logout ({{currentUser.full_name.split(' ')[0]}})
+                </button>
+                <a href="#/" class="pma-top-btn" ng-if="!currentUser" style="background: #16A34A; color: #FFFFFF; border-color: #15803D; font-weight: 700;" title="Sign In or Register">
+                    🔑 Sign In
+                </a>
                 <button type="button" class="pma-top-btn" ng-click="resetDatabaseSeed()" title="Seed database with realistic Indian records">
                     🌱 Reset Seed Data
                 </button>
