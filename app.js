@@ -1177,6 +1177,14 @@ app.controller('HeaderController', ['$scope', '$rootScope', '$location', 'AuthSe
         $scope.currentUser = null;
         $location.path('/');
     };
+
+    $scope.openAuthModal = function (tab, $event) {
+        $rootScope.openAuthModal(tab, $event);
+    };
+
+    $scope.openAdminPanel = function ($event) {
+        $rootScope.openAdminPanel($event);
+    };
 }]);
 
 // Navigation & Global Shell Controller
@@ -1184,6 +1192,20 @@ app.controller('NavController', ['$scope', '$location', '$rootScope', 'AuthServi
     $scope.mobileMenuOpen = false;
     $scope.currentUser = AuthService.getCurrentUser();
     $scope.activeDropdown = null;
+
+    $scope.openAuthModal = function (tab, $event) {
+        if ($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+        }
+        $scope.closeMenu();
+        $rootScope.openAuthModal(tab, $event);
+    };
+
+    $scope.openAdminPanel = function ($event) {
+        $scope.closeMenu();
+        $rootScope.openAdminPanel($event);
+    };
 
     $scope.toggleDropdown = function (name, $event) {
         if ($event) {
