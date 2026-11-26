@@ -193,12 +193,12 @@
                     </p>
 
                     <div class="auth-header-tabs">
-                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='login'}" ng-click="activeTab='login'">Login</button>
-                        <button type="button" class="auth-tab-link" ng-class="{active: activeTab==='register'}" ng-click="activeTab='register'">Register New Student</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: authUi.tab==='login'}" ng-click="setAuthTab('login')">Login</button>
+                        <button type="button" class="auth-tab-link" ng-class="{active: authUi.tab==='register'}" ng-click="setAuthTab('register')">Register New Student</button>
                     </div>
 
                     <!-- Login Form -->
-                    <div ng-if="activeTab==='login'">
+                    <div ng-if="authUi.tab==='login'">
                         <form ng-submit="submitLogin()">
                             <div class="input-group-row">
                                 <div class="php-form-group">
@@ -225,7 +225,7 @@
                     </div>
 
                     <!-- Register Form -->
-                    <div ng-if="activeTab==='register'">
+                    <div ng-if="authUi.tab==='register'">
                         <form ng-submit="submitRegister()">
                             <div class="input-group-row">
                                 <div class="php-form-group">

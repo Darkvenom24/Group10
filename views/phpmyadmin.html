@@ -97,9 +97,12 @@
                 <button type="button" class="pma-top-btn" ng-if="currentUser" ng-click="logout()" style="background: #DC2626; color: #FFFFFF; border-color: #B91C1C; font-weight: 700;" title="Logout current user ({{currentUser.enrollment_no}})">
                     🚪 Logout ({{currentUser.full_name.split(' ')[0]}})
                 </button>
-                <a href="#/" class="pma-top-btn" ng-if="!currentUser" style="background: #16A34A; color: #FFFFFF; border-color: #15803D; font-weight: 700;" title="Sign In or Register">
+                <button type="button" class="pma-top-btn" ng-if="!currentUser" ng-click="openAuthModal('login', $event)" style="background: #16A34A; color: #FFFFFF; border-color: #15803D; font-weight: 700;" title="Sign In">
                     🔑 Sign In
-                </a>
+                </button>
+                <button type="button" class="pma-top-btn" ng-if="!currentUser" ng-click="openAuthModal('register', $event)" style="background: #0284C7; color: #FFFFFF; border-color: #0369A1; font-weight: 700;" title="Sign Up / Register">
+                    📝 Sign Up
+                </button>
                 <button type="button" class="pma-top-btn" ng-click="resetDatabaseSeed()" title="Seed database with realistic Indian records">
                     🌱 Reset Seed Data
                 </button>

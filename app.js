@@ -189,6 +189,69 @@
             $location.path('/');
         };
 
+        $rootScope.authModal = {
+            open: false,
+            tab: 'login',
+            loading: false,
+            error: '',
+            login: { usernameOrEnroll: '', password: '', rememberMe: true },
+            reg: { full_name: '', enrollment_no: '', email: '', username: '', password: '', role: 'Student Member', rememberMe: true }
+        };
+
+        $rootScope.openAuthModal = function (tab, $event) {
+            if ($event) $event.preventDefault();
+            $rootScope.authModal.open = true;
+            $rootScope.authModal.tab = (tab === 'register') ? 'register' : 'login';
+            $rootScope.authModal.error = '';
+            $rootScope.authModal.loading = false;
+        };
+
+        $rootScope.closeAuthModal = function () {
+            $rootScope.authModal.open = false;
+            $rootScope.authModal.error = '';
+        };
+
+        $rootScope.submitAuthModalLogin = function () {
+            $rootScope.authModal.error = '';
+            var u = ($rootScope.authModal.login.usernameOrEnroll || '').trim();
+            var p = $rootScope.authModal.login.password || '';
+            if (!u || !p) {
+                $rootScope.authModal.error = 'Please enter username/enrollment and password.';
+                return;
+            }
+            $rootScope.authModal.loading = true;
+            AuthService.loginAsync(u, p, $rootScope.authModal.login.rememberMe).then(function (res) {
+                $rootScope.authModal.loading = false;
+                if (res && res.success) {
+                    $rootScope.authModal.open = false;
+                    $rootScope.authModal.login.password = '';
+                    RailwayService.syncNow(true);
+                } else {
+                    $rootScope.authModal.error = (res && res.message) || 'Invalid credentials.';
+                }
+            });
+        };
+
+        $rootScope.submitAuthModalRegister = function () {
+            $rootScope.authModal.error = '';
+            var r = $rootScope.authModal.reg;
+            if (!r.full_name || !r.enrollment_no || !r.password) {
+                $rootScope.authModal.error = 'Please complete Full Name, Enrollment No, Email, and Password.';
+                return;
+            }
+            $rootScope.authModal.loading = true;
+            AuthService.registerAsync(angular.extend({}, r, { avatar: 'temp.jpeg' }), r.rememberMe).then(function (res) {
+                $rootScope.authModal.loading = false;
+                if (res && res.success) {
+                    $rootScope.authModal.open = false;
+                    $rootScope.authModal.reg = { full_name: '', enrollment_no: '', email: '', username: '', password: '', role: 'Student Member', rememberMe: true };
+                    RailwayService.syncNow(true);
+                } else {
+                    $rootScope.authModal.error = (res && res.message) || 'Registration failed.';
+                }
+            });
+        };
+
         $rootScope.$on('authChanged', function (event, user) {
             $rootScope.currentUser = user || null;
         });
@@ -498,7 +561,35 @@
                     }
                     return { success: false, message: (res && res.message) || 'Registration failed.' };
                 }, function () {
-                    return { success: false, message: 'Unable to reach server for registration.' };
+                    // Offline/static fallback if PHP backend is unreachable
+                    var users = getUsers();
+                    var enroll = String(userObj.enrollment_no || '').trim().toUpperCase();
+                    var un = String(userObj.username || enroll).trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+                    var email = String(userObj.email || (enroll.toLowerCase() + '@gmca.ac.in')).trim();
+                    var dup = users.find(function (u) {
+                        return (u.enrollment_no && u.enrollment_no.toUpperCase() === enroll) ||
+                            (u.username && u.username.toLowerCase() === un);
+                    });
+                    if (dup) {
+                        return { success: false, message: 'An account with this Enrollment or Username already exists.' };
+                    }
+                    var nextId = 1;
+                    users.forEach(function (u) { if (u.id >= nextId) nextId = u.id + 1; });
+                    var created = {
+                        id: nextId,
+                        full_name: String(userObj.full_name || '').trim(),
+                        enrollment_no: enroll,
+                        email: email,
+                        username: un,
+                        password: userObj.password,
+                        role: userObj.role || 'Student Member',
+                        avatar: userObj.avatar || 'temp.jpeg',
+                        systemCode: 'WR-ADI',
+                        isAdmin: false
+                    };
+                    upsertLocalUser(created);
+                    persistSession(created, rememberMe);
+                    return { success: true, user: created };
                 });
             },
             register: function (userObj, rememberMe) {
@@ -1185,8 +1276,14 @@ app.controller('HomeController', ['$scope', '$location', '$rootScope', '$interva
         rememberMe: true
     };
     $scope.regModel = { role: 'Student Member', rememberMe: true };
-    $scope.activeTab = 'login';
+    $scope.authUi = { tab: 'login' };
+    $scope.setAuthTab = function (tab) {
+        $scope.authUi.tab = (tab === 'register') ? 'register' : 'login';
+        $scope.loginError = '';
+        $scope.regError = '';
+    };
     $scope.loginError = '';
+    $scope.regError = '';
     $scope.regSuccess = '';
     $scope.selectedProfileId = null;
 

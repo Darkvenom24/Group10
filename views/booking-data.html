@@ -67,7 +67,8 @@
                 </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <a href="#/" class="btn-php-action" style="text-decoration: none; background: var(--navy); color: #FFFFFF; font-size: 12px; padding: 6px 14px;">🔑 Login / Register</a>
+                <button type="button" ng-click="openAuthModal('login', $event)" class="btn-php-action" style="background: var(--navy); color: #FFFFFF; font-size: 12px; padding: 6px 14px;">🔑 Login</button>
+                <button type="button" ng-click="openAuthModal('register', $event)" class="btn-php-action" style="background: #0284C7; color: #FFFFFF; font-size: 12px; padding: 6px 14px;">📝 Sign Up</button>
                 <button type="button" ng-click="openAdminPanel($event)" class="btn-php-action" style="background: #D97706; color: #FFFFFF; font-size: 12px; padding: 6px 14px;">👑 Station Master Login</button>
             </div>
         </div>

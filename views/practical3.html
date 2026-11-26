@@ -31,7 +31,10 @@
             <div style="font-size: 13px; color: #991B1B; font-weight: 600;">
                 🔒 Not Logged In: Please sign in or register a new account on Home before submitting a reservation.
             </div>
-            <a href="#/" class="btn-php-action" style="text-decoration: none; background: var(--navy); color: #FFFFFF; font-size: 12px; padding: 6px 14px;">🔑 Sign In / Register</a>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" ng-click="openAuthModal('login', $event)" class="btn-php-action" style="background: var(--navy); color: #FFFFFF; font-size: 12px; padding: 6px 14px;">🔑 Login</button>
+                <button type="button" ng-click="openAuthModal('register', $event)" class="btn-php-action" style="background: #0284C7; color: #FFFFFF; font-size: 12px; padding: 6px 14px;">📝 Sign Up</button>
+            </div>
         </div>
 
         <!-- View Mode Non-Editable Banner -->
