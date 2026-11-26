@@ -47,11 +47,8 @@
                         <div class="header-user-name" style="color: #FEF3C7;">Guest</div>
                         <div class="header-user-enroll" style="color: #FFFFFF;">Not Logged In</div>
                     </div>
-                    <button type="button" ng-click="openAuthModal('login', $event)" class="header-logout-btn" style="background: #16A34A;" title="Login to your account">
+                    <button type="button" ng-click="openAuthModal('login', $event)" class="header-logout-btn" style="background: #16A34A;" title="Login or Register">
                         Login
-                    </button>
-                    <button type="button" ng-click="openAuthModal('register', $event)" class="header-logout-btn" style="background: #0284C7;" title="Register New Account (Sign Up)">
-                        Sign Up
                     </button>
                 </div>
             </div>
@@ -277,7 +274,7 @@
             <button type="button" ng-if="currentUser" ng-click="logout(); closeMenu()" class="nav-item" style="background: #DC2626; color: #FFFFFF; font-weight: 700; border: none; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Logout {{currentUser.full_name}}">
                 <span>🚪</span> Logout ({{currentUser.full_name.split(' ')[0]}})
             </button>
-            <button type="button" ng-if="!currentUser" ng-click="openAuthModal('login', $event); closeMenu()" class="nav-item" style="background: #16A34A; color: #FFFFFF; font-weight: 700; border: none; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Login to your account">
+            <button type="button" ng-if="!currentUser" ng-click="openAuthModal('login', $event)" class="nav-item" style="background: #16A34A; color: #FFFFFF; font-weight: 700; border: none; border-radius: 4px; padding: 5px 11px; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="Sign In or Register">
                 <span>🔑</span> Sign In
             </button>
         </div>
